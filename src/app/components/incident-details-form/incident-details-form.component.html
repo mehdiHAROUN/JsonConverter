@@ -8,18 +8,39 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Detection Date & Time</mat-label>
-        <input matInput type="datetime-local" formControlName="detectionDateTime">
+        <mat-label>Detection Date</mat-label>
+        <input matInput [matDatepicker]="detectionDatePicker" formControlName="detectionDate">
+        <mat-datepicker-toggle matSuffix [for]="detectionDatePicker"></mat-datepicker-toggle>
+        <mat-datepicker #detectionDatePicker></mat-datepicker>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Classification Date & Time</mat-label>
-        <input matInput type="datetime-local" formControlName="classificationDateTime">
+        <mat-label>Detection Time</mat-label>
+        <input matInput type="time" formControlName="detectionTime">
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Incident Occurrence Date & Time</mat-label>
-        <input matInput type="datetime-local" formControlName="incidentOccurrenceDateTime">
+        <mat-label>Classification Date</mat-label>
+        <input matInput [matDatepicker]="classificationDatePicker" formControlName="classificationDate">
+        <mat-datepicker-toggle matSuffix [for]="classificationDatePicker"></mat-datepicker-toggle>
+        <mat-datepicker #classificationDatePicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Classification Time</mat-label>
+        <input matInput type="time" formControlName="classificationTime">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Incident Occurrence Date</mat-label>
+        <input matInput [matDatepicker]="incidentOccurrenceDatePicker" formControlName="incidentOccurrenceDate">
+        <mat-datepicker-toggle matSuffix [for]="incidentOccurrenceDatePicker"></mat-datepicker-toggle>
+        <mat-datepicker #incidentOccurrenceDatePicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Incident Occurrence Time</mat-label>
+        <input matInput type="time" formControlName="incidentOccurrenceTime">
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
@@ -127,8 +148,14 @@
         <textarea matInput rows="2" formControlName="rootCausesInformation"></textarea>
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Root Cause Addressing Date & Time</mat-label>
-        <input matInput type="datetime-local" formControlName="rootCauseAddressingDateTime">
+        <mat-label>Root Cause Addressing Date</mat-label>
+        <input matInput [matDatepicker]="rootCauseAddressingDatePicker" formControlName="rootCauseAddressingDate">
+        <mat-datepicker-toggle matSuffix [for]="rootCauseAddressingDatePicker"></mat-datepicker-toggle>
+        <mat-datepicker #rootCauseAddressingDatePicker></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Root Cause Addressing Time</mat-label>
+        <input matInput type="time" formControlName="rootCauseAddressingTime">
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Incident Resolution Summary</mat-label>
@@ -139,8 +166,14 @@
         <textarea matInput rows="2" formControlName="incidentResolutionVsPlannedImplementation"></textarea>
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Incident Resolution Date & Time</mat-label>
-        <input matInput type="datetime-local" formControlName="incidentResolutionDateTime">
+        <mat-label>Incident Resolution Date</mat-label>
+        <input matInput [matDatepicker]="incidentResolutionDatePicker" formControlName="incidentResolutionDate">
+        <mat-datepicker-toggle matSuffix [for]="incidentResolutionDatePicker"></mat-datepicker-toggle>
+        <mat-datepicker #incidentResolutionDatePicker></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Incident Resolution Time</mat-label>
+        <input matInput type="time" formControlName="incidentResolutionTime">
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Financial Recoveries Amount</mat-label>

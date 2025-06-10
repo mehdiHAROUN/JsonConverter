@@ -140,18 +140,22 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
   constructor(private fb: FormBuilder) {
     this.incidentDetailsForm = this.fb.group({
       financialEntityCode: [''],
-      detectionDateTime: [null],
-      classificationDateTime: [null],
+      detectionDate: [null],
+      detectionTime: [null],
+      classificationDate: [null],
+      classificationTime: [null],
+      incidentOccurrenceDate: [null],
+      incidentOccurrenceTime: [null],
       incidentDescription: [''],
       isBusinessContinuityActivated: [false],
-      incidentOccurrenceDateTime: [null],
       incidentDuration: ['', incidentDurationValidator()],
       originatesFromThirdPartyProvider: [''],
       incidentDiscovery: [''],
       competentAuthorityCode: [''],
       indicatorsOfCompromise: [''],
       incidentResolutionSummary: [''],
-      incidentResolutionDateTime: [null],
+      incidentResolutionDate: [null],
+      incidentResolutionTime: [null],
       incidentResolutionVsPlannedImplementation: [''],
       assessmentOfRiskToCriticalFunctions: [''],
       informationRelevantToResolutionAuthorities: [''],
@@ -172,13 +176,53 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
       rootCausesAdditionalClassification: [[]],
       rootCausesOther: [''],
       rootCausesInformation: [''],
-      rootCauseAddressingDateTime: [null]
+      rootCauseAddressingDate: [null],
+      rootCauseAddressingTime: [null]
     });
   }
 
+  private combineDateAndTime(date: Date | null, time: string | null): Date | null {
+    if (!date || !time) return null;
+    const [hours, minutes] = time.split(':').map(Number);
+    const combinedDate = new Date(date);
+    combinedDate.setHours(hours, minutes);
+    return combinedDate;
+  }
+
+  private updateFormValue(): void {
+    const formValue = this.incidentDetailsForm.value;
+    
+    // Combine Detection Date & Time
+    const detectionDateTime = this.combineDateAndTime(formValue.detectionDate, formValue.detectionTime);
+    // Combine Classification Date & Time
+    const classificationDateTime = this.combineDateAndTime(formValue.classificationDate, formValue.classificationTime);
+    // Combine Incident Occurrence Date & Time
+    const incidentOccurrenceDateTime = this.combineDateAndTime(formValue.incidentOccurrenceDate, formValue.incidentOccurrenceTime);
+    // Combine Incident Resolution Date & Time
+    const resolutionDate = formValue.incidentResolutionDate;
+    const resolutionTime = formValue.incidentResolutionTime;
+    const combinedResolutionDateTime = this.combineDateAndTime(resolutionDate, resolutionTime);
+    // Combine Root Cause Addressing Date & Time
+    const addressingDate = formValue.rootCauseAddressingDate;
+    const addressingTime = formValue.rootCauseAddressingTime;
+    const combinedAddressingDateTime = this.combineDateAndTime(addressingDate, addressingTime);
+
+    // Update the form value with combined date-times
+    const updatedValue = {
+      ...formValue,
+      detectionDateTime,
+      classificationDateTime,
+      incidentOccurrenceDateTime,
+      incidentResolutionDateTime: combinedResolutionDateTime,
+      rootCauseAddressingDateTime: combinedAddressingDateTime
+    };
+
+    this.onChange(updatedValue);
+  }
+
   ngOnInit(): void {
-    this.incidentDetailsForm.valueChanges.subscribe(value => {
-      this.onChange(value);
+    this.incidentDetailsForm.valueChanges.subscribe(() => {
+      this.updateFormValue();
       this.updateConditionalValidators();
       this.updateClassificationTypeValidators();
       this.updateIncidentTypeValidators();
@@ -298,19 +342,22 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
     // The following are required only for final_report
     if (type === 'final_report') {
       f.get('incidentResolutionSummary')?.setValidators([Validators.required]);
-      f.get('incidentResolutionDateTime')?.setValidators([Validators.required]);
+      f.get('incidentResolutionDate')?.setValidators([Validators.required]);
+      f.get('incidentResolutionTime')?.setValidators([Validators.required]);
       f.get('incidentResolutionVsPlannedImplementation')?.setValidators([Validators.required]);
       f.get('financialRecoveriesAmount')?.setValidators([Validators.required]);
       f.get('incidentClassification')?.setValidators([Validators.required]);
     } else {
       f.get('incidentResolutionSummary')?.clearValidators();
-      f.get('incidentResolutionDateTime')?.clearValidators();
+      f.get('incidentResolutionDate')?.clearValidators();
+      f.get('incidentResolutionTime')?.clearValidators();
       f.get('incidentResolutionVsPlannedImplementation')?.clearValidators();
       f.get('financialRecoveriesAmount')?.clearValidators();
       f.get('incidentClassification')?.clearValidators();
     }
     f.get('incidentResolutionSummary')?.updateValueAndValidity({ onlySelf: true });
-    f.get('incidentResolutionDateTime')?.updateValueAndValidity({ onlySelf: true });
+    f.get('incidentResolutionDate')?.updateValueAndValidity({ onlySelf: true });
+    f.get('incidentResolutionTime')?.updateValueAndValidity({ onlySelf: true });
     f.get('incidentResolutionVsPlannedImplementation')?.updateValueAndValidity({ onlySelf: true });
     f.get('financialRecoveriesAmount')?.updateValueAndValidity({ onlySelf: true });
     f.get('incidentClassification')?.updateValueAndValidity({ onlySelf: true });
