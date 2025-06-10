@@ -13,6 +13,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { IncidentDetailsFormComponent } from '../incident-details-form/incident-details-form.component';
 
 export enum IncidentSubmissionType {
   INITIAL_NOTIFICATION = 'initial_notification',
@@ -86,7 +87,8 @@ const PHONE_REGEX = /^\+?[1-9]\d{1,14}(\s?\(\d+\))?([\-\s\.]?\d+)*$/;
     MatTabsModule,
     MatCardModule,
     MatDividerModule,
-    MatIconModule
+    MatIconModule,
+    IncidentDetailsFormComponent
   ],
   templateUrl: './incident-report-form.component.html',
   styleUrl: './incident-report-form.component.scss'
@@ -143,16 +145,21 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
         phone: ['', [Validators.pattern(PHONE_REGEX)]]
       }),
       // --- End Contact Information ---
+      // --- Incident Details ---
+      incidentDetails: this.fb.control(null),
+      // --- End Incident Details ---
       entityName: ['', Validators.required],
       entityType: ['', Validators.required],
       entityLocation: ['', Validators.required],
       contactName: ['', Validators.required],
       contactEmail: ['', [Validators.required, Validators.email]],
       contactPhone: ['', [Validators.required, Validators.pattern('^[0-9-+()]*$')]],
-      incidentTitle: ['', [Validators.required, Validators.minLength(3)]],
-      incidentDate: ['', [Validators.required, this.dateValidator()]],
-      incidentDescription: ['', [Validators.required, Validators.minLength(10)]],
-      severity: ['', Validators.required],
+      // Remove old incident details fields here
+      // incidentTitle, incidentDate, incidentDescription, severity, etc. are removed
+      incidentTitle: undefined,
+      incidentDate: undefined,
+      incidentDescription: undefined,
+      severity: undefined,
       financialImpact: [0, [Validators.required, Validators.min(0)]],
       operationalImpact: ['', Validators.required],
       customerImpact: ['', Validators.required],

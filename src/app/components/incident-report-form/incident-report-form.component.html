@@ -211,53 +211,7 @@
       <!-- Incident Details -->
       <mat-tab label="Incident Details">
         <div class="tab-content">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Incident Title</mat-label>
-            <input matInput formControlName="incidentTitle">
-            <mat-error *ngIf="incidentForm.get('incidentTitle')?.hasError('required') && (incidentForm.get('incidentTitle')?.touched || formSubmitted)">
-              Incident title is required
-            </mat-error>
-            <mat-error *ngIf="incidentForm.get('incidentTitle')?.hasError('minlength') && (incidentForm.get('incidentTitle')?.touched || formSubmitted)">
-              Title must be at least 3 characters
-            </mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Incident Date</mat-label>
-            <input matInput [matDatepicker]="incidentPicker" formControlName="incidentDate">
-            <mat-datepicker-toggle matSuffix [for]="incidentPicker"></mat-datepicker-toggle>
-            <mat-datepicker #incidentPicker></mat-datepicker>
-            <mat-error *ngIf="incidentForm.get('incidentDate')?.hasError('required') && (incidentForm.get('incidentDate')?.touched || formSubmitted)">
-              Incident date is required
-            </mat-error>
-            <mat-error *ngIf="incidentForm.get('incidentDate')?.hasError('futureDate') && (incidentForm.get('incidentDate')?.touched || formSubmitted)">
-              Date cannot be in the future
-            </mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Description</mat-label>
-            <textarea matInput rows="4" formControlName="incidentDescription"></textarea>
-            <mat-error *ngIf="incidentForm.get('incidentDescription')?.hasError('required') && (incidentForm.get('incidentDescription')?.touched || formSubmitted)">
-              Description is required
-            </mat-error>
-            <mat-error *ngIf="incidentForm.get('incidentDescription')?.hasError('minlength') && (incidentForm.get('incidentDescription')?.touched || formSubmitted)">
-              Description must be at least 10 characters
-            </mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Severity Level</mat-label>
-            <mat-select formControlName="severity">
-              <mat-option value="low">Low</mat-option>
-              <mat-option value="medium">Medium</mat-option>
-              <mat-option value="high">High</mat-option>
-              <mat-option value="critical">Critical</mat-option>
-            </mat-select>
-            <mat-error *ngIf="incidentForm.get('severity')?.hasError('required') && (incidentForm.get('severity')?.touched || formSubmitted)">
-              Severity level is required
-            </mat-error>
-          </mat-form-field>
+          <app-incident-details-form></app-incident-details-form>
         </div>
       </mat-tab>
 

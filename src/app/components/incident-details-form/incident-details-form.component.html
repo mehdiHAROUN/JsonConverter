@@ -1,0 +1,163 @@
+<form [formGroup]="incidentDetailsForm">
+  <mat-card class="incident-details-card">
+    <mat-card-title>Incident Details</mat-card-title>
+    <div class="incident-details-section">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Financial Entity Code</mat-label>
+        <input matInput formControlName="financialEntityCode">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Detection Date & Time</mat-label>
+        <input matInput type="datetime-local" formControlName="detectionDateTime">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Classification Date & Time</mat-label>
+        <input matInput type="datetime-local" formControlName="classificationDateTime">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Incident Occurrence Date & Time</mat-label>
+        <input matInput type="datetime-local" formControlName="incidentOccurrenceDateTime">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Incident Description</mat-label>
+        <textarea matInput rows="3" formControlName="incidentDescription"></textarea>
+      </mat-form-field>
+
+      <mat-checkbox formControlName="isBusinessContinuityActivated">
+        Business Continuity Activated
+      </mat-checkbox>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Incident Duration (HH:MM:SS)</mat-label>
+        <input matInput formControlName="incidentDuration">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Incident Discovery</mat-label>
+        <mat-select formControlName="incidentDiscovery">
+          <mat-option value="it_security">IT Security</mat-option>
+          <mat-option value="staff">Staff</mat-option>
+          <mat-option value="internal_audit">Internal Audit</mat-option>
+          <mat-option value="external_audit">External Audit</mat-option>
+          <mat-option value="customer">Customer</mat-option>
+          <mat-option value="public_information">Public Information</mat-option>
+          <mat-option value="other">Other</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Competent Authority Code</mat-label>
+        <input matInput formControlName="competentAuthorityCode">
+      </mat-form-field>
+
+      <div formGroupName="incidentType">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Incident Classification</mat-label>
+          <mat-select formControlName="incidentClassification" multiple>
+            <mat-option value="cybersecurity-related">Cybersecurity-related</mat-option>
+            <mat-option value="fraud">Fraud</mat-option>
+            <mat-option value="system_failure">System Failure</mat-option>
+            <mat-option value="process_failure">Process Failure</mat-option>
+            <mat-option value="other">Other</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field *ngIf="incidentDetailsForm.get('incidentType.incidentClassification')?.value?.includes('other')" appearance="outline" class="full-width">
+          <mat-label>Other Incident Classification</mat-label>
+          <textarea matInput rows="2" formControlName="otherIncidentClassification"></textarea>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Threat Techniques</mat-label>
+          <mat-select formControlName="threatTechniques" multiple>
+            <mat-option value="malware">Malware</mat-option>
+            <mat-option value="phishing">Phishing</mat-option>
+            <mat-option value="ddos">DDoS</mat-option>
+            <mat-option value="ransomware">Ransomware</mat-option>
+            <mat-option value="other">Other</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field *ngIf="incidentDetailsForm.get('incidentType.threatTechniques')?.value?.includes('other')" appearance="outline" class="full-width">
+          <mat-label>Other Threat Techniques</mat-label>
+          <textarea matInput rows="2" formControlName="otherThreatTechniques"></textarea>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Indicators of Compromise</mat-label>
+        <input matInput formControlName="indicatorsOfCompromise">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Root Cause HL Classification</mat-label>
+        <mat-select formControlName="rootCauseHLClassification" multiple>
+          <mat-option value="internal">Internal</mat-option>
+          <mat-option value="external">External</mat-option>
+          <mat-option value="third_party">Third Party</mat-option>
+          <mat-option value="Other">Other</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Root Causes Detailed Classification</mat-label>
+        <mat-select formControlName="rootCausesDetailedClassification" multiple>
+          <mat-option value="software">Software</mat-option>
+          <mat-option value="hardware">Hardware</mat-option>
+          <mat-option value="network">Network</mat-option>
+          <mat-option value="human_error">Human Error</mat-option>
+          <mat-option value="Other">Other</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Root Causes Additional Classification</mat-label>
+        <mat-select formControlName="rootCausesAdditionalClassification" multiple>
+          <mat-option value="configuration">Configuration</mat-option>
+          <mat-option value="maintenance">Maintenance</mat-option>
+          <mat-option value="security">Security</mat-option>
+          <mat-option value="Other">Other</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field *ngIf="hasOtherRootCause()" appearance="outline" class="full-width">
+        <mat-label>Other Root Causes</mat-label>
+        <textarea matInput rows="2" formControlName="rootCausesOther"></textarea>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Root Causes Information</mat-label>
+        <textarea matInput rows="2" formControlName="rootCausesInformation"></textarea>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Root Cause Addressing Date & Time</mat-label>
+        <input matInput type="datetime-local" formControlName="rootCauseAddressingDateTime">
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Incident Resolution Summary</mat-label>
+        <textarea matInput rows="2" formControlName="incidentResolutionSummary"></textarea>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Incident Resolution vs Planned Implementation</mat-label>
+        <textarea matInput rows="2" formControlName="incidentResolutionVsPlannedImplementation"></textarea>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Incident Resolution Date & Time</mat-label>
+        <input matInput type="datetime-local" formControlName="incidentResolutionDateTime">
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Financial Recoveries Amount</mat-label>
+        <input matInput type="number" formControlName="financialRecoveriesAmount">
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Gross Amount Indirect/Direct Costs</mat-label>
+        <input matInput type="number" formControlName="grossAmountIndirectDirectCosts">
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Recurring Non-Major Incidents Description</mat-label>
+        <textarea matInput rows="2" formControlName="recurringNonMajorIncidentsDescription"></textarea>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Recurring Incident Date</mat-label>
+        <input matInput type="date" formControlName="recurringIncidentDate">
+      </mat-form-field>
+    </div>
+  </mat-card>
+</form> 
