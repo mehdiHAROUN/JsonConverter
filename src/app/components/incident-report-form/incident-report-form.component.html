@@ -45,34 +45,105 @@
       <!-- Entity Information -->
       <mat-tab label="Entity Information">
         <div class="tab-content">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Entity Name</mat-label>
-            <input matInput formControlName="entityName">
-            <mat-error *ngIf="incidentForm.get('entityName')?.hasError('required') && (incidentForm.get('entityName')?.touched || formSubmitted)">
-              Entity name is required
-            </mat-error>
-          </mat-form-field>
+          <!-- Submitting Entity Card -->
+          <mat-card class="entity-card">
+            <mat-card-title>Submitting Entity</mat-card-title>
+            <div [formGroup]="submittingEntityGroup">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="name">
+                <mat-error *ngIf="incidentForm.get('submittingEntity.name')?.hasError('required') && (incidentForm.get('submittingEntity.name')?.touched || formSubmitted)">
+                  Name is required
+                </mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Code</mat-label>
+                <input matInput formControlName="code">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>LEI</mat-label>
+                <input matInput formControlName="LEI">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Affected Entity Type</mat-label>
+                <mat-select formControlName="affectedEntityType" multiple>
+                  <mat-option value="credit_institution">Credit Institution</mat-option>
+                  <mat-option value="payment_institution">Payment Institution</mat-option>
+                  <mat-option value="investment_firm">Investment Firm</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <input type="hidden" formControlName="entityType">
+              <mat-error *ngIf="incidentForm.get('submittingEntity')?.hasError('codeOrLeiRequired') && (incidentForm.get('submittingEntity.code')?.touched || incidentForm.get('submittingEntity.LEI')?.touched || formSubmitted)">
+                Either Code or LEI is required
+              </mat-error>
+            </div>
+          </mat-card>
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Entity Type</mat-label>
-            <mat-select formControlName="entityType">
-              <mat-option value="company">Company</mat-option>
-              <mat-option value="department">Department</mat-option>
-              <mat-option value="division">Division</mat-option>
-              <mat-option value="other">Other</mat-option>
-            </mat-select>
-            <mat-error *ngIf="incidentForm.get('entityType')?.hasError('required') && (incidentForm.get('entityType')?.touched || formSubmitted)">
-              Entity type is required
-            </mat-error>
-          </mat-form-field>
+          <!-- Affected Entities Card -->
+          <mat-card class="entity-card">
+            <mat-card-title>Affected Entities</mat-card-title>
+            <div formArrayName="affectedEntities">
+              <div *ngFor="let entity of affectedEntities.controls; let i = index" [formGroupName]="i" class="affected-entity-group">
+                <mat-divider></mat-divider>
+                <div class="entity-row">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Name</mat-label>
+                    <input matInput formControlName="name">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Code</mat-label>
+                    <input matInput formControlName="code">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>LEI</mat-label>
+                    <input matInput formControlName="LEI">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Affected Entity Type</mat-label>
+                    <mat-select formControlName="affectedEntityType" multiple>
+                      <mat-option value="credit_institution">Credit Institution</mat-option>
+                      <mat-option value="payment_institution">Payment Institution</mat-option>
+                      <mat-option value="investment_firm">Investment Firm</mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="entity.get('affectedEntityType')?.hasError('required') && (entity.get('affectedEntityType')?.touched || formSubmitted)">
+                      Affected Entity Type is required
+                    </mat-error>
+                  </mat-form-field>
+                  <input type="hidden" formControlName="entityType">
+                  <button mat-icon-button color="warn" type="button" (click)="affectedEntities.removeAt(i)" aria-label="Remove entity">
+                    <mat-icon>remove_circle</mat-icon>
+                  </button>
+                </div>
+              </div>
+              <button mat-raised-button color="primary" type="button" (click)="addAffectedEntity()">Add Entity</button>
+            </div>
+          </mat-card>
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Entity Location</mat-label>
-            <input matInput formControlName="entityLocation">
-            <mat-error *ngIf="incidentForm.get('entityLocation')?.hasError('required') && (incidentForm.get('entityLocation')?.touched || formSubmitted)">
-              Entity location is required
-            </mat-error>
-          </mat-form-field>
+          <!-- Ultimate Parent Undertaking Card -->
+          <mat-card class="entity-card">
+            <mat-card-title>Ultimate Parent Undertaking</mat-card-title>
+            <div [formGroup]="ultimateParentUndertakingGroup">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="name">
+                <mat-error *ngIf="incidentForm.get('ultimateParentUndertaking.name')?.hasError('required') && (incidentForm.get('ultimateParentUndertaking.name')?.touched || formSubmitted)">
+                  Name is required
+                </mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Code</mat-label>
+                <input matInput formControlName="code">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>LEI</mat-label>
+                <input matInput formControlName="LEI">
+              </mat-form-field>
+              <input type="hidden" formControlName="entityType">
+              <mat-error *ngIf="incidentForm.get('ultimateParentUndertaking')?.hasError('codeOrLeiRequired') && (incidentForm.get('ultimateParentUndertaking.code')?.touched || incidentForm.get('ultimateParentUndertaking.LEI')?.touched || formSubmitted)">
+                Either Code or LEI is required
+              </mat-error>
+            </div>
+          </mat-card>
         </div>
       </mat-tab>
 

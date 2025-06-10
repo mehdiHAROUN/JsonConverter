@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators, AbstractControl, FormArray, ValidatorFn, ValidationErrors } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -8,6 +8,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatCardModule } from '@angular/material/card';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatIconModule } from '@angular/material/icon';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -78,7 +81,10 @@ interface IncidentFormData {
     MatButtonModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatTabsModule
+    MatTabsModule,
+    MatCardModule,
+    MatDividerModule,
+    MatIconModule
   ],
   templateUrl: './incident-report-form.component.html',
   styleUrl: './incident-report-form.component.scss'
@@ -91,34 +97,51 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
   formSubmitted = false;
   IncidentSubmissionType = IncidentSubmissionType;
 
+  // Custom validator to ensure at least one of code or LEI is filled
+  static codeOrLeiRequiredValidator: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
+    const code = group.get('code')?.value;
+    const lei = group.get('LEI')?.value;
+    if (!code && !lei) {
+      return { codeOrLeiRequired: true };
+    }
+    return null;
+  };
+
   constructor(private fb: FormBuilder) {
     this.incidentForm = this.fb.group({
       incidentSubmissionDetails: this.fb.group({
         incidentSubmission: ['', Validators.required],
         reportCurrency: ['', Validators.required]
       }),
-      // Entity Information
+      // --- Entity Information ---
+      submittingEntity: this.fb.group({
+        name: ['', Validators.required],
+        code: [''],
+        LEI: [''],
+        affectedEntityType: [[]], // optional multi-select
+        entityType: ['SUBMITTING_ENTITY']
+      }, { validators: IncidentReportFormComponent.codeOrLeiRequiredValidator }),
+      affectedEntities: this.fb.array([]),
+      ultimateParentUndertaking: this.fb.group({
+        name: ['', Validators.required],
+        code: [''],
+        LEI: [''],
+        entityType: ['ULTIMATE_PARENT_UNDERTAKING_ENTITY']
+      }, { validators: IncidentReportFormComponent.codeOrLeiRequiredValidator }),
+      // --- End Entity Information ---
       entityName: ['', Validators.required],
       entityType: ['', Validators.required],
       entityLocation: ['', Validators.required],
-
-      // Contact Information
       contactName: ['', Validators.required],
       contactEmail: ['', [Validators.required, Validators.email]],
       contactPhone: ['', [Validators.required, Validators.pattern('^[0-9-+()]*$')]],
-
-      // Incident Details
       incidentTitle: ['', [Validators.required, Validators.minLength(3)]],
       incidentDate: ['', [Validators.required, this.dateValidator()]],
       incidentDescription: ['', [Validators.required, Validators.minLength(10)]],
       severity: ['', Validators.required],
-
-      // Impact Assessment
       financialImpact: [0, [Validators.required, Validators.min(0)]],
       operationalImpact: ['', Validators.required],
       customerImpact: ['', Validators.required],
-
-      // Reporting to Other Authorities
       reportedToAuthorities: [false],
       authorityName: [''],
       reportReference: ['']
@@ -169,6 +192,15 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
     }
   }
 
+  submitForm(): void {
+    this.formSubmitted = true;
+    if (this.incidentForm.valid) {
+      console.log('Form Value:', this.incidentForm.value);
+    } else {
+      this.markFormGroupTouched(this.incidentForm);
+    }
+  }
+
   resetForm(): void {
     this.incidentForm.reset({
       submissionDate: new Date(),
@@ -199,5 +231,26 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
         this.markFormGroupTouched(control);
       }
     });
+  }
+
+  get affectedEntities(): FormArray {
+    return this.incidentForm.get('affectedEntities') as FormArray;
+  }
+
+  addAffectedEntity(): void {
+    this.affectedEntities.push(this.fb.group({
+      name: [''],
+      code: [''],
+      LEI: [''],
+      affectedEntityType: [[], Validators.required], // required multi-select
+      entityType: ['AFFECTED_ENTITY']
+    }));
+  }
+
+  get submittingEntityGroup(): FormGroup {
+    return this.incidentForm.get('submittingEntity') as FormGroup;
+  }
+  get ultimateParentUndertakingGroup(): FormGroup {
+    return this.incidentForm.get('ultimateParentUndertaking') as FormGroup;
   }
 }

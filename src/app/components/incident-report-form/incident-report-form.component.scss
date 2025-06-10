@@ -1,15 +1,21 @@
 .incident-report-form {
-  max-width: 800px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 1100px;
+  margin: 3rem auto;
+  padding: 3rem 2.5rem 2.5rem 2.5rem;
+  background-color: #f5f7fa;
+  border-radius: 18px;
+  box-shadow: 0 6px 32px rgba(0,0,0,0.13);
+  min-height: 80vh;
+  position: relative;
 
   h2 {
-    color: #333;
-    margin-bottom: 1.5rem;
+    color: #263238;
+    margin-bottom: 2.5rem;
     text-align: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.04);
   }
 
   form {
@@ -18,14 +24,14 @@
   }
 
   .mat-mdc-tab-group {
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
   }
 
   .tab-content {
-    padding: 1.5rem 0;
+    padding: 2rem 0;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.5rem;
   }
 
   .full-width {
@@ -34,24 +40,28 @@
 
   .button-container {
     display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    justify-content: center;
 
     button {
-      flex: 1;
+      flex: 0 0 180px;
+      font-size: 1.1rem;
+      padding: 0.75rem 0;
+      border-radius: 24px;
     }
   }
 
   mat-form-field {
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
   }
 
   .mat-mdc-form-field-error {
-    font-size: 12px;
+    font-size: 14px;
   }
 
   mat-checkbox {
-    margin-bottom: 1rem;
+    margin-bottom: 1.2rem;
   }
 
   ::ng-deep {
@@ -59,4 +69,53 @@
       overflow: visible;
     }
   }
+}
+
+.entity-card {
+  margin-bottom: 2.5rem;
+  padding: 2rem 2rem 1.5rem 2rem;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.10);
+  background: #fff;
+}
+
+.entity-card .mat-card-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #1976d2;
+  letter-spacing: 0.5px;
+}
+
+.affected-entity-group {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.entity-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  align-items: flex-end;
+}
+
+.entity-row mat-form-field {
+  flex: 1 1 220px;
+  min-width: 200px;
+}
+
+mat-error, .mat-error {
+  color: #d32f2f !important;
+  font-size: 15px;
+  margin-top: 2px;
+}
+
+button[mat-icon-button] {
+  margin-left: 0.7rem;
+  margin-bottom: 0.7rem;
+}
+
+button[mat-raised-button] {
+  margin-top: 1.2rem;
 }
