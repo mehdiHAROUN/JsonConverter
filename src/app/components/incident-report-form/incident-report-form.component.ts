@@ -68,6 +68,8 @@ interface IncidentFormData {
   reportReference: string;
 }
 
+const PHONE_REGEX = /^\+?[1-9]\d{1,14}(\s?\(\d+\))?([\-\s\.]?\d+)*$/;
+
 @Component({
   selector: 'app-incident-report-form',
   standalone: true,
@@ -129,6 +131,18 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
         entityType: ['ULTIMATE_PARENT_UNDERTAKING_ENTITY']
       }, { validators: IncidentReportFormComponent.codeOrLeiRequiredValidator }),
       // --- End Entity Information ---
+      // --- Contact Information ---
+      primaryContact: this.fb.group({
+        name: [''],
+        email: ['', [Validators.required, Validators.email]],
+        phone: ['', [Validators.pattern(PHONE_REGEX)]]
+      }),
+      secondaryContact: this.fb.group({
+        name: [''],
+        email: ['', [Validators.required, Validators.email]],
+        phone: ['', [Validators.pattern(PHONE_REGEX)]]
+      }),
+      // --- End Contact Information ---
       entityName: ['', Validators.required],
       entityType: ['', Validators.required],
       entityLocation: ['', Validators.required],
@@ -252,5 +266,12 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
   }
   get ultimateParentUndertakingGroup(): FormGroup {
     return this.incidentForm.get('ultimateParentUndertaking') as FormGroup;
+  }
+
+  get primaryContactGroup(): FormGroup {
+    return this.incidentForm.get('primaryContact') as FormGroup;
+  }
+  get secondaryContactGroup(): FormGroup {
+    return this.incidentForm.get('secondaryContact') as FormGroup;
   }
 }

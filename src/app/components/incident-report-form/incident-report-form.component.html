@@ -150,35 +150,61 @@
       <!-- Contact Information -->
       <mat-tab label="Contact Information">
         <div class="tab-content">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Contact Name</mat-label>
-            <input matInput formControlName="contactName">
-            <mat-error *ngIf="incidentForm.get('contactName')?.hasError('required') && (incidentForm.get('contactName')?.touched || formSubmitted)">
-              Contact name is required
-            </mat-error>
-          </mat-form-field>
+          <!-- Primary Contact Card -->
+          <mat-card class="entity-card">
+            <mat-card-title>Primary Contact</mat-card-title>
+            <div formGroupName="primaryContact">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="name">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Email</mat-label>
+                <input matInput formControlName="email" type="email">
+                <mat-error *ngIf="incidentForm.get('primaryContact.email')?.hasError('required') && (incidentForm.get('primaryContact.email')?.touched || formSubmitted)">
+                  Email is required
+                </mat-error>
+                <mat-error *ngIf="incidentForm.get('primaryContact.email')?.hasError('email') && (incidentForm.get('primaryContact.email')?.touched || formSubmitted)">
+                  Please enter a valid email address
+                </mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Phone</mat-label>
+                <input matInput formControlName="phone">
+                <mat-error *ngIf="incidentForm.get('primaryContact.phone')?.hasError('pattern') && (incidentForm.get('primaryContact.phone')?.touched || formSubmitted)">
+                  Please enter a valid international phone number
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </mat-card>
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Contact Email</mat-label>
-            <input matInput formControlName="contactEmail" type="email">
-            <mat-error *ngIf="incidentForm.get('contactEmail')?.hasError('required') && (incidentForm.get('contactEmail')?.touched || formSubmitted)">
-              Contact email is required
-            </mat-error>
-            <mat-error *ngIf="incidentForm.get('contactEmail')?.hasError('email') && (incidentForm.get('contactEmail')?.touched || formSubmitted)">
-              Please enter a valid email address
-            </mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Contact Phone</mat-label>
-            <input matInput formControlName="contactPhone">
-            <mat-error *ngIf="incidentForm.get('contactPhone')?.hasError('required') && (incidentForm.get('contactPhone')?.touched || formSubmitted)">
-              Contact phone is required
-            </mat-error>
-            <mat-error *ngIf="incidentForm.get('contactPhone')?.hasError('pattern') && (incidentForm.get('contactPhone')?.touched || formSubmitted)">
-              Please enter a valid phone number
-            </mat-error>
-          </mat-form-field>
+          <!-- Secondary Contact Card -->
+          <mat-card class="entity-card">
+            <mat-card-title>Secondary Contact</mat-card-title>
+            <div formGroupName="secondaryContact">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="name">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Email</mat-label>
+                <input matInput formControlName="email" type="email">
+                <mat-error *ngIf="incidentForm.get('secondaryContact.email')?.hasError('required') && (incidentForm.get('secondaryContact.email')?.touched || formSubmitted)">
+                  Email is required
+                </mat-error>
+                <mat-error *ngIf="incidentForm.get('secondaryContact.email')?.hasError('email') && (incidentForm.get('secondaryContact.email')?.touched || formSubmitted)">
+                  Please enter a valid email address
+                </mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Phone</mat-label>
+                <input matInput formControlName="phone">
+                <mat-error *ngIf="incidentForm.get('secondaryContact.phone')?.hasError('pattern') && (incidentForm.get('secondaryContact.phone')?.touched || formSubmitted)">
+                  Please enter a valid international phone number
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </mat-card>
         </div>
       </mat-tab>
 
