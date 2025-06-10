@@ -5,31 +5,40 @@
       <!-- Incident Submission Details -->
       <mat-tab label="Incident Submission Details">
         <div class="tab-content">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Submission Date</mat-label>
-            <input matInput [matDatepicker]="submissionPicker" formControlName="submissionDate">
-            <mat-datepicker-toggle matSuffix [for]="submissionPicker"></mat-datepicker-toggle>
-            <mat-datepicker #submissionPicker></mat-datepicker>
-            <mat-error *ngIf="incidentForm.get('submissionDate')?.hasError('required') && (incidentForm.get('submissionDate')?.touched || formSubmitted)">
-              Submission date is required
-            </mat-error>
-          </mat-form-field>
+          <div formGroupName="incidentSubmissionDetails">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Incident Submission Type</mat-label>
+              <mat-select formControlName="incidentSubmission">
+                <mat-option [value]="IncidentSubmissionType.INITIAL_NOTIFICATION">
+                  Initial Notification
+                </mat-option>
+                <mat-option [value]="IncidentSubmissionType.INTERMEDIATE_REPORT">
+                  Intermediate Report
+                </mat-option>
+                <mat-option [value]="IncidentSubmissionType.FINAL_REPORT">
+                  Final Report
+                </mat-option>
+                <mat-option [value]="IncidentSubmissionType.MAJOR_INCIDENT_RECLASSIFIED">
+                  Major Incident Reclassified as Non-Major
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="incidentForm.get('incidentSubmissionDetails.incidentSubmission')?.hasError('required')">
+                Incident submission type is required
+              </mat-error>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Reporter Name</mat-label>
-            <input matInput formControlName="reporterName">
-            <mat-error *ngIf="incidentForm.get('reporterName')?.hasError('required') && (incidentForm.get('reporterName')?.touched || formSubmitted)">
-              Reporter name is required
-            </mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Reporter Role</mat-label>
-            <input matInput formControlName="reporterRole">
-            <mat-error *ngIf="incidentForm.get('reporterRole')?.hasError('required') && (incidentForm.get('reporterRole')?.touched || formSubmitted)">
-              Reporter role is required
-            </mat-error>
-          </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Report Currency</mat-label>
+              <mat-select formControlName="reportCurrency">
+                <mat-option *ngFor="let currency of reportCurrencies" [value]="currency">
+                  {{currency}}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="incidentForm.get('incidentSubmissionDetails.reportCurrency')?.hasError('required')">
+                Report currency is required
+              </mat-error>
+            </mat-form-field>
+          </div>
         </div>
       </mat-tab>
 

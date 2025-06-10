@@ -11,6 +11,27 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
+export enum IncidentSubmissionType {
+  INITIAL_NOTIFICATION = 'initial_notification',
+  INTERMEDIATE_REPORT = 'intermediate_report',
+  FINAL_REPORT = 'final_report',
+  MAJOR_INCIDENT_RECLASSIFIED = 'major_incident_reclassified_as_non-major'
+}
+
+export enum ReportCurrency {
+  EUR = 'EUR',
+  BGN = 'BGN',
+  CZK = 'CZK',
+  DKK = 'DKK',
+  HUF = 'HUF',
+  PLN = 'PLN',
+  RON = 'RON',
+  ISK = 'ISK',
+  CHF = 'CHF',
+  NOK = 'NOK',
+  SEK = 'SEK'
+}
+
 interface IncidentFormData {
   // Incident Submission Details
   submissionDate: Date;
@@ -64,16 +85,18 @@ interface IncidentFormData {
 })
 export class IncidentReportFormComponent implements OnInit, OnDestroy {
   incidentForm: FormGroup;
+  incidentSubmissionTypes = Object.values(IncidentSubmissionType);
+  reportCurrencies = Object.values(ReportCurrency);
   private destroy$ = new Subject<void>();
   formSubmitted = false;
+  IncidentSubmissionType = IncidentSubmissionType;
 
   constructor(private fb: FormBuilder) {
     this.incidentForm = this.fb.group({
-      // Incident Submission Details
-      submissionDate: [new Date(), Validators.required],
-      reporterName: ['', [Validators.required, Validators.minLength(3)]],
-      reporterRole: ['', Validators.required],
-
+      incidentSubmissionDetails: this.fb.group({
+        incidentSubmission: ['', Validators.required],
+        reportCurrency: ['', Validators.required]
+      }),
       // Entity Information
       entityName: ['', Validators.required],
       entityType: ['', Validators.required],
