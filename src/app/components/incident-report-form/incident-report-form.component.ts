@@ -160,9 +160,6 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
       incidentDate: undefined,
       incidentDescription: undefined,
       severity: undefined,
-      financialImpact: [0, [Validators.required, Validators.min(0)]],
-      operationalImpact: ['', Validators.required],
-      customerImpact: ['', Validators.required],
       reportedToAuthorities: [false],
       authorityName: [''],
       reportReference: ['']

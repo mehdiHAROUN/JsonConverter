@@ -218,32 +218,7 @@
       <!-- Impact Assessment -->
       <mat-tab label="Impact Assessment">
         <div class="tab-content">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Financial Impact</mat-label>
-            <input matInput type="number" formControlName="financialImpact">
-            <mat-error *ngIf="incidentForm.get('financialImpact')?.hasError('required') && (incidentForm.get('financialImpact')?.touched || formSubmitted)">
-              Financial impact is required
-            </mat-error>
-            <mat-error *ngIf="incidentForm.get('financialImpact')?.hasError('min') && (incidentForm.get('financialImpact')?.touched || formSubmitted)">
-              Financial impact cannot be negative
-            </mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Operational Impact</mat-label>
-            <textarea matInput rows="3" formControlName="operationalImpact"></textarea>
-            <mat-error *ngIf="incidentForm.get('operationalImpact')?.hasError('required') && (incidentForm.get('operationalImpact')?.touched || formSubmitted)">
-              Operational impact is required
-            </mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Customer Impact</mat-label>
-            <textarea matInput rows="3" formControlName="customerImpact"></textarea>
-            <mat-error *ngIf="incidentForm.get('customerImpact')?.hasError('required') && (incidentForm.get('customerImpact')?.touched || formSubmitted)">
-              Customer impact is required
-            </mat-error>
-          </mat-form-field>
+          <!-- Impact assessment fields have been removed -->
         </div>
       </mat-tab>
 
