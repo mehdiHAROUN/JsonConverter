@@ -14,6 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { IncidentDetailsFormComponent } from '../incident-details-form/incident-details-form.component';
+import { ImpactAssessmentComponent } from '../impact-assessment/impact-assessment.component';
 
 export enum IncidentSubmissionType {
   INITIAL_NOTIFICATION = 'initial_notification',
@@ -88,7 +89,8 @@ const PHONE_REGEX = /^\+?[1-9]\d{1,14}(\s?\(\d+\))?([\-\s\.]?\d+)*$/;
     MatCardModule,
     MatDividerModule,
     MatIconModule,
-    IncidentDetailsFormComponent
+    IncidentDetailsFormComponent,
+    ImpactAssessmentComponent
   ],
   templateUrl: './incident-report-form.component.html',
   styleUrl: './incident-report-form.component.scss'

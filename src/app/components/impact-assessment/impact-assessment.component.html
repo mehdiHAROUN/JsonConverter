@@ -1,0 +1,252 @@
+<div class="impact-assessment">
+  <mat-card class="impact-card">
+    <mat-card-title>Impact Assessment</mat-card-title>
+    <mat-card-content>
+      <form [formGroup]="impactForm">
+        <!-- Impact on Relevant Clients -->
+        <mat-checkbox formControlName="hasImpactOnRelevantClients" class="full-width">
+          Has Impact on Relevant Clients
+        </mat-checkbox>
+
+        <!-- Service Impact Section -->
+        <div formGroupName="serviceImpact" class="form-section">
+          <h3>Service Impact</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Service Downtime (HH:MM:SS)</mat-label>
+            <input matInput formControlName="serviceDowntime" placeholder="00:00:00">
+            <mat-error *ngIf="serviceDowntimeControl.hasError('required')">
+              Service downtime is required for {{ incidentSubmission === 'initial_notification' ? 'initial notification' : 'intermediate report' }}
+            </mat-error>
+            <mat-error *ngIf="serviceDowntimeControl.hasError('invalidTimeFormat')">
+              Please enter time in HH:MM:SS format (e.g., 01:30:00)
+            </mat-error>
+            <mat-error *ngIf="serviceDowntimeControl.hasError('maxlength')">
+              Service downtime cannot exceed {{ MAX_TEXT_LENGTH }} characters
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Service Restoration Date/Time</mat-label>
+            <input matInput [matDatepicker]="restorationPicker" formControlName="serviceRestorationDateTime">
+            <mat-datepicker-toggle matSuffix [for]="restorationPicker"></mat-datepicker-toggle>
+            <mat-datepicker #restorationPicker></mat-datepicker>
+            <mat-error *ngIf="serviceImpactGroup.get('serviceRestorationDateTime')?.hasError('required')">
+              Service restoration date/time is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-checkbox formControlName="isTemporaryActionsMeasuresForRecovery" class="full-width">
+            Temporary Actions/Measures for Recovery Implemented
+          </mat-checkbox>
+
+          <mat-form-field appearance="outline" class="full-width" *ngIf="serviceImpactGroup.get('isTemporaryActionsMeasuresForRecovery')?.value">
+            <mat-label>Description of Temporary Actions/Measures for Recovery</mat-label>
+            <textarea matInput formControlName="descriptionOfTemporaryActionsMeasuresForRecovery" rows="3"></textarea>
+            <mat-error *ngIf="temporaryActionsDescriptionControl.hasError('required')">
+              Description of temporary actions/measures is required when temporary actions are taken
+            </mat-error>
+            <mat-error *ngIf="temporaryActionsDescriptionControl.hasError('maxlength')">
+              Description cannot exceed {{ MAX_TEXT_LENGTH }} characters
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Critical Services Affected -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Critical Services Affected</mat-label>
+          <textarea matInput formControlName="criticalServicesAffected" rows="4"></textarea>
+          <mat-error *ngIf="criticalServicesAffectedControl.hasError('required')">
+            Critical services affected is required for {{ incidentSubmission === 'initial_notification' ? 'initial notification' : 'intermediate report' }}
+          </mat-error>
+          <mat-error *ngIf="criticalServicesAffectedControl.hasError('maxlength')">
+            Critical services affected cannot exceed {{ MAX_TEXT_LENGTH }} characters
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Affected Assets Section -->
+        <div formGroupName="affectedAssets" class="form-section">
+          <h3>Affected Assets</h3>
+
+          <!-- Affected Clients -->
+          <div formGroupName="affectedClients" class="nested-form-group">
+            <h4>Affected Clients</h4>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea matInput formControlName="description" rows="3"></textarea>
+              <mat-error *ngIf="affectedClientsGroup.get('description')?.hasError('required')">
+                Description is required
+              </mat-error>
+              <mat-error *ngIf="affectedClientsGroup.get('description')?.hasError('maxlength')">
+                Description cannot exceed {{ MAX_TEXT_LENGTH }} characters
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Percentage</mat-label>
+              <input matInput type="number" formControlName="percentage" min="0" max="100">
+              <mat-error *ngIf="affectedClientsGroup.get('percentage')?.hasError('required')">
+                Percentage is required
+              </mat-error>
+              <mat-error *ngIf="affectedClientsGroup.get('percentage')?.hasError('invalidPercentage')">
+                Percentage must be between 0 and 100
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Affected Financial Counterparts -->
+          <div formGroupName="affectedFinancialCounterparts" class="nested-form-group">
+            <h4>Affected Financial Counterparts</h4>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea matInput formControlName="description" rows="3"></textarea>
+              <mat-error *ngIf="affectedFinancialCounterpartsGroup.get('description')?.hasError('required')">
+                Description is required
+              </mat-error>
+              <mat-error *ngIf="affectedFinancialCounterpartsGroup.get('description')?.hasError('maxlength')">
+                Description cannot exceed {{ MAX_TEXT_LENGTH }} characters
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Percentage</mat-label>
+              <input matInput type="number" formControlName="percentage" min="0" max="100">
+              <mat-error *ngIf="affectedFinancialCounterpartsGroup.get('percentage')?.hasError('required')">
+                Percentage is required
+              </mat-error>
+              <mat-error *ngIf="affectedFinancialCounterpartsGroup.get('percentage')?.hasError('invalidPercentage')">
+                Percentage must be between 0 and 100
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Affected Transactions -->
+          <div formGroupName="affectedTransactions" class="nested-form-group">
+            <h4>Affected Transactions</h4>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea matInput formControlName="description" rows="3"></textarea>
+              <mat-error *ngIf="affectedTransactionsGroup.get('description')?.hasError('required')">
+                Description is required
+              </mat-error>
+              <mat-error *ngIf="affectedTransactionsGroup.get('description')?.hasError('maxlength')">
+                Description cannot exceed {{ MAX_TEXT_LENGTH }} characters
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Percentage</mat-label>
+              <input matInput type="number" formControlName="percentage" min="0" max="100">
+              <mat-error *ngIf="affectedTransactionsGroup.get('percentage')?.hasError('required')">
+                Percentage is required
+              </mat-error>
+              <mat-error *ngIf="affectedTransactionsGroup.get('percentage')?.hasError('invalidPercentage')">
+                Percentage must be between 0 and 100
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Value of Affected Transactions</mat-label>
+            <input matInput type="number" formControlName="valueOfAffectedTransactions">
+            <mat-error *ngIf="affectedAssetsGroup.get('valueOfAffectedTransactions')?.hasError('required')">
+              Value of affected transactions is required
+            </mat-error>
+            <mat-error *ngIf="affectedAssetsGroup.get('valueOfAffectedTransactions')?.hasError('min')">
+              Value cannot be negative
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Numbers (Actual/Estimate)</mat-label>
+            <textarea matInput rows="2" formControlName="numbersActualEstimate"
+                      [maxLength]="MAX_TEXT_LENGTH"
+                      placeholder="Provide actual or estimated numbers"></textarea>
+            <mat-error *ngIf="affectedAssetsGroup.get('numbersActualEstimate')?.hasError('required')">
+              Numbers (actual/estimate) is required
+            </mat-error>
+            <mat-error *ngIf="affectedAssetsGroup.get('numbersActualEstimate')?.hasError('maxlength')">
+              Description exceeds maximum length
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Affected Functional Areas -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Affected Functional Areas</mat-label>
+          <textarea matInput rows="3" formControlName="affectedFunctionalAreas"
+                    [maxLength]="MAX_TEXT_LENGTH"
+                    placeholder="Describe affected functional areas"></textarea>
+          <mat-error *ngIf="impactForm.get('affectedFunctionalAreas')?.hasError('required')">
+            Affected functional areas is required
+          </mat-error>
+          <mat-error *ngIf="impactForm.get('affectedFunctionalAreas')?.hasError('maxlength')">
+            Description exceeds maximum length
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Affected Infrastructure Components Section -->
+        <div class="form-section">
+          <h3>Affected Infrastructure Components</h3>
+
+          <mat-radio-group formControlName="isAffectedInfrastructureComponents" class="radio-group">
+            <mat-radio-button value="yes">Yes</mat-radio-button>
+            <mat-radio-button value="no">No</mat-radio-button>
+          </mat-radio-group>
+
+          <mat-form-field appearance="outline" class="full-width" *ngIf="isAffectedInfrastructureComponentsControl.value === 'yes'">
+            <mat-label>Description of Affected Infrastructure Components</mat-label>
+            <textarea matInput formControlName="affectedInfrastructureComponents" rows="3"></textarea>
+            <mat-error *ngIf="affectedInfrastructureComponentsControl.hasError('required')">
+              Description of affected infrastructure components is required when infrastructure is affected
+            </mat-error>
+            <mat-error *ngIf="affectedInfrastructureComponentsControl.hasError('maxlength')">
+              Description cannot exceed {{ MAX_TEXT_LENGTH }} characters
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Financial Interest Impact -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Impact on Financial Interest</mat-label>
+          <textarea matInput rows="3" formControlName="isImpactOnFinancialInterest"
+                    [maxLength]="MAX_TEXT_LENGTH"
+                    placeholder="Describe the impact on financial interest"></textarea>
+          <mat-error *ngIf="impactForm.get('isImpactOnFinancialInterest')?.hasError('required')">
+            Impact on financial interest is required
+          </mat-error>
+          <mat-error *ngIf="impactForm.get('isImpactOnFinancialInterest')?.hasError('maxlength')">
+            Description exceeds maximum length
+          </mat-error>
+        </mat-form-field>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<style>
+.nested-form-group {
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+
+.half-width {
+  width: 48%;
+  margin-right: 2%;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-section {
+  margin-bottom: 24px;
+}
+
+h4 {
+  margin: 0 0 16px 0;
+  color: #666;
+}
+</style> 

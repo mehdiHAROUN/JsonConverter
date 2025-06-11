@@ -1,0 +1,86 @@
+.impact-assessment {
+  padding: 1rem;
+
+  .impact-card {
+    max-width: 800px;
+    margin: 0 auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    mat-card-title {
+      font-size: 1.5rem;
+      color: #1976d2;
+      margin-bottom: 1.5rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    mat-card-content {
+      padding: 1rem 0;
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+    }
+  }
+
+  .form-section {
+    background-color: #f5f5f5;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+
+    h3 {
+      color: #1976d2;
+      margin: 0 0 1rem 0;
+      font-size: 1.2rem;
+      font-weight: 500;
+    }
+  }
+
+  .full-width {
+    width: 100%;
+  }
+
+  mat-checkbox {
+    margin-bottom: 1rem;
+  }
+
+  mat-form-field {
+    margin-bottom: 0.5rem;
+
+    &.mat-mdc-form-field-type-mat-textarea {
+      .mat-mdc-form-field-flex {
+        padding-top: 0.5rem;
+      }
+    }
+  }
+
+  .mat-mdc-form-field-error {
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  textarea {
+    min-height: 80px;
+  }
+
+  // Style for date picker
+  .mat-datepicker-toggle {
+    color: rgba(0, 0, 0, 0.54);
+  }
+
+  // Responsive adjustments
+  @media (max-width: 600px) {
+    .impact-card {
+      margin: 0;
+      border-radius: 0;
+    }
+
+    .form-section {
+      padding: 1rem;
+    }
+  }
+} 
