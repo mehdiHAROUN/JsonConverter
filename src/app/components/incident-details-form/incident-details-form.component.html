@@ -3,62 +3,62 @@
     <mat-card-title>Incident Details</mat-card-title>
     <div class="incident-details-section">
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Financial Entity Code</mat-label>
+        <mat-label>Financial Entity Code (field 2.1)</mat-label>
         <input matInput formControlName="financialEntityCode">
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Detection Date</mat-label>
+        <mat-label>Detection Date (field 2.2)</mat-label>
         <input matInput [matDatepicker]="detectionDatePicker" formControlName="detectionDate">
         <mat-datepicker-toggle matSuffix [for]="detectionDatePicker"></mat-datepicker-toggle>
         <mat-datepicker #detectionDatePicker></mat-datepicker>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Detection Time</mat-label>
+        <mat-label>Detection Time (field 2.2)</mat-label>
         <input matInput type="time" formControlName="detectionTime">
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Classification Date</mat-label>
+        <mat-label>Classification Date (field 2.3)</mat-label>
         <input matInput [matDatepicker]="classificationDatePicker" formControlName="classificationDate">
         <mat-datepicker-toggle matSuffix [for]="classificationDatePicker"></mat-datepicker-toggle>
         <mat-datepicker #classificationDatePicker></mat-datepicker>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Classification Time</mat-label>
+        <mat-label>Classification Time (field 2.3)</mat-label>
         <input matInput type="time" formControlName="classificationTime">
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Incident Occurrence Date</mat-label>
+        <mat-label>Incident Occurrence Date (field 2.4)</mat-label>
         <input matInput [matDatepicker]="incidentOccurrenceDatePicker" formControlName="incidentOccurrenceDate">
         <mat-datepicker-toggle matSuffix [for]="incidentOccurrenceDatePicker"></mat-datepicker-toggle>
         <mat-datepicker #incidentOccurrenceDatePicker></mat-datepicker>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Incident Occurrence Time</mat-label>
+        <mat-label>Incident Occurrence Time (field 2.4)</mat-label>
         <input matInput type="time" formControlName="incidentOccurrenceTime">
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Incident Description</mat-label>
+        <mat-label>Incident Description (field 2.5)</mat-label>
         <textarea matInput rows="3" formControlName="incidentDescription"></textarea>
       </mat-form-field>
 
       <mat-checkbox formControlName="isBusinessContinuityActivated">
-        Business Continuity Activated
+        Business Continuity Activated (field 2.6)
       </mat-checkbox>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Incident Duration (HH:MM:SS)</mat-label>
+        <mat-label>Incident Duration (HH:MM:SS) (field 2.7)</mat-label>
         <input matInput formControlName="incidentDuration">
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Incident Discovery</mat-label>
+        <mat-label>Incident Discovery (field 2.8)</mat-label>
         <mat-select formControlName="incidentDiscovery">
           <mat-option value="it_security">IT Security</mat-option>
           <mat-option value="staff">Staff</mat-option>
@@ -71,13 +71,13 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Competent Authority Code</mat-label>
+        <mat-label>Competent Authority Code (field 2.9)</mat-label>
         <input matInput formControlName="competentAuthorityCode">
       </mat-form-field>
 
       <div formGroupName="incidentType">
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Incident Classification</mat-label>
+          <mat-label>Incident Classification (field 2.10.1)</mat-label>
           <mat-select formControlName="incidentClassification" multiple>
             <mat-option value="cybersecurity-related">Cybersecurity-related</mat-option>
             <mat-option value="fraud">Fraud</mat-option>
@@ -87,11 +87,11 @@
           </mat-select>
         </mat-form-field>
         <mat-form-field *ngIf="incidentDetailsForm.get('incidentType.incidentClassification')?.value?.includes('other')" appearance="outline" class="full-width">
-          <mat-label>Other Incident Classification</mat-label>
+          <mat-label>Other Incident Classification (field 2.10.1a)</mat-label>
           <textarea matInput rows="2" formControlName="otherIncidentClassification"></textarea>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Threat Techniques</mat-label>
+          <mat-label>Threat Techniques (field 2.10.2)</mat-label>
           <mat-select formControlName="threatTechniques" multiple>
             <mat-option value="malware">Malware</mat-option>
             <mat-option value="phishing">Phishing</mat-option>
@@ -101,18 +101,18 @@
           </mat-select>
         </mat-form-field>
         <mat-form-field *ngIf="incidentDetailsForm.get('incidentType.threatTechniques')?.value?.includes('other')" appearance="outline" class="full-width">
-          <mat-label>Other Threat Techniques</mat-label>
+          <mat-label>Other Threat Techniques (field 2.10.2a)</mat-label>
           <textarea matInput rows="2" formControlName="otherThreatTechniques"></textarea>
         </mat-form-field>
       </div>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Indicators of Compromise</mat-label>
+        <mat-label>Indicators of Compromise (field 2.11)</mat-label>
         <input matInput formControlName="indicatorsOfCompromise">
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Root Cause HL Classification</mat-label>
+        <mat-label>Root Cause HL Classification (field 2.12.1)</mat-label>
         <mat-select formControlName="rootCauseHLClassification" multiple>
           <mat-option value="internal">Internal</mat-option>
           <mat-option value="external">External</mat-option>
@@ -121,7 +121,7 @@
         </mat-select>
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Root Causes Detailed Classification</mat-label>
+        <mat-label>Root Causes Detailed Classification (field 2.12.2)</mat-label>
         <mat-select formControlName="rootCausesDetailedClassification" multiple>
           <mat-option value="software">Software</mat-option>
           <mat-option value="hardware">Hardware</mat-option>
@@ -131,7 +131,7 @@
         </mat-select>
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Root Causes Additional Classification</mat-label>
+        <mat-label>Root Causes Additional Classification (field 2.12.3)</mat-label>
         <mat-select formControlName="rootCausesAdditionalClassification" multiple>
           <mat-option value="configuration">Configuration</mat-option>
           <mat-option value="maintenance">Maintenance</mat-option>
@@ -140,57 +140,57 @@
         </mat-select>
       </mat-form-field>
       <mat-form-field *ngIf="hasOtherRootCause()" appearance="outline" class="full-width">
-        <mat-label>Other Root Causes</mat-label>
+        <mat-label>Other Root Causes (field 2.12.3a)</mat-label>
         <textarea matInput rows="2" formControlName="rootCausesOther"></textarea>
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Root Causes Information</mat-label>
+        <mat-label>Root Causes Information (field 2.12.4)</mat-label>
         <textarea matInput rows="2" formControlName="rootCausesInformation"></textarea>
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Root Cause Addressing Date</mat-label>
+        <mat-label>Root Cause Addressing Date (field 2.12.5)</mat-label>
         <input matInput [matDatepicker]="rootCauseAddressingDatePicker" formControlName="rootCauseAddressingDate">
         <mat-datepicker-toggle matSuffix [for]="rootCauseAddressingDatePicker"></mat-datepicker-toggle>
         <mat-datepicker #rootCauseAddressingDatePicker></mat-datepicker>
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Root Cause Addressing Time</mat-label>
+        <mat-label>Root Cause Addressing Time (field 2.12.5)</mat-label>
         <input matInput type="time" formControlName="rootCauseAddressingTime">
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Incident Resolution Summary</mat-label>
+        <mat-label>Incident Resolution Summary (field 2.13.1)</mat-label>
         <textarea matInput rows="2" formControlName="incidentResolutionSummary"></textarea>
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Incident Resolution vs Planned Implementation</mat-label>
+        <mat-label>Incident Resolution vs Planned Implementation (field 2.13.2)</mat-label>
         <textarea matInput rows="2" formControlName="incidentResolutionVsPlannedImplementation"></textarea>
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Incident Resolution Date</mat-label>
+        <mat-label>Incident Resolution Date (field 2.13.3)</mat-label>
         <input matInput [matDatepicker]="incidentResolutionDatePicker" formControlName="incidentResolutionDate">
         <mat-datepicker-toggle matSuffix [for]="incidentResolutionDatePicker"></mat-datepicker-toggle>
         <mat-datepicker #incidentResolutionDatePicker></mat-datepicker>
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Incident Resolution Time</mat-label>
+        <mat-label>Incident Resolution Time (field 2.13.3)</mat-label>
         <input matInput type="time" formControlName="incidentResolutionTime">
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Financial Recoveries Amount</mat-label>
+        <mat-label>Financial Recoveries Amount (field 2.14)</mat-label>
         <input matInput type="number" formControlName="financialRecoveriesAmount">
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Gross Amount Indirect/Direct Costs</mat-label>
+        <mat-label>Gross Amount Indirect/Direct Costs (field 2.15)</mat-label>
         <input matInput type="number" formControlName="grossAmountIndirectDirectCosts">
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Recurring Non-Major Incidents Description</mat-label>
+        <mat-label>Recurring Non-Major Incidents Description (field 2.16.1)</mat-label>
         <textarea matInput rows="2" formControlName="recurringNonMajorIncidentsDescription"></textarea>
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Recurring Incident Date</mat-label>
+        <mat-label>Recurring Incident Date (field 2.16.2)</mat-label>
         <input matInput type="date" formControlName="recurringIncidentDate">
       </mat-form-field>
     </div>
   </mat-card>
-</form> 
+</form>

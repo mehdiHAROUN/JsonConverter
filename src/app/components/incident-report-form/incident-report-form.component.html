@@ -3,7 +3,7 @@
   <form [formGroup]="incidentForm" (ngSubmit)="onSubmit()">
     <div formGroupName="incidentSubmissionDetails">
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Incident Submission Type</mat-label>
+        <mat-label>Incident Submission Type (field 1.1)</mat-label>
         <mat-select formControlName="incidentSubmission">
           <mat-option [value]="IncidentSubmissionType.INITIAL_NOTIFICATION">
             Initial Notification
@@ -33,22 +33,22 @@
             <mat-card-title>Submitting Entity</mat-card-title>
             <div [formGroup]="submittingEntityGroup">
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Name</mat-label>
+                <mat-label>Name (field 1.3.1)</mat-label>
                 <input matInput formControlName="name">
                 <mat-error *ngIf="incidentForm.get('submittingEntity.name')?.hasError('required') && (incidentForm.get('submittingEntity.name')?.touched || formSubmitted)">
                   Name is required
                 </mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Code</mat-label>
+                <mat-label>Code (field 1.3.2)</mat-label>
                 <input matInput formControlName="code">
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>LEI</mat-label>
+                <mat-label>LEI (field 1.3.3)</mat-label>
                 <input matInput formControlName="LEI">
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Affected Entity Type</mat-label>
+                <mat-label>Entity Type (field 1.3.4)</mat-label>
                 <mat-select formControlName="affectedEntityType" multiple>
                   <mat-option value="credit_institution">Credit Institution</mat-option>
                   <mat-option value="payment_institution">Payment Institution</mat-option>
@@ -70,19 +70,19 @@
                 <mat-divider></mat-divider>
                 <div class="entity-row">
                   <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Name</mat-label>
+                    <mat-label>Name (field 1.4.1)</mat-label>
                     <input matInput formControlName="name">
                   </mat-form-field>
                   <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Code</mat-label>
+                    <mat-label>Code (field 1.4.2)</mat-label>
                     <input matInput formControlName="code">
                   </mat-form-field>
                   <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>LEI</mat-label>
+                    <mat-label>LEI (field 1.4.3)</mat-label>
                     <input matInput formControlName="LEI">
                   </mat-form-field>
                   <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Affected Entity Type</mat-label>
+                    <mat-label>Entity Type (field 1.4.4)</mat-label>
                     <mat-select formControlName="affectedEntityType" multiple>
                       <mat-option value="credit_institution">Credit Institution</mat-option>
                       <mat-option value="payment_institution">Payment Institution</mat-option>
@@ -107,11 +107,11 @@
             <mat-card-title>Primary Contact</mat-card-title>
             <div formGroupName="primaryContact">
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Name</mat-label>
+                <mat-label>Name (field 1.5.1)</mat-label>
                 <input matInput formControlName="name">
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Email</mat-label>
+                <mat-label>Email (field 1.5.2)</mat-label>
                 <input matInput formControlName="email" type="email">
                 <mat-error *ngIf="incidentForm.get('primaryContact.email')?.hasError('required') && (incidentForm.get('primaryContact.email')?.touched || formSubmitted)">
                   Email is required
@@ -121,7 +121,7 @@
                 </mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Phone</mat-label>
+                <mat-label>Phone (field 1.5.3)</mat-label>
                 <input matInput formControlName="phone">
                 <mat-error *ngIf="incidentForm.get('primaryContact.phone')?.hasError('pattern') && (incidentForm.get('primaryContact.phone')?.touched || formSubmitted)">
                   Please enter a valid international phone number
@@ -135,11 +135,11 @@
             <mat-card-title>Secondary Contact</mat-card-title>
             <div formGroupName="secondaryContact">
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Name</mat-label>
+                <mat-label>Name (field 1.6.1)</mat-label>
                 <input matInput formControlName="name">
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Email</mat-label>
+                <mat-label>Email (field 1.6.2)</mat-label>
                 <input matInput formControlName="email" type="email">
                 <mat-error *ngIf="incidentForm.get('secondaryContact.email')?.hasError('required') && (incidentForm.get('secondaryContact.email')?.touched || formSubmitted)">
                   Email is required
@@ -149,7 +149,7 @@
                 </mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Phone</mat-label>
+                <mat-label>Phone (field 1.6.3)</mat-label>
                 <input matInput formControlName="phone">
                 <mat-error *ngIf="incidentForm.get('secondaryContact.phone')?.hasError('pattern') && (incidentForm.get('secondaryContact.phone')?.touched || formSubmitted)">
                   Please enter a valid international phone number
@@ -163,18 +163,18 @@
             <mat-card-title>Ultimate Parent Undertaking</mat-card-title>
             <div [formGroup]="ultimateParentUndertakingGroup">
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Name</mat-label>
+                <mat-label>Name (field 1.7.1)</mat-label>
                 <input matInput formControlName="name">
                 <mat-error *ngIf="incidentForm.get('ultimateParentUndertaking.name')?.hasError('required') && (incidentForm.get('ultimateParentUndertaking.name')?.touched || formSubmitted)">
                   Name is required
                 </mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Code</mat-label>
+                <mat-label>Code (field 1.7.2)</mat-label>
                 <input matInput formControlName="code">
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>LEI</mat-label>
+                <mat-label>LEI (field 1.7.3)</mat-label>
                 <input matInput formControlName="LEI">
               </mat-form-field>
               <input type="hidden" formControlName="entityType">
@@ -187,7 +187,7 @@
           <!-- Report Currency Field -->
           <div formGroupName="incidentSubmissionDetails">
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Report Currency</mat-label>
+              <mat-label>Report Currency (field 1.2)</mat-label>
               <mat-select formControlName="reportCurrency">
                 <mat-option *ngFor="let currency of reportCurrencies" [value]="currency">
                   {{currency}}
@@ -220,12 +220,12 @@
       <mat-tab label="Reporting to Other Authorities">
         <div class="tab-content">
           <mat-checkbox formControlName="reportedToAuthorities" class="full-width">
-            Has this incident been reported to other authorities?
+            Has this incident been reported to other authorities? (related to section 4.3)
           </mat-checkbox>
 
           <ng-container *ngIf="incidentForm.get('reportedToAuthorities')?.value">
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Authority Name</mat-label>
+              <mat-label>Authority Name (field 4.3.1)</mat-label>
               <input matInput formControlName="authorityName">
               <mat-error *ngIf="incidentForm.get('authorityName')?.hasError('required') && (incidentForm.get('authorityName')?.touched || formSubmitted)">
                 Authority name is required
@@ -233,7 +233,7 @@
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Report Reference</mat-label>
+              <mat-label>Report Reference (field 4.3.2)</mat-label>
               <input matInput formControlName="reportReference">
               <mat-error *ngIf="incidentForm.get('reportReference')?.hasError('required') && (incidentForm.get('reportReference')?.touched || formSubmitted)">
                 Report reference is required

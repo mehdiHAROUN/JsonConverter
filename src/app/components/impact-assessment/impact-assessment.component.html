@@ -1,6 +1,6 @@
 <div class="impact-assessment">
   <mat-card class="impact-card">
-    <mat-card-title>Impact Assessment</mat-card-title>
+    <mat-card-title>Impact Assessment (Section 3)</mat-card-title>
     <mat-card-content>
       <form [formGroup]="impactForm">
         <!-- Impact on Relevant Clients -->
@@ -10,10 +10,10 @@
 
         <!-- Service Impact Section -->
         <div formGroupName="serviceImpact" class="form-section">
-          <h3>Service Impact</h3>
+          <h3>Service Impact (field 3.1)</h3>
           
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Service Downtime (HH:MM:SS)</mat-label>
+            <mat-label>Service Downtime (HH:MM:SS) (field 3.1.3)</mat-label>
             <input matInput formControlName="serviceDowntime" placeholder="00:00:00">
             <mat-error *ngIf="serviceDowntimeControl.hasError('required')">
               Service downtime is required for {{ incidentSubmission === 'initial_notification' ? 'initial notification' : 'intermediate report' }}
@@ -27,7 +27,7 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Service Restoration Date/Time</mat-label>
+            <mat-label>Service Restoration Date/Time (field 3.1.4)</mat-label>
             <input matInput [matDatepicker]="restorationPicker" formControlName="serviceRestorationDateTime">
             <mat-datepicker-toggle matSuffix [for]="restorationPicker"></mat-datepicker-toggle>
             <mat-datepicker #restorationPicker></mat-datepicker>
@@ -37,11 +37,11 @@
           </mat-form-field>
 
           <mat-checkbox formControlName="isTemporaryActionsMeasuresForRecovery" class="full-width">
-            Temporary Actions/Measures for Recovery Implemented
+            Temporary Actions/Measures for Recovery Implemented (field 3.1.5)
           </mat-checkbox>
 
           <mat-form-field appearance="outline" class="full-width" *ngIf="serviceImpactGroup.get('isTemporaryActionsMeasuresForRecovery')?.value">
-            <mat-label>Description of Temporary Actions/Measures for Recovery</mat-label>
+            <mat-label>Description of Temporary Actions/Measures for Recovery (field 3.1.5a)</mat-label>
             <textarea matInput formControlName="descriptionOfTemporaryActionsMeasuresForRecovery" rows="3"></textarea>
             <mat-error *ngIf="temporaryActionsDescriptionControl.hasError('required')">
               Description of temporary actions/measures is required when temporary actions are taken
@@ -54,7 +54,7 @@
 
         <!-- Critical Services Affected -->
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Critical Services Affected</mat-label>
+          <mat-label>Critical Services Affected (related to field 3.1.1, 3.1.2)</mat-label>
           <textarea matInput formControlName="criticalServicesAffected" rows="4"></textarea>
           <mat-error *ngIf="criticalServicesAffectedControl.hasError('required')">
             Critical services affected is required for {{ incidentSubmission === 'initial_notification' ? 'initial notification' : 'intermediate report' }}
@@ -70,16 +70,10 @@
 
           <!-- Affected Clients -->
           <div formGroupName="affectedClients" class="nested-form-group">
-            <h4>Affected Clients</h4>
+            <h4>Affected Clients (related to schema fields for client impact, e.g., part of 3.3, 3.5)</h4>
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Description</mat-label>
               <textarea matInput formControlName="description" rows="3"></textarea>
-              <mat-error *ngIf="affectedClientsGroup.get('description')?.hasError('required')">
-                Description is required
-              </mat-error>
-              <mat-error *ngIf="affectedClientsGroup.get('description')?.hasError('maxlength')">
-                Description cannot exceed {{ MAX_TEXT_LENGTH }} characters
-              </mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="half-width">
@@ -100,12 +94,6 @@
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Description</mat-label>
               <textarea matInput formControlName="description" rows="3"></textarea>
-              <mat-error *ngIf="affectedFinancialCounterpartsGroup.get('description')?.hasError('required')">
-                Description is required
-              </mat-error>
-              <mat-error *ngIf="affectedFinancialCounterpartsGroup.get('description')?.hasError('maxlength')">
-                Description cannot exceed {{ MAX_TEXT_LENGTH }} characters
-              </mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="half-width">
@@ -126,12 +114,6 @@
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Description</mat-label>
               <textarea matInput formControlName="description" rows="3"></textarea>
-              <mat-error *ngIf="affectedTransactionsGroup.get('description')?.hasError('required')">
-                Description is required
-              </mat-error>
-              <mat-error *ngIf="affectedTransactionsGroup.get('description')?.hasError('maxlength')">
-                Description cannot exceed {{ MAX_TEXT_LENGTH }} characters
-              </mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="half-width">
@@ -173,9 +155,8 @@
 
         <!-- Affected Functional Areas -->
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Affected Functional Areas</mat-label>
+          <mat-label>Affected Functional Areas (field 3.2)</mat-label>
           <textarea matInput rows="3" formControlName="affectedFunctionalAreas"
-                    [maxLength]="MAX_TEXT_LENGTH"
                     placeholder="Describe affected functional areas"></textarea>
           <mat-error *ngIf="impactForm.get('affectedFunctionalAreas')?.hasError('required')">
             Affected functional areas is required
@@ -195,7 +176,7 @@
           </mat-radio-group>
 
           <mat-form-field appearance="outline" class="full-width" *ngIf="isAffectedInfrastructureComponentsControl.value === 'yes'">
-            <mat-label>Description of Affected Infrastructure Components</mat-label>
+            <mat-label>Description of Affected Infrastructure</mat-label>
             <textarea matInput formControlName="affectedInfrastructureComponents" rows="3"></textarea>
             <mat-error *ngIf="affectedInfrastructureComponentsControl.hasError('required')">
               Description of affected infrastructure components is required when infrastructure is affected
@@ -208,9 +189,8 @@
 
         <!-- Financial Interest Impact -->
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Impact on Financial Interest</mat-label>
+          <mat-label>Impact on Financial Interest (field 3.6)</mat-label>
           <textarea matInput rows="3" formControlName="isImpactOnFinancialInterest"
-                    [maxLength]="MAX_TEXT_LENGTH"
                     placeholder="Describe the impact on financial interest"></textarea>
           <mat-error *ngIf="impactForm.get('isImpactOnFinancialInterest')?.hasError('required')">
             Impact on financial interest is required
@@ -249,4 +229,4 @@ h4 {
   margin: 0 0 16px 0;
   color: #666;
 }
-</style> 
+</style>
