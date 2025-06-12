@@ -8,6 +8,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 // Custom validator for incidentDuration
 export function incidentDurationValidator(): ValidatorFn {
@@ -85,7 +86,8 @@ export const ROOT_CAUSES_ADDITIONAL_CLASSIFICATION_OPTIONS = [
     MatDatepickerModule,
     MatNativeDateModule,
     MatButtonModule,
-    MatCardModule
+    MatCardModule,
+    MatCheckboxModule
   ],
   templateUrl: './incident-details-form.component.html',
   styleUrls: ['./incident-details-form.component.scss'],
@@ -369,4 +371,4 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
     const additional = this.incidentDetailsForm.get('rootCausesAdditionalClassification')?.value || [];
     return [...hl, ...detailed, ...additional].includes('Other');
   }
-} 
+}

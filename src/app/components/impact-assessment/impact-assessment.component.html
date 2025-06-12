@@ -3,27 +3,52 @@
     <mat-card-title>Impact Assessment (Section 3)</mat-card-title>
     <mat-card-content>
       <form [formGroup]="impactForm">
-        <!-- Impact on Relevant Clients -->
-        <mat-checkbox formControlName="hasImpactOnRelevantClients" class="full-width">
-          Has Impact on Relevant Clients
-        </mat-checkbox>
-
-        <!-- Service Impact Section -->
-        <div formGroupName="serviceImpact" class="form-section">
+        <!-- Service Impact Section (now servicesAffected) -->
+        <div formGroupName="servicesAffected" class="form-section">
           <h3>Service Impact (field 3.1)</h3>
           
+          <mat-checkbox formControlName="isCriticalServiceAffected" class="full-width">
+            Is Critical Service Affected (field 3.1.1)
+          </mat-checkbox>
+
+          <!-- Moved Critical Services Affected Description here -->
+          <mat-form-field appearance="outline" class="full-width" *ngIf="impactForm.get('servicesAffected.isCriticalServiceAffected')?.value">
+            <mat-label>Critical Services Affected Description (field 3.1.1a)</mat-label>
+            <textarea matInput formControlName="criticalServicesAffectedDescription" rows="4"></textarea>
+            <mat-error *ngIf="impactForm.get('servicesAffected.criticalServicesAffectedDescription')?.hasError('required')">
+              Critical services affected description is required when critical services are affected.
+            </mat-error>
+            <mat-error *ngIf="impactForm.get('servicesAffected.criticalServicesAffectedDescription')?.hasError('maxlength')">
+              Description cannot exceed {{ MAX_TEXT_LENGTH }} characters.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Non-Critical Services Affected Description (field 3.1.2)</mat-label>
+            <textarea matInput formControlName="nonCriticalServicesAffectedDescription" rows="3"></textarea>
+          </mat-form-field>
+
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Service Downtime (HH:MM:SS) (field 3.1.3)</mat-label>
             <input matInput formControlName="serviceDowntime" placeholder="00:00:00">
-            <mat-error *ngIf="serviceDowntimeControl.hasError('required')">
-              Service downtime is required for {{ incidentSubmission === 'initial_notification' ? 'initial notification' : 'intermediate report' }}
+            <mat-error *ngIf="impactForm.get('servicesAffected.serviceDowntime')?.hasError('required')">
+              Service downtime is required.
             </mat-error>
-            <mat-error *ngIf="serviceDowntimeControl.hasError('invalidTimeFormat')">
-              Please enter time in HH:MM:SS format (e.g., 01:30:00)
+            <mat-error *ngIf="impactForm.get('servicesAffected.serviceDowntime')?.hasError('invalidTimeFormat')">
+              Please enter time in HH:MM:SS format (e.g., 01:30:00).
             </mat-error>
-            <mat-error *ngIf="serviceDowntimeControl.hasError('maxlength')">
-              Service downtime cannot exceed {{ MAX_TEXT_LENGTH }} characters
+            <mat-error *ngIf="impactForm.get('servicesAffected.serviceDowntime')?.hasError('maxlength')">
+              Service downtime cannot exceed 8 characters.
             </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Service Downtime Information Type (field 3.1.3a)</mat-label>
+            <mat-select formControlName="serviceDowntimeInformationType">
+              <mat-option value="actual">Actual Figures</mat-option>
+              <mat-option value="estimated">Estimates</mat-option>
+              <mat-option value="not_applicable">Not Applicable</mat-option>
+            </mat-select>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full-width">
@@ -31,174 +56,264 @@
             <input matInput [matDatepicker]="restorationPicker" formControlName="serviceRestorationDateTime">
             <mat-datepicker-toggle matSuffix [for]="restorationPicker"></mat-datepicker-toggle>
             <mat-datepicker #restorationPicker></mat-datepicker>
-            <mat-error *ngIf="serviceImpactGroup.get('serviceRestorationDateTime')?.hasError('required')">
-              Service restoration date/time is required
+            <mat-error *ngIf="impactForm.get('servicesAffected.serviceRestorationDateTime')?.hasError('required')">
+              Service restoration date/time is required.
             </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Service Restoration Date/Time Information Type (field 3.1.4a)</mat-label>
+            <mat-select formControlName="serviceRestorationDateTimeInformationType">
+              <mat-option value="actual">Actual Figures</mat-option>
+              <mat-option value="estimated">Estimates</mat-option>
+              <mat-option value="not_applicable">Not Applicable</mat-option>
+            </mat-select>
           </mat-form-field>
 
           <mat-checkbox formControlName="isTemporaryActionsMeasuresForRecovery" class="full-width">
             Temporary Actions/Measures for Recovery Implemented (field 3.1.5)
           </mat-checkbox>
 
-          <mat-form-field appearance="outline" class="full-width" *ngIf="serviceImpactGroup.get('isTemporaryActionsMeasuresForRecovery')?.value">
+          <mat-form-field appearance="outline" class="full-width" *ngIf="impactForm.get('servicesAffected.isTemporaryActionsMeasuresForRecovery')?.value">
             <mat-label>Description of Temporary Actions/Measures for Recovery (field 3.1.5a)</mat-label>
             <textarea matInput formControlName="descriptionOfTemporaryActionsMeasuresForRecovery" rows="3"></textarea>
-            <mat-error *ngIf="temporaryActionsDescriptionControl.hasError('required')">
-              Description of temporary actions/measures is required when temporary actions are taken
+            <mat-error *ngIf="impactForm.get('servicesAffected.descriptionOfTemporaryActionsMeasuresForRecovery')?.hasError('required')">
+              Description of temporary actions/measures is required when temporary actions are taken.
             </mat-error>
-            <mat-error *ngIf="temporaryActionsDescriptionControl.hasError('maxlength')">
-              Description cannot exceed {{ MAX_TEXT_LENGTH }} characters
+            <mat-error *ngIf="impactForm.get('servicesAffected.descriptionOfTemporaryActionsMeasuresForRecovery')?.hasError('maxlength')">
+              Description cannot exceed {{ MAX_TEXT_LENGTH }} characters.
             </mat-error>
           </mat-form-field>
         </div>
 
-        <!-- Critical Services Affected -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Critical Services Affected (related to field 3.1.1, 3.1.2)</mat-label>
-          <textarea matInput formControlName="criticalServicesAffected" rows="4"></textarea>
-          <mat-error *ngIf="criticalServicesAffectedControl.hasError('required')">
-            Critical services affected is required for {{ incidentSubmission === 'initial_notification' ? 'initial notification' : 'intermediate report' }}
-          </mat-error>
-          <mat-error *ngIf="criticalServicesAffectedControl.hasError('maxlength')">
-            Critical services affected cannot exceed {{ MAX_TEXT_LENGTH }} characters
-          </mat-error>
-        </mat-form-field>
-
-        <!-- Affected Assets Section -->
-        <div formGroupName="affectedAssets" class="form-section">
-          <h3>Affected Assets</h3>
-
-          <!-- Affected Clients -->
-          <div formGroupName="affectedClients" class="nested-form-group">
-            <h4>Affected Clients (related to schema fields for client impact, e.g., part of 3.3, 3.5)</h4>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Description</mat-label>
-              <textarea matInput formControlName="description" rows="3"></textarea>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="half-width">
-              <mat-label>Percentage</mat-label>
-              <input matInput type="number" formControlName="percentage" min="0" max="100">
-              <mat-error *ngIf="affectedClientsGroup.get('percentage')?.hasError('required')">
-                Percentage is required
-              </mat-error>
-              <mat-error *ngIf="affectedClientsGroup.get('percentage')?.hasError('invalidPercentage')">
-                Percentage must be between 0 and 100
-              </mat-error>
-            </mat-form-field>
-          </div>
-
-          <!-- Affected Financial Counterparts -->
-          <div formGroupName="affectedFinancialCounterparts" class="nested-form-group">
-            <h4>Affected Financial Counterparts</h4>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Description</mat-label>
-              <textarea matInput formControlName="description" rows="3"></textarea>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="half-width">
-              <mat-label>Percentage</mat-label>
-              <input matInput type="number" formControlName="percentage" min="0" max="100">
-              <mat-error *ngIf="affectedFinancialCounterpartsGroup.get('percentage')?.hasError('required')">
-                Percentage is required
-              </mat-error>
-              <mat-error *ngIf="affectedFinancialCounterpartsGroup.get('percentage')?.hasError('invalidPercentage')">
-                Percentage must be between 0 and 100
-              </mat-error>
-            </mat-form-field>
-          </div>
-
-          <!-- Affected Transactions -->
-          <div formGroupName="affectedTransactions" class="nested-form-group">
-            <h4>Affected Transactions</h4>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Description</mat-label>
-              <textarea matInput formControlName="description" rows="3"></textarea>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="half-width">
-              <mat-label>Percentage</mat-label>
-              <input matInput type="number" formControlName="percentage" min="0" max="100">
-              <mat-error *ngIf="affectedTransactionsGroup.get('percentage')?.hasError('required')">
-                Percentage is required
-              </mat-error>
-              <mat-error *ngIf="affectedTransactionsGroup.get('percentage')?.hasError('invalidPercentage')">
-                Percentage must be between 0 and 100
-              </mat-error>
-            </mat-form-field>
-          </div>
-
+        <!-- Functions Affected (field 3.2) -->
+        <div formGroupName="functionsAffected" class="form-section">
+          <h3>Functions Affected (field 3.2)</h3>
+          <mat-checkbox formControlName="isCriticalFunctionAffected" class="full-width">
+            Is Critical Function Affected (field 3.2.1)
+          </mat-checkbox>
+          <mat-form-field appearance="outline" class="full-width" *ngIf="impactForm.get('functionsAffected.isCriticalFunctionAffected')?.value">
+            <mat-label>Critical Functions Affected Description (field 3.2.1a)</mat-label>
+            <textarea matInput formControlName="criticalFunctionsAffectedDescription" rows="3"></textarea>
+          </mat-form-field>
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Value of Affected Transactions</mat-label>
-            <input matInput type="number" formControlName="valueOfAffectedTransactions">
-            <mat-error *ngIf="affectedAssetsGroup.get('valueOfAffectedTransactions')?.hasError('required')">
-              Value of affected transactions is required
-            </mat-error>
-            <mat-error *ngIf="affectedAssetsGroup.get('valueOfAffectedTransactions')?.hasError('min')">
-              Value cannot be negative
-            </mat-error>
+            <mat-label>Non-Critical Functions Affected Description (field 3.2.2)</mat-label>
+            <textarea matInput formControlName="nonCriticalFunctionsAffectedDescription" rows="3"></textarea>
+          </mat-form-field>
+        </div>
+
+        <!-- Counterparties Affected Section (field 3.3) (previously Affected Assets) -->
+        <div formGroupName="counterpartiesAffected" class="form-section">
+          <h3>Counterparties Affected (Clients, Financial Counterparts, Transactions) (field 3.3)</h3>
+
+          <h4>Clients Affected (field 3.3.1)</h4>
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Number of Clients Affected (field 3.3.1.1)</mat-label>
+            <input matInput type="number" formControlName="numberOfClientsAffected">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Clients Affected Information Type (field 3.3.1.1b)</mat-label>
+            <mat-select formControlName="clientsAffectedInformationType">
+              <mat-option value="actual">Actual Figures</mat-option>
+              <mat-option value="estimated">Estimates</mat-option>
+              <mat-option value="not_applicable">Not Applicable</mat-option>
+            </mat-select>
           </mat-form-field>
 
+          <h4>Financial Counterparts Affected (field 3.3.2)</h4>
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Number of Financial Counterparts Affected (field 3.3.2.1)</mat-label>
+            <input matInput type="number" formControlName="numberOfFinancialCounterpartsAffected">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Financial Counterparts Affected Information Type (field 3.3.2.1b)</mat-label>
+            <mat-select formControlName="financialCounterpartsAffectedInformationType">
+              <mat-option value="actual">Actual Figures</mat-option>
+              <mat-option value="estimated">Estimates</mat-option>
+              <mat-option value="not_applicable">Not Applicable</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <h4>Transactions Affected (field 3.3.3)</h4>
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Number of Transactions Affected (field 3.3.3.1)</mat-label>
+            <input matInput type="number" formControlName="numberOfTransactionsAffected">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Transactions Affected Information Type (field 3.3.3.1a)</mat-label>
+            <mat-select formControlName="transactionsAffectedInformationType">
+              <mat-option value="actual">Actual Figures</mat-option>
+              <mat-option value="estimated">Estimates</mat-option>
+              <mat-option value="not_applicable">Not Applicable</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="one-third-width">
+            <mat-label>Value of Transactions Affected (field 3.3.3.2)</mat-label>
+            <input matInput type="number" formControlName="valueOfTransactionsAffected">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="one-third-width">
+            <mat-label>Currency (field 3.3.3.2a)</mat-label>
+            <input matInput formControlName="valueOfTransactionsAffectedCurrency" placeholder="EUR">
+             <mat-error *ngIf="impactForm.get('counterpartiesAffected.valueOfTransactionsAffectedCurrency')?.hasError('required')">
+              Currency is required if value is provided.
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="one-third-width">
+            <mat-label>Value Information Type (field 3.3.3.2b)</mat-label>
+            <mat-select formControlName="valueOfTransactionsAffectedInformationType">
+              <mat-option value="actual">Actual Figures</mat-option>
+              <mat-option value="estimated">Estimates</mat-option>
+              <mat-option value="not_applicable">Not Applicable</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Geographical Impact (field 3.4) -->
+        <div class="form-section" formGroupName="geographicalImpact">
+          <h3>Geographical Impact (field 3.4)</h3>
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Numbers (Actual/Estimate)</mat-label>
-            <textarea matInput rows="2" formControlName="numbersActualEstimate"
-                      [maxLength]="MAX_TEXT_LENGTH"
-                      placeholder="Provide actual or estimated numbers"></textarea>
-            <mat-error *ngIf="affectedAssetsGroup.get('numbersActualEstimate')?.hasError('required')">
-              Numbers (actual/estimate) is required
+            <mat-label>Member States Affected (comma-separated) (field 3.4.1)</mat-label>
+            <input matInput formControlName="memberStatesAffected" placeholder="e.g., DE, FR, ES">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Third Countries Affected (comma-separated) (field 3.4.2)</mat-label>
+            <input matInput formControlName="thirdCountriesAffected" placeholder="e.g., US, UK, CH">
+          </mat-form-field>
+        </div>
+
+        <!-- Data Loss (field 3.5) -->
+        <div class="form-section" formGroupName="dataLoss">
+          <h3>Data Loss (field 3.5)</h3>
+          <mat-checkbox formControlName="isDataLost" class="full-width">
+            Is Data Lost (field 3.5.1)
+          </mat-checkbox>
+          <mat-form-field appearance="outline" class="full-width" *ngIf="impactForm.get('dataLoss.isDataLost')?.value">
+            <mat-label>Data Lost Description (field 3.5.1a)</mat-label>
+            <textarea matInput formControlName="dataLostDescription" rows="2"></textarea>
+          </mat-form-field>
+
+          <mat-checkbox formControlName="isDataCompromised" class="full-width">
+            Is Data Compromised (field 3.5.2)
+          </mat-checkbox>
+          <mat-form-field appearance="outline" class="full-width" *ngIf="impactForm.get('dataLoss.isDataCompromised')?.value">
+            <mat-label>Data Compromised Description (field 3.5.2a)</mat-label>
+            <textarea matInput formControlName="dataCompromisedDescription" rows="2"></textarea>
+          </mat-form-field>
+
+          <!-- Schema fields 3.5.3 (isDataBreached), 3.5.4 (isConfidentialityAffected), 3.5.5 (isIntegrityAffected), 3.5.6 (isAvailabilityAffected) -->
+          <mat-checkbox formControlName="isDataBreached" class="full-width">
+            Is Data Breached (Personal Data) (field 3.5.3)
+          </mat-checkbox>
+          <mat-form-field appearance="outline" class="full-width" *ngIf="impactForm.get('dataLoss.isDataBreached')?.value">
+            <mat-label>Data Breached Description (field 3.5.3a)</mat-label>
+            <textarea matInput formControlName="dataBreachedDescription" rows="2"></textarea>
+          </mat-form-field>
+
+          <mat-checkbox formControlName="isConfidentialityAffected" class="full-width">
+            Is Confidentiality Affected (field 3.5.4)
+          </mat-checkbox>
+          <mat-form-field appearance="outline" class="full-width" *ngIf="impactForm.get('dataLoss.isConfidentialityAffected')?.value">
+            <mat-label>Confidentiality Affected Description (field 3.5.4a)</mat-label>
+            <textarea matInput formControlName="confidentialityAffectedDescription" rows="2"></textarea>
+          </mat-form-field>
+
+          <mat-checkbox formControlName="isIntegrityAffected" class="full-width">
+            Is Integrity Affected (field 3.5.5)
+          </mat-checkbox>
+          <mat-form-field appearance="outline" class="full-width" *ngIf="impactForm.get('dataLoss.isIntegrityAffected')?.value">
+            <mat-label>Integrity Affected Description (field 3.5.5a)</mat-label>
+            <textarea matInput formControlName="integrityAffectedDescription" rows="2"></textarea>
+          </mat-form-field>
+
+          <mat-checkbox formControlName="isAvailabilityAffected" class="full-width">
+            Is Availability Affected (field 3.5.6)
+          </mat-checkbox>
+          <mat-form-field appearance="outline" class="full-width" *ngIf="impactForm.get('dataLoss.isAvailabilityAffected')?.value">
+            <mat-label>Availability Affected Description (field 3.5.6a)</mat-label>
+            <textarea matInput formControlName="availabilityAffectedDescription" rows="2"></textarea>
+          </mat-form-field>
+        </div>
+
+        <!-- Economic Impact (field 3.6) -->
+        <div class="form-section" formGroupName="economicImpact">
+          <h3>Economic Impact (field 3.6)</h3>
+          <mat-form-field appearance="outline" class="one-third-width">
+            <mat-label>Direct Costs (field 3.6.1)</mat-label>
+            <input matInput type="number" formControlName="directCosts">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="one-third-width">
+            <mat-label>Indirect Costs (field 3.6.2)</mat-label>
+            <input matInput type="number" formControlName="indirectCosts">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="one-third-width">
+            <mat-label>Total Amount (field 3.6.3)</mat-label>
+            <input matInput type="number" formControlName="totalAmount">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Currency (field 3.6.3a)</mat-label>
+            <input matInput formControlName="economicImpactCurrency" placeholder="EUR">
+             <mat-error *ngIf="impactForm.get('economicImpact.economicImpactCurrency')?.hasError('required')">
+              Currency is required if amounts are provided.
             </mat-error>
-            <mat-error *ngIf="affectedAssetsGroup.get('numbersActualEstimate')?.hasError('maxlength')">
-              Description exceeds maximum length
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Economic Impact Information Type (field 3.6.4)</mat-label>
+            <mat-select formControlName="economicImpactInformationType">
+              <mat-option value="actual">Actual Figures</mat-option>
+              <mat-option value="estimated">Estimates</mat-option>
+              <mat-option value="not_applicable">Not Applicable</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <!-- Moved Overall Impact on Financial Interest Description here -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Economic Impact Description (field 3.6.5)</mat-label>
+            <textarea matInput rows="3" formControlName="economicImpactDescription"
+                      placeholder="Describe the economic impact"></textarea>
+            <mat-error *ngIf="impactForm.get('economicImpact.economicImpactDescription')?.hasError('required')">
+              Economic impact description is required.
+            </mat-error>
+            <mat-error *ngIf="impactForm.get('economicImpact.economicImpactDescription')?.hasError('maxlength')">
+              Description exceeds maximum length.
             </mat-error>
           </mat-form-field>
         </div>
 
-        <!-- Affected Functional Areas -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Affected Functional Areas (field 3.2)</mat-label>
-          <textarea matInput rows="3" formControlName="affectedFunctionalAreas"
-                    placeholder="Describe affected functional areas"></textarea>
-          <mat-error *ngIf="impactForm.get('affectedFunctionalAreas')?.hasError('required')">
-            Affected functional areas is required
-          </mat-error>
-          <mat-error *ngIf="impactForm.get('affectedFunctionalAreas')?.hasError('maxlength')">
-            Description exceeds maximum length
-          </mat-error>
-        </mat-form-field>
+        <!-- Reputational Impact (field 3.7) -->
+        <div class="form-section" formGroupName="reputationalImpact">
+          <h3>Reputational Impact (field 3.7)</h3>
+          <mat-checkbox formControlName="isNegativeMediaCoverage" class="full-width">
+            Is Negative Media Coverage (field 3.7.1)
+          </mat-checkbox>
+          <mat-form-field appearance="outline" class="full-width" *ngIf="impactForm.get('reputationalImpact.isNegativeMediaCoverage')?.value">
+            <mat-label>Negative Media Coverage Description (field 3.7.1a)</mat-label>
+            <textarea matInput formControlName="negativeMediaCoverageDescription" rows="2"></textarea>
+          </mat-form-field>
 
-        <!-- Affected Infrastructure Components Section -->
-        <div class="form-section">
-          <h3>Affected Infrastructure Components</h3>
+          <mat-checkbox formControlName="isComplaintsFromClients" class="full-width">
+            Is Complaints From Clients (field 3.7.2)
+          </mat-checkbox>
+          <mat-form-field appearance="outline" class="full-width" *ngIf="impactForm.get('reputationalImpact.isComplaintsFromClients')?.value">
+            <mat-label>Complaints From Clients Description (field 3.7.2a)</mat-label>
+            <textarea matInput formControlName="complaintsFromClientsDescription" rows="2"></textarea>
+          </mat-form-field>
 
-          <mat-radio-group formControlName="isAffectedInfrastructureComponents" class="radio-group">
-            <mat-radio-button value="yes">Yes</mat-radio-button>
-            <mat-radio-button value="no">No</mat-radio-button>
-          </mat-radio-group>
+          <mat-checkbox formControlName="isComplaintsFromOtherStakeholders" class="full-width">
+            Is Complaints From Other Stakeholders (field 3.7.3)
+          </mat-checkbox>
+          <mat-form-field appearance="outline" class="full-width" *ngIf="impactForm.get('reputationalImpact.isComplaintsFromOtherStakeholders')?.value">
+            <mat-label>Complaints From Other Stakeholders Description (field 3.7.3a)</mat-label>
+            <textarea matInput formControlName="complaintsFromOtherStakeholdersDescription" rows="2"></textarea>
+          </mat-form-field>
 
-          <mat-form-field appearance="outline" class="full-width" *ngIf="isAffectedInfrastructureComponentsControl.value === 'yes'">
-            <mat-label>Description of Affected Infrastructure</mat-label>
-            <textarea matInput formControlName="affectedInfrastructureComponents" rows="3"></textarea>
-            <mat-error *ngIf="affectedInfrastructureComponentsControl.hasError('required')">
-              Description of affected infrastructure components is required when infrastructure is affected
-            </mat-error>
-            <mat-error *ngIf="affectedInfrastructureComponentsControl.hasError('maxlength')">
-              Description cannot exceed {{ MAX_TEXT_LENGTH }} characters
-            </mat-error>
+          <mat-checkbox formControlName="isOtherReputationalImpact" class="full-width">
+            Is Other Reputational Impact (field 3.7.4)
+          </mat-checkbox>
+          <mat-form-field appearance="outline" class="full-width" *ngIf="impactForm.get('reputationalImpact.isOtherReputationalImpact')?.value">
+            <mat-label>Other Reputational Impact Description (field 3.7.4a)</mat-label>
+            <textarea matInput formControlName="otherReputationalImpactDescription" rows="2"></textarea>
           </mat-form-field>
         </div>
-
-        <!-- Financial Interest Impact -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Impact on Financial Interest (field 3.6)</mat-label>
-          <textarea matInput rows="3" formControlName="isImpactOnFinancialInterest"
-                    placeholder="Describe the impact on financial interest"></textarea>
-          <mat-error *ngIf="impactForm.get('isImpactOnFinancialInterest')?.hasError('required')">
-            Impact on financial interest is required
-          </mat-error>
-          <mat-error *ngIf="impactForm.get('isImpactOnFinancialInterest')?.hasError('maxlength')">
-            Description exceeds maximum length
-          </mat-error>
-        </mat-form-field>
       </form>
     </mat-card-content>
   </mat-card>
@@ -213,8 +328,25 @@
 }
 
 .half-width {
-  width: 48%;
-  margin-right: 2%;
+  width: calc(50% - 8px); /* Adjusted for potential margin/padding */
+  display: inline-block;
+  margin-right: 16px;
+  vertical-align: top;
+}
+
+.half-width:last-of-type {
+    margin-right: 0;
+}
+
+.one-third-width {
+  width: calc(33.333% - 11px); /* Adjusted for potential margin/padding */
+  display: inline-block;
+  margin-right: 16px;
+  vertical-align: top;
+}
+
+.one-third-width:last-of-type {
+    margin-right: 0;
 }
 
 .full-width {
@@ -223,10 +355,37 @@
 
 .form-section {
   margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+}
+
+h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.2em;
+  color: #3f51b5; /* Material primary color */
 }
 
 h4 {
-  margin: 0 0 16px 0;
-  color: #666;
+  margin-top: 16px;
+  margin-bottom: 12px;
+  font-size: 1em;
+  font-weight: 500;
+  color: #555;
+}
+
+/* Clearfix for floated half-width/one-third-width elements if they were floated */
+.form-section::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+mat-checkbox {
+  margin-bottom: 10px;
 }
 </style>
