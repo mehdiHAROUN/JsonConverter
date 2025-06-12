@@ -1,47 +1,30 @@
 <div class="incident-report-form">
-  <h2>Incident Report Form</h2>
+  <h2>JSON DORA</h2>
   <form [formGroup]="incidentForm" (ngSubmit)="onSubmit()">
+    <div formGroupName="incidentSubmissionDetails">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Incident Submission Type</mat-label>
+        <mat-select formControlName="incidentSubmission">
+          <mat-option [value]="IncidentSubmissionType.INITIAL_NOTIFICATION">
+            Initial Notification
+          </mat-option>
+          <mat-option [value]="IncidentSubmissionType.INTERMEDIATE_REPORT">
+            Intermediate Report
+          </mat-option>
+          <mat-option [value]="IncidentSubmissionType.FINAL_REPORT">
+            Final Report
+          </mat-option>
+          <mat-option [value]="IncidentSubmissionType.MAJOR_INCIDENT_RECLASSIFIED">
+            Major Incident Reclassified as Non-Major
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="incidentForm.get('incidentSubmissionDetails.incidentSubmission')?.hasError('required')">
+          Incident submission type is required
+        </mat-error>
+      </mat-form-field>
+    </div>
+
     <mat-tab-group>
-      <!-- Incident Submission Details -->
-      <mat-tab label="Incident Submission Details">
-        <div class="tab-content">
-          <div formGroupName="incidentSubmissionDetails">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Incident Submission Type</mat-label>
-              <mat-select formControlName="incidentSubmission">
-                <mat-option [value]="IncidentSubmissionType.INITIAL_NOTIFICATION">
-                  Initial Notification
-                </mat-option>
-                <mat-option [value]="IncidentSubmissionType.INTERMEDIATE_REPORT">
-                  Intermediate Report
-                </mat-option>
-                <mat-option [value]="IncidentSubmissionType.FINAL_REPORT">
-                  Final Report
-                </mat-option>
-                <mat-option [value]="IncidentSubmissionType.MAJOR_INCIDENT_RECLASSIFIED">
-                  Major Incident Reclassified as Non-Major
-                </mat-option>
-              </mat-select>
-              <mat-error *ngIf="incidentForm.get('incidentSubmissionDetails.incidentSubmission')?.hasError('required')">
-                Incident submission type is required
-              </mat-error>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Report Currency</mat-label>
-              <mat-select formControlName="reportCurrency">
-                <mat-option *ngFor="let currency of reportCurrencies" [value]="currency">
-                  {{currency}}
-                </mat-option>
-              </mat-select>
-              <mat-error *ngIf="incidentForm.get('incidentSubmissionDetails.reportCurrency')?.hasError('required')">
-                Report currency is required
-              </mat-error>
-            </mat-form-field>
-          </div>
-        </div>
-      </mat-tab>
-
       <!-- Entity Information -->
       <mat-tab label="Entity Information">
         <div class="tab-content">
@@ -119,37 +102,6 @@
             </div>
           </mat-card>
 
-          <!-- Ultimate Parent Undertaking Card -->
-          <mat-card class="entity-card">
-            <mat-card-title>Ultimate Parent Undertaking</mat-card-title>
-            <div [formGroup]="ultimateParentUndertakingGroup">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Name</mat-label>
-                <input matInput formControlName="name">
-                <mat-error *ngIf="incidentForm.get('ultimateParentUndertaking.name')?.hasError('required') && (incidentForm.get('ultimateParentUndertaking.name')?.touched || formSubmitted)">
-                  Name is required
-                </mat-error>
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Code</mat-label>
-                <input matInput formControlName="code">
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>LEI</mat-label>
-                <input matInput formControlName="LEI">
-              </mat-form-field>
-              <input type="hidden" formControlName="entityType">
-              <mat-error *ngIf="incidentForm.get('ultimateParentUndertaking')?.hasError('codeOrLeiRequired') && (incidentForm.get('ultimateParentUndertaking.code')?.touched || incidentForm.get('ultimateParentUndertaking.LEI')?.touched || formSubmitted)">
-                Either Code or LEI is required
-              </mat-error>
-            </div>
-          </mat-card>
-        </div>
-      </mat-tab>
-
-      <!-- Contact Information -->
-      <mat-tab label="Contact Information">
-        <div class="tab-content">
           <!-- Primary Contact Card -->
           <mat-card class="entity-card">
             <mat-card-title>Primary Contact</mat-card-title>
@@ -205,6 +157,48 @@
               </mat-form-field>
             </div>
           </mat-card>
+
+          <!-- Ultimate Parent Undertaking Card -->
+          <mat-card class="entity-card">
+            <mat-card-title>Ultimate Parent Undertaking</mat-card-title>
+            <div [formGroup]="ultimateParentUndertakingGroup">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="name">
+                <mat-error *ngIf="incidentForm.get('ultimateParentUndertaking.name')?.hasError('required') && (incidentForm.get('ultimateParentUndertaking.name')?.touched || formSubmitted)">
+                  Name is required
+                </mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Code</mat-label>
+                <input matInput formControlName="code">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>LEI</mat-label>
+                <input matInput formControlName="LEI">
+              </mat-form-field>
+              <input type="hidden" formControlName="entityType">
+              <mat-error *ngIf="incidentForm.get('ultimateParentUndertaking')?.hasError('codeOrLeiRequired') && (incidentForm.get('ultimateParentUndertaking.code')?.touched || incidentForm.get('ultimateParentUndertaking.LEI')?.touched || formSubmitted)">
+                Either Code or LEI is required
+              </mat-error>
+            </div>
+          </mat-card>
+
+          <!-- Report Currency Field -->
+          <div formGroupName="incidentSubmissionDetails">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Report Currency</mat-label>
+              <mat-select formControlName="reportCurrency">
+                <mat-option *ngFor="let currency of reportCurrencies" [value]="currency">
+                  {{currency}}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="incidentForm.get('incidentSubmissionDetails.reportCurrency')?.hasError('required')">
+                Report currency is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+
         </div>
       </mat-tab>
 
@@ -252,10 +246,7 @@
 
     <div class="button-container">
       <button mat-raised-button color="primary" type="submit" [disabled]="!incidentForm.valid">
-        Submit Report
-      </button>
-      <button mat-button type="button" (click)="resetForm()">
-        Reset Form
+        generate report
       </button>
     </div>
   </form>

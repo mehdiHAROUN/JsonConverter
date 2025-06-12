@@ -15,6 +15,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { IncidentDetailsFormComponent } from '../incident-details-form/incident-details-form.component';
 import { ImpactAssessmentComponent } from '../impact-assessment/impact-assessment.component';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 export enum IncidentSubmissionType {
   INITIAL_NOTIFICATION = 'initial_notification',
@@ -85,6 +86,7 @@ const PHONE_REGEX = /^\+?[1-9]\d{1,14}(\s?\(\d+\))?([\-\s\.]?\d+)*$/;
     MatButtonModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatCheckboxModule,
     MatTabsModule,
     MatCardModule,
     MatDividerModule,
