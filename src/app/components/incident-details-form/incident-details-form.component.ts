@@ -9,6 +9,8 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
 
 // Custom validator for incidentDuration
 export function incidentDurationValidator(): ValidatorFn {
@@ -30,9 +32,22 @@ export const CLASSIFICATION_CRITERION_OPTIONS = [
 ];
 
 export const INCIDENT_DISCOVERY_OPTIONS = [
-  { value: 'internal', label: 'Internal' },
-  { value: 'external', label: 'External' },
-  { value: 'customer', label: 'Customer' },
+  { value: 'internal_detection_processes', label: 'Internal detection processes' },
+  { value: 'monitoring_by_a_third_party_provider_or_external_entity', label: 'Monitoring by a third-party provider or external entity' },
+  { value: 'notification_by_the_third_party_provider_itself', label: 'Notification by the third-party provider itself' },
+  { value: 'notification_by_any_other_financial_entity', label: 'Notification by any other financial entity' },
+  { value: 'notification_by_a_client', label: 'Notification by a client' },
+  { value: 'notification_by_a_counterparty', label: 'Notification by a counterparty' },
+  { value: 'notification_by_a_public_authority_other_than_a_competent_authority_or_a_single_point_of_contact', label: 'Notification by a public authority other than a competent authority or a single point of contact' },
+  { value: 'notification_by_media_monitoring', label: 'Notification by media monitoring' },
+  { value: 'other', label: 'Other' }
+];
+
+export const ICT_PROVIDER_TYPES = [ // Placeholder - needs actual schema definition
+  { value: 'cloud_provider', label: 'Cloud Provider' },
+  { value: 'data_center_provider', label: 'Data Center Provider' },
+  { value: 'network_provider', label: 'Network Provider' },
+  { value: 'software_provider', label: 'Software Provider' },
   { value: 'other', label: 'Other' }
 ];
 
@@ -87,7 +102,9 @@ export const ROOT_CAUSES_ADDITIONAL_CLASSIFICATION_OPTIONS = [
     MatNativeDateModule,
     MatButtonModule,
     MatCardModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatIconModule,
+    MatDividerModule
   ],
   templateUrl: './incident-details-form.component.html',
   styleUrls: ['./incident-details-form.component.scss'],
@@ -107,6 +124,9 @@ export const ROOT_CAUSES_ADDITIONAL_CLASSIFICATION_OPTIONS = [
 export class IncidentDetailsFormComponent implements OnInit, ControlValueAccessor {
   @Input() incidentType: string | null = null; // expects 'final_report', 'intermediate_report', etc.
   incidentDetailsForm: FormGroup;
+  incidentDiscoveryOptions = INCIDENT_DISCOVERY_OPTIONS;
+  ictProviderTypes = ICT_PROVIDER_TYPES;
+
 
   get classificationTypes(): FormArray {
     return this.incidentDetailsForm.get('classificationTypes') as FormArray;
@@ -141,45 +161,89 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
 
   constructor(private fb: FormBuilder) {
     this.incidentDetailsForm = this.fb.group({
-      financialEntityCode: [''],
-      detectionDate: [null],
-      detectionTime: [null],
-      classificationDate: [null],
-      classificationTime: [null],
-      incidentOccurrenceDate: [null],
-      incidentOccurrenceTime: [null],
-      incidentDescription: [''],
-      isBusinessContinuityActivated: [false],
-      incidentDuration: ['', incidentDurationValidator()],
-      originatesFromThirdPartyProvider: [''],
-      incidentDiscovery: [''],
-      competentAuthorityCode: [''],
-      indicatorsOfCompromise: [''],
-      incidentResolutionSummary: [''],
-      incidentResolutionDate: [null],
-      incidentResolutionTime: [null],
-      incidentResolutionVsPlannedImplementation: [''],
-      assessmentOfRiskToCriticalFunctions: [''],
-      informationRelevantToResolutionAuthorities: [''],
-      financialRecoveriesAmount: [null],
-      grossAmountIndirectDirectCosts: [null],
-      recurringNonMajorIncidentsDescription: [''],
-      recurringIncidentDate: [null],
-      incidentClassification: [''],
-      classificationTypes: this.fb.array([]),
-      incidentType: this.fb.group({
-        incidentClassification: [[], Validators.required],
-        otherIncidentClassification: [''],
-        threatTechniques: [[]],
-        otherThreatTechniques: ['']
+      financialEntityCode: [''], // 2.1
+      detectionDate: [null], // 2.2 (date part)
+      detectionTime: [null], // 2.2 (time part)
+      classificationDate: [null], // 2.3 (date part)
+      classificationTime: [null], // 2.3 (time part)
+      incidentOccurrenceDate: [null], // Schema 2.6 (date part) - Note: HTML uses 2.6 for isBusinessContinuityActivated
+      incidentOccurrenceTime: [null], // Schema 2.6 (time part)
+      incidentDescription: ['', Validators.maxLength(1000)], // 2.4
+      classificationTypes: this.fb.array([]), // 2.5
+      isBusinessContinuityActivated: [false], // 2.9 in schema (HTML was 2.6)
+      incidentDuration: ['', [incidentDurationValidator(), Validators.pattern(/^\\d{1,3}:[0-5]\\d:[0-5]\\d$/)]], // 3.15 in schema (HTML was 2.7)
+      incidentDiscovery: [''], // 2.7 in schema (HTML was 2.8)
+      competentAuthorityCode: ['', Validators.maxLength(10)], // 3.1 in schema (HTML was 2.9) - Assuming this is NCA code
+      otherInformation: ['', Validators.maxLength(1000)], // 2.10
+      isIctThirdPartyProviderInvolved: [false], // 2.17
+      ictThirdPartyProviderDetails: this.fb.group({ // 2.17.1
+        ictThirdPartyProviderName: ['', Validators.maxLength(200)], // 2.17.1.1
+        ictThirdPartyProviderType: [''], // 2.17.1.2
+        ictThirdPartyProviderCountry: ['', [Validators.pattern(/^[A-Z]{2}$/)]], // 2.17.1.3
+        ictThirdPartyProviderLEI: ['', [Validators.pattern(/^[A-Z0-9]{18}[0-9]{2}$/)]], // 2.17.1.4
+        ictThirdPartyProviderNACESector: ['', Validators.maxLength(5)] // 2.17.1.5
       }),
-      rootCauseHLClassification: [[]],
-      rootCausesDetailedClassification: [[]],
-      rootCausesAdditionalClassification: [[]],
-      rootCausesOther: [''],
-      rootCausesInformation: [''],
-      rootCauseAddressingDate: [null],
-      rootCauseAddressingTime: [null]
+      // recurringIncidentTime: [null], // 2.16.2 - if recurringIncidentDate is 2.16.1 (schema shows 4.16 for recurringIncidentDate)
+
+      // Fields from original form that might map to section 4 (Response and Recovery) or need re-evaluation
+      originatesFromThirdPartyProvider: [''], // Potentially related to 2.17 or a different concept
+      indicatorsOfCompromise: ['', Validators.maxLength(1000)], // Potentially 4.x
+      incidentResolutionSummary: ['', Validators.maxLength(1000)], // Potentially 4.x
+      incidentResolutionDate: [null], // Potentially 4.x
+      incidentResolutionTime: [null], // Potentially 4.x
+      incidentResolutionVsPlannedImplementation: ['', Validators.maxLength(1000)], // Potentially 4.x
+      assessmentOfRiskToCriticalFunctions: ['', Validators.maxLength(1000)], // Potentially 4.x
+      informationRelevantToResolutionAuthorities: ['', Validators.maxLength(1000)], // Potentially 4.x
+      financialRecoveriesAmount: [null, Validators.min(0)], // Potentially 3.x (economic impact) or 4.x
+      grossAmountIndirectDirectCosts: [null, Validators.min(0)], // Potentially 3.x (economic impact) or 4.x
+      recurringNonMajorIncidentsDescription: ['', Validators.maxLength(1000)], // Potentially related to 2.16
+      recurringIncidentDate: [null], // Schema 4.16
+
+      incidentClassification: [''], // This seems to be a simple string, schema 2.5 is an array of objects. Re-evaluating.
+                                    // This might be the old way of handling classification.
+                                    // The new classificationTypes FormArray (2.5) is more complex.
+
+      // incidentType FormGroup seems to handle parts of schema 2.5 (ClassificationType) and 4.5 (ThreatType)
+      // This needs careful mapping to the new structure or removal if redundant.
+      incidentType: this.fb.group({
+        incidentClassification: [[], Validators.required], // Maps to DORA_IR_Schema_v1.2 (1).json#/$defs/ClassificationType/properties/incidentClassification
+        otherIncidentClassification: [''], // Conditional based on 'other' in incidentClassification
+        threatTechniques: [[]], // Maps to DORA_IR_Schema_v1.2 (1).json#/$defs/ThreatType/properties/threatTechniques
+        otherThreatTechniques: [''] // Conditional based on 'other' in threatTechniques
+      }),
+      // Root cause fields (Section 4 of schema)
+      rootCauseHLClassification: [[]], // 4.7
+      rootCausesDetailedClassification: [[]], // 4.8
+      rootCausesAdditionalClassification: [[]], // 4.9
+      rootCausesOther: ['', Validators.maxLength(250)], // 4.10
+      rootCausesInformation: ['', Validators.maxLength(1000)], // 4.11
+      rootCauseAddressingDate: [null], // 4.13 (date part)
+      rootCauseAddressingTime: [null] // 4.13 (time part)
+    });
+
+    // Disable ictThirdPartyProviderDetails by default
+    this.incidentDetailsForm.get('ictThirdPartyProviderDetails')?.disable();
+
+    this.incidentDetailsForm.get('isIctThirdPartyProviderInvolved')?.valueChanges.subscribe(involved => {
+      const detailsGroup = this.incidentDetailsForm.get('ictThirdPartyProviderDetails');
+      if (involved) {
+        detailsGroup?.enable();
+        // Add required validators when enabled
+        detailsGroup?.get('ictThirdPartyProviderName')?.setValidators([Validators.required, Validators.maxLength(200)]);
+        detailsGroup?.get('ictThirdPartyProviderType')?.setValidators(Validators.required);
+        detailsGroup?.get('ictThirdPartyProviderCountry')?.setValidators([Validators.required, Validators.pattern(/^[A-Z]{2}$/)]);
+
+      } else {
+        detailsGroup?.disable();
+        detailsGroup?.reset();
+        // Clear validators when disabled
+        detailsGroup?.get('ictThirdPartyProviderName')?.clearValidators();
+        detailsGroup?.get('ictThirdPartyProviderType')?.clearValidators();
+        detailsGroup?.get('ictThirdPartyProviderCountry')?.clearValidators();
+      }
+      detailsGroup?.get('ictThirdPartyProviderName')?.updateValueAndValidity();
+      detailsGroup?.get('ictThirdPartyProviderType')?.updateValueAndValidity();
+      detailsGroup?.get('ictThirdPartyProviderCountry')?.updateValueAndValidity();
     });
   }
 
@@ -238,57 +302,112 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
 
   addClassificationType(): void {
     const group = this.fb.group({
-      classificationCriterion: ['', Validators.required],
-      countryCodeMaterialityThresholds: [[]],
-      memberStatesImpactType: [''],
-      memberStatesImpactTypeDescription: [''],
-      dataLosseMaterialityThresholds: [[]],
-      dataLossesDescription: [''],
-      reputationalImpactType: [[]],
-      reputationalImpactDescription: [''],
-      economicImpactMaterialityThreshold: ['']
+      // Fields based on DORA_IR_Schema_v1.2 (1).json#/$defs/ClassificationType
+      incidentClassification: ['', Validators.required], // enum from schema
+      otherIncidentClassification: [{value: '', disabled: true}, Validators.maxLength(250)],
+      criterion: ['', Validators.required], // enum: geographical_spread, number_of_affected_users, ...
+      // Conditional fields based on criterion will be added here by updateClassificationTypeValidators
+      countryCodeMaterialityThresholds: [[]], // Array of strings (ISO country codes)
+      memberStatesImpactType: [''], // enum
+      memberStatesImpactTypeDescription: [{value: '', disabled: true}, Validators.maxLength(1000)],
+      dataLosseMaterialityThresholds: [[]], // Array of enums
+      dataLossesDescription: [{value: '', disabled: true}, Validators.maxLength(1000)],
+      reputationalImpactType: [[]], // Array of enums
+      reputationalImpactDescription: [{value: '', disabled: true}, Validators.maxLength(1000)],
+      economicImpactMaterialityThreshold: [''] // enum
     });
     this.classificationTypes.push(group);
+    this.updateSingleClassificationTypeValidators(group); // Validate the newly added group
+  }
+
+  removeClassificationType(index: number): void {
+    this.classificationTypes.removeAt(index);
   }
 
   updateClassificationTypeValidators(): void {
     this.classificationTypes.controls.forEach((group: AbstractControl) => {
-      const criterion = group.get('classificationCriterion')?.value;
-      // Clear all validators first
-      group.get('countryCodeMaterialityThresholds')?.clearValidators();
-      group.get('memberStatesImpactType')?.clearValidators();
-      group.get('memberStatesImpactTypeDescription')?.clearValidators();
-      group.get('dataLosseMaterialityThresholds')?.clearValidators();
-      group.get('dataLossesDescription')?.clearValidators();
-      group.get('reputationalImpactType')?.clearValidators();
-      group.get('reputationalImpactDescription')?.clearValidators();
-      group.get('economicImpactMaterialityThreshold')?.clearValidators();
-
-      if (criterion === 'geographical_spread') {
-        group.get('countryCodeMaterialityThresholds')?.setValidators([Validators.required]);
-        group.get('memberStatesImpactType')?.setValidators([Validators.required]);
-        group.get('memberStatesImpactTypeDescription')?.setValidators([Validators.required]);
-      } else if (criterion === 'data_losses') {
-        group.get('dataLosseMaterialityThresholds')?.setValidators([Validators.required]);
-        group.get('dataLossesDescription')?.setValidators([Validators.required]);
-      } else if (criterion === 'reputational_impact') {
-        group.get('reputationalImpactType')?.setValidators([Validators.required]);
-        group.get('reputationalImpactDescription')?.setValidators([Validators.required]);
-      } else if (criterion === 'economic_impact') {
-        group.get('economicImpactMaterialityThreshold')?.setValidators([Validators.required]);
-      }
-      // No additional fields for duration_and_service_downtime
-
-      group.get('countryCodeMaterialityThresholds')?.updateValueAndValidity({ onlySelf: true });
-      group.get('memberStatesImpactType')?.updateValueAndValidity({ onlySelf: true });
-      group.get('memberStatesImpactTypeDescription')?.updateValueAndValidity({ onlySelf: true });
-      group.get('dataLosseMaterialityThresholds')?.updateValueAndValidity({ onlySelf: true });
-      group.get('dataLossesDescription')?.updateValueAndValidity({ onlySelf: true });
-      group.get('reputationalImpactType')?.updateValueAndValidity({ onlySelf: true });
-      group.get('reputationalImpactDescription')?.updateValueAndValidity({ onlySelf: true });
-      group.get('economicImpactMaterialityThreshold')?.updateValueAndValidity({ onlySelf: true });
+      this.updateSingleClassificationTypeValidators(group as FormGroup);
     });
   }
+
+  private updateSingleClassificationTypeValidators(group: FormGroup): void {
+    const incidentClassificationValue = group.get('incidentClassification')?.value;
+    const otherIncidentClassificationControl = group.get('otherIncidentClassification');
+
+    if (incidentClassificationValue === 'other') {
+      otherIncidentClassificationControl?.enable();
+      otherIncidentClassificationControl?.setValidators(Validators.required);
+    } else {
+      otherIncidentClassificationControl?.disable();
+      otherIncidentClassificationControl?.clearValidators();
+      otherIncidentClassificationControl?.reset();
+    }
+    otherIncidentClassificationControl?.updateValueAndValidity({ emitEvent: false });
+
+
+    const criterion = group.get('criterion')?.value;
+    // Clear all conditional validators and disable/reset fields first
+    const fieldsToManage = [
+      'countryCodeMaterialityThresholds', 'memberStatesImpactType', 'memberStatesImpactTypeDescription',
+      'dataLosseMaterialityThresholds', 'dataLossesDescription',
+      'reputationalImpactType', 'reputationalImpactDescription',
+      'economicImpactMaterialityThreshold'
+    ];
+
+    fieldsToManage.forEach(fieldName => {
+      const control = group.get(fieldName);
+      control?.clearValidators();
+      control?.disable(); // Disable first
+      control?.reset(); // Reset to clear previous values
+    });
+    
+    // Enable and set validators based on criterion
+    if (criterion === 'geographical_spread') {
+      group.get('countryCodeMaterialityThresholds')?.enable();
+      group.get('countryCodeMaterialityThresholds')?.setValidators([Validators.required, Validators.minLength(1)]);
+      group.get('memberStatesImpactType')?.enable();
+      group.get('memberStatesImpactType')?.setValidators([Validators.required]);
+      // memberStatesImpactTypeDescription is conditional on memberStatesImpactType
+      const msImpactType = group.get('memberStatesImpactType')?.value;
+      if (msImpactType === 'other' && criterion === 'geographical_spread') { // Assuming 'other' is a possible value
+        group.get('memberStatesImpactTypeDescription')?.enable();
+        group.get('memberStatesImpactTypeDescription')?.setValidators([Validators.required, Validators.maxLength(1000)]);
+      }
+    } else if (criterion === 'data_losses') {
+      group.get('dataLosseMaterialityThresholds')?.enable();
+      group.get('dataLosseMaterialityThresholds')?.setValidators([Validators.required, Validators.minLength(1)]);
+      group.get('dataLossesDescription')?.enable();
+      group.get('dataLossesDescription')?.setValidators([Validators.required, Validators.maxLength(1000)]);
+    } else if (criterion === 'reputational_impact') {
+      group.get('reputationalImpactType')?.enable();
+      group.get('reputationalImpactType')?.setValidators([Validators.required, Validators.minLength(1)]);
+      group.get('reputationalImpactDescription')?.enable();
+      group.get('reputationalImpactDescription')?.setValidators([Validators.required, Validators.maxLength(1000)]);
+    } else if (criterion === 'economic_impact') {
+      group.get('economicImpactMaterialityThreshold')?.enable();
+      group.get('economicImpactMaterialityThreshold')?.setValidators([Validators.required]);
+    }
+    // No additional fields for 'duration_and_service_downtime' or 'number_of_affected_users' based on current understanding
+
+    fieldsToManage.forEach(fieldName => {
+      group.get(fieldName)?.updateValueAndValidity({ emitEvent: false });
+    });
+
+    // Conditional for memberStatesImpactTypeDescription
+    group.get('memberStatesImpactType')?.valueChanges.subscribe(value => {
+        const descControl = group.get('memberStatesImpactTypeDescription');
+        if (value === 'other' && criterion === 'geographical_spread') { // Check criterion again
+            descControl?.enable();
+            descControl?.setValidators([Validators.required, Validators.maxLength(1000)]);
+        } else {
+            descControl?.disable();
+            descControl?.clearValidators();
+            descControl?.reset();
+        }
+        descControl?.updateValueAndValidity({ emitEvent: false });
+    });
+  }
+
 
   updateIncidentTypeValidators(): void {
     const group = this.incidentDetailsForm.get('incidentType') as FormGroup;

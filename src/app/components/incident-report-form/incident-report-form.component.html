@@ -33,26 +33,46 @@
             <mat-card-title>Submitting Entity</mat-card-title>
             <div [formGroup]="submittingEntityGroup">
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Name (field 1.3.1)</mat-label>
+                <mat-label>Name (field 1.2)</mat-label>
                 <input matInput formControlName="name">
                 <mat-error *ngIf="incidentForm.get('submittingEntity.name')?.hasError('required') && (incidentForm.get('submittingEntity.name')?.touched || formSubmitted)">
                   Name is required
                 </mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Code (field 1.3.2)</mat-label>
+                <mat-label>Code (field 1.3a)</mat-label>
                 <input matInput formControlName="code">
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>LEI (field 1.3.3)</mat-label>
+                <mat-label>LEI (field 1.3b)</mat-label>
                 <input matInput formControlName="LEI">
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Entity Type (field 1.3.4)</mat-label>
+                <mat-label>Entity Type (field 1.3c)</mat-label>
                 <mat-select formControlName="affectedEntityType" multiple>
                   <mat-option value="credit_institution">Credit Institution</mat-option>
                   <mat-option value="payment_institution">Payment Institution</mat-option>
+                  <mat-option value="exempted_payment_institution">Exempted Payment Institution</mat-option>
+                  <mat-option value="account_information_service_provider">Account Information Service Provider</mat-option>
+                  <mat-option value="electronic_money_institution">Electronic Money Institution</mat-option>
+                  <mat-option value="exempted_electronic_money_institution">Exempted Electronic Money Institution</mat-option>
                   <mat-option value="investment_firm">Investment Firm</mat-option>
+                  <mat-option value="crypto-asset_service_provider">Crypto-Asset Service Provider</mat-option>
+                  <mat-option value="issuer_of_asset-referenced_tokens">Issuer of Asset-Referenced Tokens</mat-option>
+                  <mat-option value="central_securities_depository">Central Securities Depository</mat-option>
+                  <mat-option value="central_counterparty">Central Counterparty</mat-option>
+                  <mat-option value="trading_venue">Trading Venue</mat-option>
+                  <mat-option value="trade_repository">Trade Repository</mat-option>
+                  <mat-option value="manager_of_alternative_investment_fund">Manager of Alternative Investment Fund</mat-option>
+                  <mat-option value="management_company">Management Company</mat-option>
+                  <mat-option value="data_reporting_service_provider">Data Reporting Service Provider</mat-option>
+                  <mat-option value="insurance_and_reinsurance_undertaking">Insurance and Reinsurance Undertaking</mat-option>
+                  <mat-option value="insurance_intermediary_reinsurance_intermediary_and_ancillary_insurance_intermediary">Insurance Intermediary, Reinsurance Intermediary and Ancillary Insurance Intermediary</mat-option>
+                  <mat-option value="institution_for_occupational_retirement_provision">Institution for Occupational Retirement Provision</mat-option>
+                  <mat-option value="credit_rating_agency">Credit Rating Agency</mat-option>  
+                  <mat-option value="administrator_of_critical_benchmarks">Administrator of Critical Benchmarks</mat-option>
+                  <mat-option value="crowdfunding_service_provider">Crowdfunding Service Provider</mat-option>
+                  <mat-option value="securitisation_repository">Securitisation Repository</mat-option>
                 </mat-select>
               </mat-form-field>
               <input type="hidden" formControlName="entityType">
@@ -70,19 +90,19 @@
                 <mat-divider></mat-divider>
                 <div class="entity-row">
                   <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Name (field 1.4.1)</mat-label>
+                    <mat-label>Name (field 1.5)</mat-label>
                     <input matInput formControlName="name">
                   </mat-form-field>
                   <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Code (field 1.4.2)</mat-label>
+                    <mat-label>Code (field 1.4a)</mat-label>
                     <input matInput formControlName="code">
                   </mat-form-field>
                   <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>LEI (field 1.4.3)</mat-label>
+                    <mat-label>LEI (field 1.4b)</mat-label>
                     <input matInput formControlName="LEI">
                   </mat-form-field>
                   <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Entity Type (field 1.4.4)</mat-label>
+                    <mat-label>Entity Type (field 1.6)</mat-label>
                     <mat-select formControlName="affectedEntityType" multiple>
                       <mat-option value="credit_institution">Credit Institution</mat-option>
                       <mat-option value="payment_institution">Payment Institution</mat-option>
@@ -107,11 +127,11 @@
             <mat-card-title>Primary Contact</mat-card-title>
             <div formGroupName="primaryContact">
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Name (field 1.5.1)</mat-label>
+                <mat-label>Name (field 1.7)</mat-label>
                 <input matInput formControlName="name">
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Email (field 1.5.2)</mat-label>
+                <mat-label>Email (field 1.8)</mat-label>
                 <input matInput formControlName="email" type="email">
                 <mat-error *ngIf="incidentForm.get('primaryContact.email')?.hasError('required') && (incidentForm.get('primaryContact.email')?.touched || formSubmitted)">
                   Email is required
@@ -121,7 +141,7 @@
                 </mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Phone (field 1.5.3)</mat-label>
+                <mat-label>Phone (field 1.9)</mat-label>
                 <input matInput formControlName="phone">
                 <mat-error *ngIf="incidentForm.get('primaryContact.phone')?.hasError('pattern') && (incidentForm.get('primaryContact.phone')?.touched || formSubmitted)">
                   Please enter a valid international phone number
@@ -135,11 +155,11 @@
             <mat-card-title>Secondary Contact</mat-card-title>
             <div formGroupName="secondaryContact">
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Name (field 1.6.1)</mat-label>
+                <mat-label>Name (field 1.10)</mat-label>
                 <input matInput formControlName="name">
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Email (field 1.6.2)</mat-label>
+                <mat-label>Email (field 1.11)</mat-label>
                 <input matInput formControlName="email" type="email">
                 <mat-error *ngIf="incidentForm.get('secondaryContact.email')?.hasError('required') && (incidentForm.get('secondaryContact.email')?.touched || formSubmitted)">
                   Email is required
@@ -149,11 +169,8 @@
                 </mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Phone (field 1.6.3)</mat-label>
+                <mat-label>Phone (field 1.12)</mat-label>
                 <input matInput formControlName="phone">
-                <mat-error *ngIf="incidentForm.get('secondaryContact.phone')?.hasError('pattern') && (incidentForm.get('secondaryContact.phone')?.touched || formSubmitted)">
-                  Please enter a valid international phone number
-                </mat-error>
               </mat-form-field>
             </div>
           </mat-card>
@@ -163,18 +180,18 @@
             <mat-card-title>Ultimate Parent Undertaking</mat-card-title>
             <div [formGroup]="ultimateParentUndertakingGroup">
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Name (field 1.7.1)</mat-label>
+                <mat-label>Name (field 1.13)</mat-label>
                 <input matInput formControlName="name">
                 <mat-error *ngIf="incidentForm.get('ultimateParentUndertaking.name')?.hasError('required') && (incidentForm.get('ultimateParentUndertaking.name')?.touched || formSubmitted)">
                   Name is required
                 </mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Code (field 1.7.2)</mat-label>
+                <mat-label>Code (field 1.14)</mat-label>
                 <input matInput formControlName="code">
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>LEI (field 1.7.3)</mat-label>
+                <mat-label>LEI (field 1.15)</mat-label>
                 <input matInput formControlName="LEI">
               </mat-form-field>
               <input type="hidden" formControlName="entityType">
@@ -185,15 +202,23 @@
           </mat-card>
 
           <!-- Report Currency Field -->
-          <div formGroupName="incidentSubmissionDetails">
+          <div>
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Report Currency (field 1.2)</mat-label>
+              <mat-label>Report Currency (field 1.15)</mat-label>
               <mat-select formControlName="reportCurrency">
-                <mat-option *ngFor="let currency of reportCurrencies" [value]="currency">
-                  {{currency}}
-                </mat-option>
+                <mat-option value="EUR">EUR</mat-option>
+                <mat-option value="BGN">BGN</mat-option>
+                <mat-option value="CZK">CZK</mat-option>
+                <mat-option value="DKK">DKK</mat-option>
+                <mat-option value="HUF">HUF</mat-option>
+                <mat-option value="PLN">PLN</mat-option>
+                <mat-option value="RON">RON</mat-option>
+                <mat-option value="ISK">ISK</mat-option>
+                <mat-option value="CHF">CHF</mat-option>
+                <mat-option value="NOK">NOK</mat-option>
+                <mat-option value="SEK">SEK</mat-option>
               </mat-select>
-              <mat-error *ngIf="incidentForm.get('incidentSubmissionDetails.reportCurrency')?.hasError('required')">
+              <mat-error *ngIf="incidentForm.get('reportCurrency')?.hasError('required')">
                 Report currency is required
               </mat-error>
             </mat-form-field>
@@ -220,25 +245,28 @@
       <mat-tab label="Reporting to Other Authorities">
         <div class="tab-content">
           <mat-checkbox formControlName="reportedToAuthorities" class="full-width">
-            Has this incident been reported to other authorities? (related to section 4.3)
+            Has this incident been reported to other authorities? (fields 3.31, 3.32)
           </mat-checkbox>
 
           <ng-container *ngIf="incidentForm.get('reportedToAuthorities')?.value">
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Authority Name (field 4.3.1)</mat-label>
+              <mat-label>Authority Name</mat-label>
               <input matInput formControlName="authorityName">
               <mat-error *ngIf="incidentForm.get('authorityName')?.hasError('required') && (incidentForm.get('authorityName')?.touched || formSubmitted)">
-                Authority name is required
+                Authority name is required if reporting to other authorities
               </mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Report Reference (field 4.3.2)</mat-label>
+              <mat-label>Report Reference</mat-label>
               <input matInput formControlName="reportReference">
               <mat-error *ngIf="incidentForm.get('reportReference')?.hasError('required') && (incidentForm.get('reportReference')?.touched || formSubmitted)">
-                Report reference is required
+                Report reference is required if reporting to other authorities
               </mat-error>
             </mat-form-field>
+            <!-- TODO: Align with schema fields 3.31 (array of enums) and 3.32 (other text) -->
+            <!-- This section will likely need a FormArray for multiple authorities -->
+            <!-- and a conditional text field for 'other' -->
           </ng-container>
         </div>
       </mat-tab>
