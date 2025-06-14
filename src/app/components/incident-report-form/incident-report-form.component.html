@@ -65,11 +65,11 @@
                     <input matInput formControlName="name">
                   </mat-form-field>
                   <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>LEI (field 1.4b)</mat-label>
+                    <mat-label>LEI (field 1.6)</mat-label>
                     <input matInput formControlName="LEI">
                   </mat-form-field>
                   <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Entity Type (field 1.3c)</mat-label>
+                    <mat-label>Entity Type (field 1.4)</mat-label>
                     <mat-select formControlName="affectedEntityType" multiple>
                       <mat-option value="credit_institution">Credit Institution</mat-option>
                       <mat-option value="payment_institution">Payment Institution</mat-option>
@@ -167,16 +167,12 @@
                 </mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Code (field 1.14)</mat-label>
-                <input matInput formControlName="code">
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>LEI (field 1.15)</mat-label>
+                <mat-label>LEI (field 1.14)</mat-label>
                 <input matInput formControlName="LEI">
               </mat-form-field>
               <input type="hidden" formControlName="entityType">
-              <mat-error *ngIf="incidentForm.get('ultimateParentUndertaking')?.hasError('codeOrLeiRequired') && (incidentForm.get('ultimateParentUndertaking.code')?.touched || incidentForm.get('ultimateParentUndertaking.LEI')?.touched || formSubmitted)">
-                Either Code or LEI is required
+              <mat-error *ngIf="incidentForm.get('ultimateParentUndertaking')?.hasError('codeOrLeiRequired') && (incidentForm.get('ultimateParentUndertaking.LEI')?.touched || formSubmitted)">
+                LEI is required
               </mat-error>
             </div>
           </mat-card>

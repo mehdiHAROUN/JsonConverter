@@ -115,6 +115,15 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
     return null;
   };
 
+  // Custom validator to ensure LEI is filled for Ultimate Parent Undertaking
+  static leiRequiredValidator: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
+    const lei = group.get('LEI')?.value;
+    if (!lei) {
+      return { leiRequired: true };
+    }
+    return null;
+  };
+
   constructor(private fb: FormBuilder) {
     this.incidentForm = this.fb.group({
       incidentSubmissionDetails: this.fb.group({
@@ -138,10 +147,9 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
       ]),
       ultimateParentUndertaking: this.fb.group({
         name: ['', Validators.required],
-        code: [''],
-        LEI: [''],
+        LEI: ['', Validators.required],
         entityType: ['ULTIMATE_PARENT_UNDERTAKING_ENTITY']
-      }, { validators: IncidentReportFormComponent.codeOrLeiRequiredValidator }),
+      }, { validators: IncidentReportFormComponent.leiRequiredValidator }),
       // --- End Entity Information ---
       // --- Contact Information ---
       primaryContact: this.fb.group({
