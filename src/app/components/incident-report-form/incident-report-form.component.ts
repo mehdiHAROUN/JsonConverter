@@ -126,10 +126,16 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
         name: ['', Validators.required],
         code: [''],
         LEI: [''],
-        affectedEntityType: [[]], // optional multi-select
         entityType: ['SUBMITTING_ENTITY']
       }, { validators: IncidentReportFormComponent.codeOrLeiRequiredValidator }),
-      affectedEntities: this.fb.array([]),
+      affectedEntities: this.fb.array([
+        this.fb.group({
+          name: [''],
+          LEI: [''],
+          affectedEntityType: [[]], // optional multi-select
+          entityType: ['AFFECTED_ENTITY']
+        })
+      ]),
       ultimateParentUndertaking: this.fb.group({
         name: ['', Validators.required],
         code: [''],
@@ -262,9 +268,8 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
   addAffectedEntity(): void {
     this.affectedEntities.push(this.fb.group({
       name: [''],
-      code: [''],
       LEI: [''],
-      affectedEntityType: [[], Validators.required], // required multi-select
+      affectedEntityType: [[]],
       entityType: ['AFFECTED_ENTITY']
     }));
   }

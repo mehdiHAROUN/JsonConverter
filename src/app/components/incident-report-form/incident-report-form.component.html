@@ -47,34 +47,6 @@
                 <mat-label>LEI (field 1.3b)</mat-label>
                 <input matInput formControlName="LEI">
               </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Entity Type (field 1.3c)</mat-label>
-                <mat-select formControlName="affectedEntityType" multiple>
-                  <mat-option value="credit_institution">Credit Institution</mat-option>
-                  <mat-option value="payment_institution">Payment Institution</mat-option>
-                  <mat-option value="exempted_payment_institution">Exempted Payment Institution</mat-option>
-                  <mat-option value="account_information_service_provider">Account Information Service Provider</mat-option>
-                  <mat-option value="electronic_money_institution">Electronic Money Institution</mat-option>
-                  <mat-option value="exempted_electronic_money_institution">Exempted Electronic Money Institution</mat-option>
-                  <mat-option value="investment_firm">Investment Firm</mat-option>
-                  <mat-option value="crypto-asset_service_provider">Crypto-Asset Service Provider</mat-option>
-                  <mat-option value="issuer_of_asset-referenced_tokens">Issuer of Asset-Referenced Tokens</mat-option>
-                  <mat-option value="central_securities_depository">Central Securities Depository</mat-option>
-                  <mat-option value="central_counterparty">Central Counterparty</mat-option>
-                  <mat-option value="trading_venue">Trading Venue</mat-option>
-                  <mat-option value="trade_repository">Trade Repository</mat-option>
-                  <mat-option value="manager_of_alternative_investment_fund">Manager of Alternative Investment Fund</mat-option>
-                  <mat-option value="management_company">Management Company</mat-option>
-                  <mat-option value="data_reporting_service_provider">Data Reporting Service Provider</mat-option>
-                  <mat-option value="insurance_and_reinsurance_undertaking">Insurance and Reinsurance Undertaking</mat-option>
-                  <mat-option value="insurance_intermediary_reinsurance_intermediary_and_ancillary_insurance_intermediary">Insurance Intermediary, Reinsurance Intermediary and Ancillary Insurance Intermediary</mat-option>
-                  <mat-option value="institution_for_occupational_retirement_provision">Institution for Occupational Retirement Provision</mat-option>
-                  <mat-option value="credit_rating_agency">Credit Rating Agency</mat-option>  
-                  <mat-option value="administrator_of_critical_benchmarks">Administrator of Critical Benchmarks</mat-option>
-                  <mat-option value="crowdfunding_service_provider">Crowdfunding Service Provider</mat-option>
-                  <mat-option value="securitisation_repository">Securitisation Repository</mat-option>
-                </mat-select>
-              </mat-form-field>
               <input type="hidden" formControlName="entityType">
               <mat-error *ngIf="incidentForm.get('submittingEntity')?.hasError('codeOrLeiRequired') && (incidentForm.get('submittingEntity.code')?.touched || incidentForm.get('submittingEntity.LEI')?.touched || formSubmitted)">
                 Either Code or LEI is required
@@ -87,38 +59,46 @@
             <mat-card-title>Affected Entities</mat-card-title>
             <div formArrayName="affectedEntities">
               <div *ngFor="let entity of affectedEntities.controls; let i = index" [formGroupName]="i" class="affected-entity-group">
-                <mat-divider></mat-divider>
-                <div class="entity-row">
+                <div class="entity-fields">
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Name (field 1.5)</mat-label>
                     <input matInput formControlName="name">
-                  </mat-form-field>
-                  <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Code (field 1.4a)</mat-label>
-                    <input matInput formControlName="code">
                   </mat-form-field>
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>LEI (field 1.4b)</mat-label>
                     <input matInput formControlName="LEI">
                   </mat-form-field>
                   <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Entity Type (field 1.6)</mat-label>
+                    <mat-label>Entity Type (field 1.3c)</mat-label>
                     <mat-select formControlName="affectedEntityType" multiple>
                       <mat-option value="credit_institution">Credit Institution</mat-option>
                       <mat-option value="payment_institution">Payment Institution</mat-option>
+                      <mat-option value="exempted_payment_institution">Exempted Payment Institution</mat-option>
+                      <mat-option value="account_information_service_provider">Account Information Service Provider</mat-option>
+                      <mat-option value="electronic_money_institution">Electronic Money Institution</mat-option>
+                      <mat-option value="exempted_electronic_money_institution">Exempted Electronic Money Institution</mat-option>
                       <mat-option value="investment_firm">Investment Firm</mat-option>
+                      <mat-option value="crypto-asset_service_provider">Crypto-Asset Service Provider</mat-option>
+                      <mat-option value="issuer_of_asset-referenced_tokens">Issuer of Asset-Referenced Tokens</mat-option>
+                      <mat-option value="central_securities_depository">Central Securities Depository</mat-option>
+                      <mat-option value="central_counterparty">Central Counterparty</mat-option>
+                      <mat-option value="trading_venue">Trading Venue</mat-option>
+                      <mat-option value="trade_repository">Trade Repository</mat-option>
+                      <mat-option value="manager_of_alternative_investment_fund">Manager of Alternative Investment Fund</mat-option>
+                      <mat-option value="management_company">Management Company</mat-option>
+                      <mat-option value="data_reporting_service_provider">Data Reporting Service Provider</mat-option>
+                      <mat-option value="insurance_and_reinsurance_undertaking">Insurance and Reinsurance Undertaking</mat-option>
+                      <mat-option value="insurance_intermediary_reinsurance_intermediary_and_ancillary_insurance_intermediary">Insurance Intermediary, Reinsurance Intermediary and Ancillary Insurance Intermediary</mat-option>
+                      <mat-option value="institution_for_occupational_retirement_provision">Institution for Occupational Retirement Provision</mat-option>
+                      <mat-option value="credit_rating_agency">Credit Rating Agency</mat-option>  
+                      <mat-option value="administrator_of_critical_benchmarks">Administrator of Critical Benchmarks</mat-option>
+                      <mat-option value="crowdfunding_service_provider">Crowdfunding Service Provider</mat-option>
+                      <mat-option value="securitisation_repository">Securitisation Repository</mat-option>
                     </mat-select>
-                    <mat-error *ngIf="entity.get('affectedEntityType')?.hasError('required') && (entity.get('affectedEntityType')?.touched || formSubmitted)">
-                      Affected Entity Type is required
-                    </mat-error>
                   </mat-form-field>
                   <input type="hidden" formControlName="entityType">
-                  <button mat-icon-button color="warn" type="button" (click)="affectedEntities.removeAt(i)" aria-label="Remove entity">
-                    <mat-icon>remove_circle</mat-icon>
-                  </button>
                 </div>
               </div>
-              <button mat-raised-button color="primary" type="button" (click)="addAffectedEntity()">Add Entity</button>
             </div>
           </mat-card>
 

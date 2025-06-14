@@ -77,14 +77,22 @@
   border-radius: 14px;
   box-shadow: 0 4px 18px rgba(0,0,0,0.10);
   background: #fff;
-}
 
-.entity-card .mat-card-title {
-  font-size: 1.35rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-  color: #1976d2;
-  letter-spacing: 0.5px;
+  .mat-card-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #1976d2;
+    letter-spacing: 0.5px;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .entity-fields, 
+  [formGroupName], 
+  [formGroup] {
+    margin-top: 1rem;
+  }
 }
 
 .affected-entity-group {
@@ -118,4 +126,16 @@ button[mat-icon-button] {
 
 button[mat-raised-button] {
   margin-top: 1.2rem;
+}
+
+.entity-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.entity-fields mat-form-field {
+  width: 100%;
+  margin-bottom: 0;
 }
