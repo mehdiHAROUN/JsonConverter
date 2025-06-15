@@ -220,30 +220,7 @@
       <!-- Reporting to Other Authorities -->
       <mat-tab label="Reporting to Other Authorities">
         <div class="tab-content">
-          <mat-checkbox formControlName="reportedToAuthorities" class="full-width">
-            Has this incident been reported to other authorities? (fields 3.31, 3.32)
-          </mat-checkbox>
-
-          <ng-container *ngIf="incidentForm.get('reportedToAuthorities')?.value">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Authority Name</mat-label>
-              <input matInput formControlName="authorityName">
-              <mat-error *ngIf="incidentForm.get('authorityName')?.hasError('required') && (incidentForm.get('authorityName')?.touched || formSubmitted)">
-                Authority name is required if reporting to other authorities
-              </mat-error>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Report Reference</mat-label>
-              <input matInput formControlName="reportReference">
-              <mat-error *ngIf="incidentForm.get('reportReference')?.hasError('required') && (incidentForm.get('reportReference')?.touched || formSubmitted)">
-                Report reference is required if reporting to other authorities
-              </mat-error>
-            </mat-form-field>
-            <!-- TODO: Align with schema fields 3.31 (array of enums) and 3.32 (other text) -->
-            <!-- This section will likely need a FormArray for multiple authorities -->
-            <!-- and a conditional text field for 'other' -->
-          </ng-container>
+          <app-reporting-to-other-authorities></app-reporting-to-other-authorities>
         </div>
       </mat-tab>
     </mat-tab-group>

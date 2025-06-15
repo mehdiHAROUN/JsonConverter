@@ -1,0 +1,89 @@
+<mat-card class="reporting-card">
+  <mat-card-content>
+    <form [formGroup]="reportingForm">
+      <!-- High-level classification of root causes of the incident (field 4.1) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>High-level classification of root causes of the incident (field 4.1)</mat-label>
+        <mat-select formControlName="highLevelClassificationRootCauses" multiple>
+          <mat-option *ngFor="let option of highLevelClassificationRootCausesOptions" [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="reportingForm.get('highLevelClassificationRootCauses')?.hasError('required')">
+          This field is required
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Detailed classification of root causes of the incident (field 4.2) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Detailed classification of root causes of the incident (field 4.2)</mat-label>
+        <mat-select formControlName="detailedClassificationRootCauses" multiple>
+          <mat-option *ngFor="let option of detailedClassificationRootCausesOptions" [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="reportingForm.get('detailedClassificationRootCauses')?.hasError('required')">
+          This field is required
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Additional classification of root causes of the incident (field 4.3) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Additional classification of root causes of the incident (field 4.3)</mat-label>
+        <mat-select formControlName="additionalClassificationRootCauses" multiple>
+          <mat-option *ngFor="let option of additionalClassificationRootCausesOptions" [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="reportingForm.get('additionalClassificationRootCauses')?.hasError('required')">
+          This field is required
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Other types of root cause types (field 4.4) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Other types of root cause types (field 4.4)</mat-label>
+        <textarea 
+          matInput 
+          formControlName="otherTypesOfRootCauseTypes" 
+          placeholder="Please specify other types of root causes"
+          rows="3"
+          resize="both">
+        </textarea>
+        <mat-error *ngIf="reportingForm.get('otherTypesOfRootCauseTypes')?.hasError('maxlength')">
+          Maximum 1000 characters allowed
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Information about the root causes of the incident (field 4.5) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Information about the root causes of the incident (field 4.5)</mat-label>
+        <textarea 
+          matInput 
+          formControlName="informationAboutRootCauses" 
+          placeholder="Please provide information about the root causes"
+          rows="3"
+          resize="both">
+        </textarea>
+        <mat-error *ngIf="reportingForm.get('informationAboutRootCauses')?.hasError('maxlength')">
+          Maximum 1000 characters allowed
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Incident resolution (field 4.6) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Incident resolution (field 4.6)</mat-label>
+        <textarea 
+          matInput 
+          formControlName="incidentResolution" 
+          placeholder="Please provide information about the incident resolution"
+          rows="3"
+          resize="both">
+        </textarea>
+        <mat-error *ngIf="reportingForm.get('incidentResolution')?.hasError('maxlength')">
+          Maximum 1000 characters allowed
+        </mat-error>
+      </mat-form-field>
+    </form>
+  </mat-card-content>
+</mat-card> 

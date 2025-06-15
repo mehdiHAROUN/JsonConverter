@@ -2,7 +2,374 @@
   <mat-card class="impact-card">
     <mat-card-title>Impact Assessment (Section 3)</mat-card-title>
     <mat-card-content>
-      <!-- All fields removed as requested -->
+      <form [formGroup]="impactForm">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Incident reference code provided by the competent authority (field 3.1)</mat-label>
+          <textarea matInput formControlName="incidentReferenceCodeProvidedByCompetentAuthority" rows="3" style="resize: vertical;"></textarea>
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Date of occurrence of the incident (field 3.2)</mat-label>
+            <input matInput [matDatepicker]="occurrenceDatePicker" formControlName="occurrenceDate">
+            <mat-datepicker-toggle matSuffix [for]="occurrenceDatePicker"></mat-datepicker-toggle>
+            <mat-datepicker #occurrenceDatePicker></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Time of occurrence of the incident (field 3.2)</mat-label>
+            <input matInput type="time" formControlName="occurrenceTime">
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Date of recovery of services, activities or operations (field 3.3)</mat-label>
+            <input matInput [matDatepicker]="recoveryDatePicker" formControlName="recoveryDate">
+            <mat-datepicker-toggle matSuffix [for]="recoveryDatePicker"></mat-datepicker-toggle>
+            <mat-datepicker #recoveryDatePicker></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Time of recovery of services, activities or operations (field 3.3)</mat-label>
+            <input matInput type="time" formControlName="recoveryTime">
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Number of clients affected (field 3.4)</mat-label>
+          <input matInput type="number" formControlName="numberOfClientsAffected" placeholder="Enter number">
+          <mat-error *ngIf="impactForm.get('numberOfClientsAffected')?.hasError('min')">
+            Number must be 0 or greater.
+          </mat-error>
+          <mat-error *ngIf="impactForm.get('numberOfClientsAffected')?.hasError('pattern')">
+            Please enter a valid integer.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Percentage of clients affected (field 3.5)</mat-label>
+          <input matInput type="number" formControlName="percentageOfClientsAffected" placeholder="e.g., 99.9" step="0.1" min="0" max="100">
+          <mat-error *ngIf="impactForm.get('percentageOfClientsAffected')?.hasError('invalidPercentage')">
+            Please enter a valid percentage between 0 and 100.
+          </mat-error>
+          <mat-error *ngIf="impactForm.get('percentageOfClientsAffected')?.hasError('tooManyDigits')">
+            Maximum 5 numeric characters allowed (e.g., 99.9).
+          </mat-error>
+          <mat-error *ngIf="impactForm.get('percentageOfClientsAffected')?.hasError('tooManyDecimals')">
+            Maximum 1 decimal place allowed.
+          </mat-error>
+          <mat-error *ngIf="impactForm.get('percentageOfClientsAffected')?.hasError('invalidFormat')">
+            Invalid format. Please enter a valid number.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Number of financial counterparts affected (field 3.6)</mat-label>
+          <input matInput type="number" formControlName="numberOfFinancialCounterpartsAffected" placeholder="Enter number">
+          <mat-error *ngIf="impactForm.get('numberOfFinancialCounterpartsAffected')?.hasError('min')">
+            Number must be 0 or greater.
+          </mat-error>
+          <mat-error *ngIf="impactForm.get('numberOfFinancialCounterpartsAffected')?.hasError('pattern')">
+            Please enter a valid integer.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Percentage of financial counterparts affected (field 3.7)</mat-label>
+          <input matInput type="number" formControlName="percentageOfFinancialCounterpartsAffected" placeholder="e.g., 99.9" step="0.1" min="0" max="100">
+          <mat-error *ngIf="impactForm.get('percentageOfFinancialCounterpartsAffected')?.hasError('invalidPercentage')">
+            Please enter a valid percentage between 0 and 100.
+          </mat-error>
+          <mat-error *ngIf="impactForm.get('percentageOfFinancialCounterpartsAffected')?.hasError('tooManyDigits')">
+            Maximum 5 numeric characters allowed (e.g., 99.9).
+          </mat-error>
+          <mat-error *ngIf="impactForm.get('percentageOfFinancialCounterpartsAffected')?.hasError('tooManyDecimals')">
+            Maximum 1 decimal place allowed.
+          </mat-error>
+          <mat-error *ngIf="impactForm.get('percentageOfFinancialCounterpartsAffected')?.hasError('invalidFormat')">
+            Invalid format. Please enter a valid number.
+          </mat-error>
+        </mat-form-field>
+
+        <div class="form-section">
+          <label class="field-label">Relevance of clients and financial counterparts' threshold (field 3.8)</label>
+          <mat-radio-group formControlName="impactOnRelevantClientsOrFinancialCounterparts" class="radio-group">
+            <mat-radio-button value="yes" class="radio-button">Yes</mat-radio-button>
+            <mat-radio-button value="no" class="radio-button">No</mat-radio-button>
+          </mat-radio-group>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Number of affected transactions (field 3.9)</mat-label>
+          <input matInput type="number" formControlName="numberOfAffectedTransactions" placeholder="Enter number">
+          <mat-error *ngIf="impactForm.get('numberOfAffectedTransactions')?.hasError('min')">
+            Number must be 0 or greater.
+          </mat-error>
+          <mat-error *ngIf="impactForm.get('numberOfAffectedTransactions')?.hasError('pattern')">
+            Please enter a valid integer.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Percentage of affected transactions (field 3.10)</mat-label>
+          <input matInput type="number" formControlName="percentageOfAffectedTransactions" placeholder="e.g., 99.9" step="0.1" min="0" max="100">
+          <mat-error *ngIf="impactForm.get('percentageOfAffectedTransactions')?.hasError('invalidPercentage')">
+            Please enter a valid percentage between 0 and 100.
+          </mat-error>
+          <mat-error *ngIf="impactForm.get('percentageOfAffectedTransactions')?.hasError('tooManyDigits')">
+            Maximum 5 numeric characters allowed (e.g., 99.9).
+          </mat-error>
+          <mat-error *ngIf="impactForm.get('percentageOfAffectedTransactions')?.hasError('tooManyDecimals')">
+            Maximum 1 decimal place allowed.
+          </mat-error>
+          <mat-error *ngIf="impactForm.get('percentageOfAffectedTransactions')?.hasError('invalidFormat')">
+            Invalid format. Please enter a valid number.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Value of affected transactions (thousands of EUR) (field 3.11)</mat-label>
+          <input matInput type="number" formControlName="valueOfAffectedTransactions" placeholder="e.g., 2.5 for 2,500 EUR" step="0.1" min="0">
+          <mat-error *ngIf="impactForm.get('valueOfAffectedTransactions')?.hasError('invalidValue')">
+            Please enter a valid non-negative number.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Reported Data Status (field 3.12)</mat-label>
+          <mat-select formControlName="reportedDataStatus" multiple>
+            <mat-option *ngFor="let option of reportedDataStatusOptions" [value]="option.value">
+              {{option.label}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Reputational impact (field 3.13)</mat-label>
+          <mat-select formControlName="reputationalImpact" multiple>
+            <mat-option *ngFor="let option of reputationalImpactOptions" [value]="option.value">
+              {{option.label}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Contextual information about the reputational impact (field 3.14)</mat-label>
+          <textarea matInput formControlName="contextualInformationReputationalImpact" rows="3" style="resize: vertical;"></textarea>
+          <mat-error *ngIf="impactForm.get('contextualInformationReputationalImpact')?.hasError('maxlength')">
+            Contextual information cannot exceed 1000 characters.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Duration of the major ICT-related incident (DD:HH:MM) (field 3.15)</mat-label>
+          <input matInput formControlName="durationOfIncident" placeholder="e.g., 02:15:30">
+          <mat-error *ngIf="impactForm.get('durationOfIncident')?.hasError('invalidDurationFormat')">
+            Please enter duration in DD:HH:MM format (e.g., 02:15:30).
+          </mat-error>
+          <mat-error *ngIf="impactForm.get('durationOfIncident')?.hasError('invalidDays')">
+            Days must be between 0 and 99.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Service downtime (DD:HH:MM) (field 3.16)</mat-label>
+          <input matInput formControlName="serviceDowntime" placeholder="e.g., 01:08:45">
+          <mat-error *ngIf="impactForm.get('serviceDowntime')?.hasError('invalidDurationFormat')">
+            Please enter service downtime in DD:HH:MM format (e.g., 01:08:45).
+          </mat-error>
+          <mat-error *ngIf="impactForm.get('serviceDowntime')?.hasError('invalidDays')">
+            Days must be between 0 and 99.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>The numbers for duration and service downtime are actual or estimates (field 3.17)</mat-label>
+          <mat-select formControlName="durationAndDowntimeInformationType">
+            <mat-option *ngFor="let option of durationAndDowntimeInformationTypeOptions" [value]="option.value">
+              {{option.label}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Types of impact in the Member States (field 3.18)</mat-label>
+          <mat-select formControlName="typesOfImpactInMemberStates" multiple>
+            <mat-option *ngFor="let option of typesOfImpactInMemberStatesOptions" [value]="option.value">
+              {{option.label}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description of how the major ICT-related incident has an impact in other Member States (field 3.19)</mat-label>
+          <textarea matInput formControlName="descriptionOfImpactInOtherMemberStates" rows="3" style="resize: vertical;"></textarea>
+          <mat-error *ngIf="impactForm.get('descriptionOfImpactInOtherMemberStates')?.hasError('maxlength')">
+            Description cannot exceed 1000 characters.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Materiality thresholds for the classification criterion 'Data losses' (field 3.20)</mat-label>
+          <mat-select formControlName="materialityThresholdsDataLosses" multiple>
+            <mat-option *ngFor="let option of materialityThresholdsDataLossesOptions" [value]="option.value">
+              {{option.label}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description of the data losses (field 3.21)</mat-label>
+          <textarea matInput formControlName="descriptionOfDataLosses" rows="3" style="resize: vertical;"></textarea>
+          <mat-error *ngIf="impactForm.get('descriptionOfDataLosses')?.hasError('maxlength')">
+            Description cannot exceed 1000 characters.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Classification criterion 'Critical services affected' (field 3.22)</mat-label>
+          <textarea matInput formControlName="classificationCriterionCriticalServicesAffected" rows="3" style="resize: vertical;"></textarea>
+          <mat-error *ngIf="impactForm.get('classificationCriterionCriticalServicesAffected')?.hasError('maxlength')">
+            Description cannot exceed 1000 characters.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Type of the major ICT-related incident (field 3.23)</mat-label>
+          <mat-select formControlName="typeOfMajorICTIncident" multiple>
+            <mat-option *ngFor="let option of typeOfMajorICTIncidentOptions" [value]="option.value">
+              {{option.label}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Other types of incidents (field 3.24)</mat-label>
+          <textarea matInput formControlName="otherTypesOfIncidents" rows="3" style="resize: vertical;"></textarea>
+          <mat-error *ngIf="impactForm.get('otherTypesOfIncidents')?.hasError('maxlength')">
+            Description cannot exceed 1000 characters.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Threats and techniques used by the threat actor (field 3.25)</mat-label>
+          <mat-select formControlName="threatsAndTechniquesUsedByThreatActor" multiple>
+            <mat-option *ngFor="let option of threatsAndTechniquesUsedByThreatActorOptions" [value]="option.value">
+              {{option.label}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Other types of techniques (field 3.26)</mat-label>
+          <textarea matInput formControlName="otherTypesOfTechniques" rows="3" style="resize: vertical;"></textarea>
+          <mat-error *ngIf="impactForm.get('otherTypesOfTechniques')?.hasError('maxlength')">
+            Description cannot exceed 1000 characters.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Information about affected functional areas and business processes (field 3.27)</mat-label>
+          <textarea matInput formControlName="informationAboutAffectedFunctionalAreas" rows="3" style="resize: vertical;"></textarea>
+          <mat-error *ngIf="impactForm.get('informationAboutAffectedFunctionalAreas')?.hasError('maxlength')">
+            Information cannot exceed 1000 characters.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Affected infrastructure components supporting business processes (field 3.28)</mat-label>
+          <textarea matInput formControlName="affectedInfrastructureComponents" rows="3" style="resize: vertical;"></textarea>
+          <mat-error *ngIf="impactForm.get('affectedInfrastructureComponents')?.hasError('maxlength')">
+            Description cannot exceed 1000 characters.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Information about affected infrastructure components supporting business processes (field 3.29)</mat-label>
+          <textarea matInput formControlName="informationAboutAffectedInfrastructureComponents" rows="3" style="resize: vertical;"></textarea>
+          <mat-error *ngIf="impactForm.get('informationAboutAffectedInfrastructureComponents')?.hasError('maxlength')">
+            Information cannot exceed 1000 characters.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Impact on the financial interest of clients (field 3.30)</mat-label>
+          <mat-select formControlName="impactOnFinancialInterestOfClients">
+            <mat-option *ngFor="let option of impactOnFinancialInterestOfClientsOptions" [value]="option.value">
+              {{option.label}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Reporting to other authorities (field 3.31) -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Reporting to other authorities (field 3.31)</mat-label>
+          <mat-select formControlName="reportingToOtherAuthorities" multiple>
+            <mat-option *ngFor="let option of reportingToOtherAuthoritiesOptions" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="impactForm.get('reportingToOtherAuthorities')?.hasError('required')">
+            This field is required
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Specification of 'other' authorities (field 3.32) -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Specification of 'other' authorities (field 3.32)</mat-label>
+          <textarea 
+            matInput 
+            formControlName="specificationOfOtherAuthorities" 
+            placeholder="Please specify other authorities"
+            rows="3"
+            resize="both">
+          </textarea>
+          <mat-error *ngIf="impactForm.get('specificationOfOtherAuthorities')?.hasError('maxlength')">
+            Maximum 1000 characters allowed
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Temporary actions/measures taken or planned to be taken to recover from the incident (field 3.33) -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Temporary actions/measures taken or planned to be taken to recover from the incident (field 3.33)</mat-label>
+          <mat-select formControlName="temporaryActionsMeasuresTaken">
+            <mat-option value="yes">Yes</mat-option>
+            <mat-option value="no">No</mat-option>
+          </mat-select>
+          <mat-error *ngIf="impactForm.get('temporaryActionsMeasuresTaken')?.hasError('required')">
+            This field is required
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Description of any temporary actions and measures taken or planned to be taken to recover from the incident (field 3.34) -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description of any temporary actions and measures taken or planned to be taken to recover from the incident (field 3.34)</mat-label>
+          <textarea 
+            matInput 
+            formControlName="descriptionOfTemporaryActionsMeasures" 
+            placeholder="Please describe any temporary actions and measures"
+            rows="3"
+            resize="both">
+          </textarea>
+          <mat-error *ngIf="impactForm.get('descriptionOfTemporaryActionsMeasures')?.hasError('maxlength')">
+            Maximum 1000 characters allowed
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Indicators of compromise (field 3.35) -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Indicators of compromise (field 3.35)</mat-label>
+          <textarea 
+            matInput 
+            formControlName="indicatorsOfCompromise" 
+            placeholder="Please provide indicators of compromise"
+            rows="3"
+            resize="both">
+          </textarea>
+          <mat-error *ngIf="impactForm.get('indicatorsOfCompromise')?.hasError('maxlength')">
+            Maximum 1000 characters allowed
+          </mat-error>
+        </mat-form-field>
+      </form>
     </mat-card-content>
   </mat-card>
 </div>

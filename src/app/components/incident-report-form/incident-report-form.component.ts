@@ -15,6 +15,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { IncidentDetailsFormComponent } from '../incident-details-form/incident-details-form.component';
 import { ImpactAssessmentComponent } from '../impact-assessment/impact-assessment.component';
+import { ReportingToOtherAuthoritiesComponent } from '../reporting-to-other-authorities/reporting-to-other-authorities.component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
 export enum IncidentSubmissionType {
@@ -92,7 +93,8 @@ const PHONE_REGEX = /^\+?[1-9]\d{1,14}(\s?\(\d+\))?([\-\s\.]?\d+)*$/;
     MatDividerModule,
     MatIconModule,
     IncidentDetailsFormComponent,
-    ImpactAssessmentComponent
+    ImpactAssessmentComponent,
+    ReportingToOtherAuthoritiesComponent
   ],
   templateUrl: './incident-report-form.component.html',
   styleUrl: './incident-report-form.component.scss'

@@ -1,0 +1,23 @@
+.reporting-card {
+  margin-bottom: 2.5rem;
+  padding: 2rem 2rem 1.5rem 2rem;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.10);
+  background: #fff;
+
+  .mat-card-content {
+    padding: 0;
+  }
+
+  .full-width {
+    width: 100%;
+  }
+
+  mat-form-field {
+    margin-bottom: 1rem;
+  }
+
+  .mat-mdc-form-field-error {
+    font-size: 14px;
+  }
+} 
