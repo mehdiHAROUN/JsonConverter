@@ -48,4 +48,14 @@ mat-error, .mat-error {
   mat-card-title {
     font-size: 1.3rem;
   }
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.half-width {
+  flex: 1 1 0;
+  min-width: 0;
 } 

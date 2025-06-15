@@ -59,6 +59,16 @@ export const INCIDENT_CLASSIFICATION_OPTIONS = [
   { value: 'other', label: 'Other' }
 ];
 
+export const CLASSIFICATION_CRITERIA_OPTIONS = [
+  { value: 'clients_financial_counterparts_transactions_affected', label: 'Clients, financial counterparts and transactions affected' },
+  { value: 'reputational_impact', label: 'Reputational impact' },
+  { value: 'duration_and_service_downtime', label: 'Duration and service downtime' },
+  { value: 'geographical_spread', label: 'Geographical spread' },
+  { value: 'data_losses', label: 'Data losses' },
+  { value: 'critical_services_affected', label: 'Critical services affected' },
+  { value: 'economic_impact', label: 'Economic impact' }
+];
+
 export const THREAT_TECHNIQUES_OPTIONS = [
   { value: 'malware', label: 'Malware' },
   { value: 'phishing', label: 'Phishing' },
@@ -87,6 +97,53 @@ export const ROOT_CAUSES_ADDITIONAL_CLASSIFICATION_OPTIONS = [
   { value: 'maintenance', label: 'Maintenance' },
   { value: 'security', label: 'Security' },
   { value: 'Other', label: 'Other' }
+];
+
+export const EEA_COUNTRIES = [
+  { code: 'AT', name: 'Austria' },
+  { code: 'BE', name: 'Belgium' },
+  { code: 'BG', name: 'Bulgaria' },
+  { code: 'HR', name: 'Croatia' },
+  { code: 'CY', name: 'Cyprus' },
+  { code: 'CZ', name: 'Czech Republic' },
+  { code: 'DK', name: 'Denmark' },
+  { code: 'EE', name: 'Estonia' },
+  { code: 'FI', name: 'Finland' },
+  { code: 'FR', name: 'France' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'GR', name: 'Greece' },
+  { code: 'HU', name: 'Hungary' },
+  { code: 'IE', name: 'Ireland' },
+  { code: 'IT', name: 'Italy' },
+  { code: 'LV', name: 'Latvia' },
+  { code: 'LT', name: 'Lithuania' },
+  { code: 'LU', name: 'Luxembourg' },
+  { code: 'MT', name: 'Malta' },
+  { code: 'NL', name: 'Netherlands' },
+  { code: 'PL', name: 'Poland' },
+  { code: 'PT', name: 'Portugal' },
+  { code: 'RO', name: 'Romania' },
+  { code: 'SK', name: 'Slovakia' },
+  { code: 'SI', name: 'Slovenia' },
+  { code: 'ES', name: 'Spain' },
+  { code: 'SE', name: 'Sweden' },
+  { code: 'IS', name: 'Iceland' },
+  { code: 'LI', name: 'Liechtenstein' },
+  { code: 'NO', name: 'Norway' }
+];
+
+export const INCIDENT_DISCOVERY_SOURCE_OPTIONS = [
+  { value: 'it_security', label: 'IT Security' },
+  { value: 'staff', label: 'Staff' },
+  { value: 'internal_audit', label: 'Internal audit' },
+  { value: 'external_audit', label: 'External audit' },
+  { value: 'clients', label: 'Clients' },
+  { value: 'financial_counterparts', label: 'Financial counterparts' },
+  { value: 'third_party_provider', label: 'Third-party provider' },
+  { value: 'attacker', label: 'Attacker' },
+  { value: 'monitoring_systems', label: 'Monitoring systems' },
+  { value: 'authority_agency_law_enforcement_body', label: 'Authority / agency / law enforcement body' },
+  { value: 'other', label: 'Other' }
 ];
 
 @Component({
@@ -126,6 +183,9 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
   incidentDetailsForm: FormGroup;
   incidentDiscoveryOptions = INCIDENT_DISCOVERY_OPTIONS;
   ictProviderTypes = ICT_PROVIDER_TYPES;
+  classificationCriteriaOptions = CLASSIFICATION_CRITERIA_OPTIONS;
+  eeaCountries = EEA_COUNTRIES;
+  incidentDiscoverySourceOptions = INCIDENT_DISCOVERY_SOURCE_OPTIONS;
 
 
   get classificationTypes(): FormArray {
@@ -161,7 +221,7 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
 
   constructor(private fb: FormBuilder) {
     this.incidentDetailsForm = this.fb.group({
-      financialEntityCode: [''], // 2.1
+      incidentReferenceCode: [''], // 2.1
       detectionDate: [null], // 2.2 (date part)
       detectionTime: [null], // 2.2 (time part)
       classificationDate: [null], // 2.3 (date part)
@@ -169,56 +229,11 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
       incidentOccurrenceDate: [null], // Schema 2.6 (date part) - Note: HTML uses 2.6 for isBusinessContinuityActivated
       incidentOccurrenceTime: [null], // Schema 2.6 (time part)
       incidentDescription: ['', Validators.maxLength(1000)], // 2.4
-      classificationTypes: this.fb.array([]), // 2.5
-      isBusinessContinuityActivated: [false], // 2.9 in schema (HTML was 2.6)
-      incidentDuration: ['', [incidentDurationValidator(), Validators.pattern(/^\\d{1,3}:[0-5]\\d:[0-5]\\d$/)]], // 3.15 in schema (HTML was 2.7)
-      incidentDiscovery: [''], // 2.7 in schema (HTML was 2.8)
-      competentAuthorityCode: ['', Validators.maxLength(10)], // 3.1 in schema (HTML was 2.9) - Assuming this is NCA code
-      otherInformation: ['', Validators.maxLength(1000)], // 2.10
-      isIctThirdPartyProviderInvolved: [false], // 2.17
-      ictThirdPartyProviderDetails: this.fb.group({ // 2.17.1
-        ictThirdPartyProviderName: ['', Validators.maxLength(200)], // 2.17.1.1
-        ictThirdPartyProviderType: [''], // 2.17.1.2
-        ictThirdPartyProviderCountry: ['', [Validators.pattern(/^[A-Z]{2}$/)]], // 2.17.1.3
-        ictThirdPartyProviderLEI: ['', [Validators.pattern(/^[A-Z0-9]{18}[0-9]{2}$/)]], // 2.17.1.4
-        ictThirdPartyProviderNACESector: ['', Validators.maxLength(5)] // 2.17.1.5
-      }),
-      // recurringIncidentTime: [null], // 2.16.2 - if recurringIncidentDate is 2.16.1 (schema shows 4.16 for recurringIncidentDate)
-
-      // Fields from original form that might map to section 4 (Response and Recovery) or need re-evaluation
-      originatesFromThirdPartyProvider: [''], // Potentially related to 2.17 or a different concept
-      indicatorsOfCompromise: ['', Validators.maxLength(1000)], // Potentially 4.x
-      incidentResolutionSummary: ['', Validators.maxLength(1000)], // Potentially 4.x
-      incidentResolutionDate: [null], // Potentially 4.x
-      incidentResolutionTime: [null], // Potentially 4.x
-      incidentResolutionVsPlannedImplementation: ['', Validators.maxLength(1000)], // Potentially 4.x
-      assessmentOfRiskToCriticalFunctions: ['', Validators.maxLength(1000)], // Potentially 4.x
-      informationRelevantToResolutionAuthorities: ['', Validators.maxLength(1000)], // Potentially 4.x
-      financialRecoveriesAmount: [null, Validators.min(0)], // Potentially 3.x (economic impact) or 4.x
-      grossAmountIndirectDirectCosts: [null, Validators.min(0)], // Potentially 3.x (economic impact) or 4.x
-      recurringNonMajorIncidentsDescription: ['', Validators.maxLength(1000)], // Potentially related to 2.16
-      recurringIncidentDate: [null], // Schema 4.16
-
-      incidentClassification: [''], // This seems to be a simple string, schema 2.5 is an array of objects. Re-evaluating.
-                                    // This might be the old way of handling classification.
-                                    // The new classificationTypes FormArray (2.5) is more complex.
-
-      // incidentType FormGroup seems to handle parts of schema 2.5 (ClassificationType) and 4.5 (ThreatType)
-      // This needs careful mapping to the new structure or removal if redundant.
-      incidentType: this.fb.group({
-        incidentClassification: [[], Validators.required], // Maps to DORA_IR_Schema_v1.2 (1).json#/$defs/ClassificationType/properties/incidentClassification
-        otherIncidentClassification: [''], // Conditional based on 'other' in incidentClassification
-        threatTechniques: [[]], // Maps to DORA_IR_Schema_v1.2 (1).json#/$defs/ThreatType/properties/threatTechniques
-        otherThreatTechniques: [''] // Conditional based on 'other' in threatTechniques
-      }),
-      // Root cause fields (Section 4 of schema)
-      rootCauseHLClassification: [[]], // 4.7
-      rootCausesDetailedClassification: [[]], // 4.8
-      rootCausesAdditionalClassification: [[]], // 4.9
-      rootCausesOther: ['', Validators.maxLength(250)], // 4.10
-      rootCausesInformation: ['', Validators.maxLength(1000)], // 4.11
-      rootCauseAddressingDate: [null], // 4.13 (date part)
-      rootCauseAddressingTime: [null] // 4.13 (time part)
+      classificationCriteria: [[]], // 2.5 - multiple choice field
+      affectedEEACountries: [[]], // 2.6
+      incidentDiscoverySource: [''], // 2.7
+      incidentOriginationSource: [''], // 2.8
+      otherRelevantInformation: [''], // 2.9
     });
 
     // Disable ictThirdPartyProviderDetails by default
@@ -264,23 +279,13 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
     const classificationDateTime = this.combineDateAndTime(formValue.classificationDate, formValue.classificationTime);
     // Combine Incident Occurrence Date & Time
     const incidentOccurrenceDateTime = this.combineDateAndTime(formValue.incidentOccurrenceDate, formValue.incidentOccurrenceTime);
-    // Combine Incident Resolution Date & Time
-    const resolutionDate = formValue.incidentResolutionDate;
-    const resolutionTime = formValue.incidentResolutionTime;
-    const combinedResolutionDateTime = this.combineDateAndTime(resolutionDate, resolutionTime);
-    // Combine Root Cause Addressing Date & Time
-    const addressingDate = formValue.rootCauseAddressingDate;
-    const addressingTime = formValue.rootCauseAddressingTime;
-    const combinedAddressingDateTime = this.combineDateAndTime(addressingDate, addressingTime);
 
     // Update the form value with combined date-times
     const updatedValue = {
       ...formValue,
       detectionDateTime,
       classificationDateTime,
-      incidentOccurrenceDateTime,
-      incidentResolutionDateTime: combinedResolutionDateTime,
-      rootCauseAddressingDateTime: combinedAddressingDateTime
+      incidentOccurrenceDateTime
     };
 
     this.onChange(updatedValue);
@@ -289,35 +294,7 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
   ngOnInit(): void {
     this.incidentDetailsForm.valueChanges.subscribe(() => {
       this.updateFormValue();
-      this.updateConditionalValidators();
-      this.updateClassificationTypeValidators();
-      this.updateIncidentTypeValidators();
-      this.updateRootCausesValidators();
     });
-    this.updateConditionalValidators();
-    this.updateClassificationTypeValidators();
-    this.updateIncidentTypeValidators();
-    this.updateRootCausesValidators();
-  }
-
-  addClassificationType(): void {
-    const group = this.fb.group({
-      // Fields based on DORA_IR_Schema_v1.2 (1).json#/$defs/ClassificationType
-      incidentClassification: ['', Validators.required], // enum from schema
-      otherIncidentClassification: [{value: '', disabled: true}, Validators.maxLength(250)],
-      criterion: ['', Validators.required], // enum: geographical_spread, number_of_affected_users, ...
-      // Conditional fields based on criterion will be added here by updateClassificationTypeValidators
-      countryCodeMaterialityThresholds: [[]], // Array of strings (ISO country codes)
-      memberStatesImpactType: [''], // enum
-      memberStatesImpactTypeDescription: [{value: '', disabled: true}, Validators.maxLength(1000)],
-      dataLosseMaterialityThresholds: [[]], // Array of enums
-      dataLossesDescription: [{value: '', disabled: true}, Validators.maxLength(1000)],
-      reputationalImpactType: [[]], // Array of enums
-      reputationalImpactDescription: [{value: '', disabled: true}, Validators.maxLength(1000)],
-      economicImpactMaterialityThreshold: [''] // enum
-    });
-    this.classificationTypes.push(group);
-    this.updateSingleClassificationTypeValidators(group); // Validate the newly added group
   }
 
   removeClassificationType(index: number): void {
@@ -449,15 +426,15 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
     const type = this.incidentType;
     const f = this.incidentDetailsForm;
 
-    // financialEntityCode, incidentDescription required for final_report and intermediate_report
+    // incident Reference Code, incidentDescription required for final_report and intermediate_report
     if (type === 'final_report' || type === 'intermediate_report') {
-      f.get('financialEntityCode')?.setValidators([Validators.required]);
+      f.get('incidentReferenceCode')?.setValidators([Validators.required]);
       f.get('incidentDescription')?.setValidators([Validators.required]);
     } else {
-      f.get('financialEntityCode')?.clearValidators();
+      f.get('incidentReferenceCode')?.clearValidators();
       f.get('incidentDescription')?.clearValidators();
     }
-    f.get('financialEntityCode')?.updateValueAndValidity({ onlySelf: true });
+    f.get('incidentReferenceCode')?.updateValueAndValidity({ onlySelf: true });
     f.get('incidentDescription')?.updateValueAndValidity({ onlySelf: true });
 
     // The following are required only for final_report
