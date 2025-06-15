@@ -13,6 +13,16 @@
     width: 100%;
   }
 
+  .form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    .half-width {
+      flex: 1;
+    }
+  }
+
   mat-form-field {
     margin-bottom: 1rem;
   }

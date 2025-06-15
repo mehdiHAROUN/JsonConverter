@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
 @Component({
   selector: 'app-reporting-to-other-authorities',
@@ -15,7 +17,9 @@ import { MatInputModule } from '@angular/material/input';
     ReactiveFormsModule,
     MatFormFieldModule,
     MatSelectModule,
-    MatInputModule
+    MatInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   templateUrl: './reporting-to-other-authorities.component.html',
   styleUrl: './reporting-to-other-authorities.component.scss'
@@ -93,10 +97,45 @@ export class ReportingToOtherAuthoritiesComponent implements OnInit {
       additionalClassificationRootCauses: [[]], // field 4.3
       otherTypesOfRootCauseTypes: ['', Validators.maxLength(1000)], // field 4.4
       informationAboutRootCauses: ['', Validators.maxLength(1000)], // field 4.5
-      incidentResolution: ['', Validators.maxLength(1000)] // field 4.6
+      incidentResolution: ['', Validators.maxLength(1000)], // field 4.6
+      incidentRootCauseAddressedDate: [null], // field 4.7 (date part)
+      incidentRootCauseAddressedTime: [null], // field 4.7 (time part)
+      incidentWasResolvedDate: [null], // field 4.8 (date part)
+      incidentWasResolvedTime: [null], // field 4.8 (time part)
+      informationPermanentResolutionDateDiffers: ['', Validators.maxLength(1000)], // field 4.9
+      assessmentOfRiskToCriticalFunctions: ['', Validators.maxLength(1000)], // field 4.10
+      informationRelevantForResolutionAuthorities: ['', Validators.maxLength(1000)], // field 4.11
+      materialityThresholdEconomicImpact: ['', Validators.maxLength(1000)], // field 4.12
+      amountOfGrossDirectAndIndirectCosts: [null, [Validators.min(0), this.transactionValueValidator()]], // field 4.13
+      amountOfFinancialRecoveries: [null, [Validators.min(0), this.transactionValueValidator()]], // field 4.14
+      informationOnNonMajorIncidentsRecurring: ['', Validators.maxLength(1000)], // field 4.15
+      occurrenceOfRecurringIncidentsDate: [null], // field 4.16 (date part)
+      occurrenceOfRecurringIncidentsTime: [null] // field 4.16 (time part)
     });
   }
 
   ngOnInit(): void {
+  }
+
+  // Custom validator for monetary values (thousands of units)
+  private transactionValueValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (value === null || value === undefined || value === '') {
+        return null;
+      }
+      
+      const numValue = Number(value);
+      if (isNaN(numValue) || numValue < 0) {
+        return { invalidValue: true };
+      }
+      
+      // Check if the value is in thousands (minimum precision)
+      if (numValue < 0.001) {
+        return { invalidValue: true };
+      }
+      
+      return null;
+    };
   }
 } 

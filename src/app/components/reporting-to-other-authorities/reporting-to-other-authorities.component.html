@@ -84,6 +84,147 @@
           Maximum 1000 characters allowed
         </mat-error>
       </mat-form-field>
+
+      <!-- The incident root cause was addressed (field 4.7) -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Date of the incident root cause was addressed (field 4.7)</mat-label>
+          <input matInput [matDatepicker]="incidentRootCauseAddressedDatePicker" formControlName="incidentRootCauseAddressedDate">
+          <mat-datepicker-toggle matSuffix [for]="incidentRootCauseAddressedDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #incidentRootCauseAddressedDatePicker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Time of the incident root cause was addressed (field 4.7)</mat-label>
+          <input matInput type="time" formControlName="incidentRootCauseAddressedTime">
+        </mat-form-field>
+      </div>
+
+      <!-- The incident was resolved (field 4.8) -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Date of the incident was resolved (field 4.8)</mat-label>
+          <input matInput [matDatepicker]="incidentWasResolvedDatePicker" formControlName="incidentWasResolvedDate">
+          <mat-datepicker-toggle matSuffix [for]="incidentWasResolvedDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #incidentWasResolvedDatePicker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Time of the incident was resolved (field 4.8)</mat-label>
+          <input matInput type="time" formControlName="incidentWasResolvedTime">
+        </mat-form-field>
+      </div>
+
+      <!-- Information if the permanent resolution date of the incidents differs from the initially planned implementation date (field 4.9) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Information if the permanent resolution date of the incidents differs from the initially planned implementation date (field 4.9)</mat-label>
+        <textarea 
+          matInput 
+          formControlName="informationPermanentResolutionDateDiffers" 
+          placeholder="Please provide information about resolution date differences"
+          rows="3"
+          resize="both">
+        </textarea>
+        <mat-error *ngIf="reportingForm.get('informationPermanentResolutionDateDiffers')?.hasError('maxlength')">
+          Maximum 1000 characters allowed
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Assessment of risk to critical functions for resolution purposes (field 4.10) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Assessment of risk to critical functions for resolution purposes (field 4.10)</mat-label>
+        <textarea 
+          matInput 
+          formControlName="assessmentOfRiskToCriticalFunctions" 
+          placeholder="Please provide assessment of risk to critical functions"
+          rows="3"
+          resize="both">
+        </textarea>
+        <mat-error *ngIf="reportingForm.get('assessmentOfRiskToCriticalFunctions')?.hasError('maxlength')">
+          Maximum 1000 characters allowed
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Information relevant for resolution authorities (field 4.11) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Information relevant for resolution authorities (field 4.11)</mat-label>
+        <textarea 
+          matInput 
+          formControlName="informationRelevantForResolutionAuthorities" 
+          placeholder="Please provide information relevant for resolution authorities"
+          rows="3"
+          resize="both">
+        </textarea>
+        <mat-error *ngIf="reportingForm.get('informationRelevantForResolutionAuthorities')?.hasError('maxlength')">
+          Maximum 1000 characters allowed
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Materiality threshold for the classification criterion 'Economic impact' (field 4.12) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Materiality threshold for the classification criterion 'Economic impact' (field 4.12)</mat-label>
+        <textarea 
+          matInput 
+          formControlName="materialityThresholdEconomicImpact" 
+          placeholder="Please provide materiality threshold information"
+          rows="3"
+          resize="both">
+        </textarea>
+        <mat-error *ngIf="reportingForm.get('materialityThresholdEconomicImpact')?.hasError('maxlength')">
+          Maximum 1000 characters allowed
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Amount of gross direct and indirect costs and losses (field 4.13) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Amount of gross direct and indirect costs and losses (thousands of EUR) (field 4.13)</mat-label>
+        <input matInput type="number" formControlName="amountOfGrossDirectAndIndirectCosts" placeholder="e.g., 2.5 for 2,500 EUR" step="0.1" min="0">
+        <mat-error *ngIf="reportingForm.get('amountOfGrossDirectAndIndirectCosts')?.hasError('min')">
+          Amount must be 0 or greater
+        </mat-error>
+        <mat-error *ngIf="reportingForm.get('amountOfGrossDirectAndIndirectCosts')?.hasError('invalidValue')">
+          Please enter a valid amount in thousands of EUR
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Amount of financial recoveries (field 4.14) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Amount of financial recoveries (thousands of EUR) (field 4.14)</mat-label>
+        <input matInput type="number" formControlName="amountOfFinancialRecoveries" placeholder="e.g., 1.2 for 1,200 EUR" step="0.1" min="0">
+        <mat-error *ngIf="reportingForm.get('amountOfFinancialRecoveries')?.hasError('min')">
+          Amount must be 0 or greater
+        </mat-error>
+        <mat-error *ngIf="reportingForm.get('amountOfFinancialRecoveries')?.hasError('invalidValue')">
+          Please enter a valid amount in thousands of EUR
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Information on whether the non-major incidents have been recurring (field 4.15) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Information on whether the non-major incidents have been recurring (field 4.15)</mat-label>
+        <textarea 
+          matInput 
+          formControlName="informationOnNonMajorIncidentsRecurring" 
+          placeholder="Please provide information about recurring non-major incidents"
+          rows="3"
+          resize="both">
+        </textarea>
+        <mat-error *ngIf="reportingForm.get('informationOnNonMajorIncidentsRecurring')?.hasError('maxlength')">
+          Maximum 1000 characters allowed
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Occurrence of recurring incidents (field 4.16) -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Date of occurrence of recurring incidents (field 4.16)</mat-label>
+          <input matInput [matDatepicker]="occurrenceOfRecurringIncidentsDatePicker" formControlName="occurrenceOfRecurringIncidentsDate">
+          <mat-datepicker-toggle matSuffix [for]="occurrenceOfRecurringIncidentsDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #occurrenceOfRecurringIncidentsDatePicker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Time of occurrence of recurring incidents (field 4.16)</mat-label>
+          <input matInput type="time" formControlName="occurrenceOfRecurringIncidentsTime">
+        </mat-form-field>
+      </div>
     </form>
   </mat-card-content>
 </mat-card> 
