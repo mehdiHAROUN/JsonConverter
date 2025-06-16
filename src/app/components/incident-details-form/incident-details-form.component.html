@@ -40,16 +40,19 @@
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Classification criteria (field 2.5)</mat-label>
-        <mat-select formControlName="classificationCriteria" multiple>
+        <mat-select formControlName="ClassificationType" multiple>
           <mat-option *ngFor="let option of classificationCriteriaOptions" [value]="option.value">
             {{option.label}}
           </mat-option>
         </mat-select>
+        <mat-error *ngIf="incidentDetailsForm.get('ClassificationType')?.hasError('minItems')">
+          At least one classification criteria must be selected
+        </mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Affected EEA Countries (field 2.6)</mat-label>
-        <mat-select formControlName="affectedEEACountries" multiple>
+        <mat-label>Country Code Materiality Thresholds (field 2.6)</mat-label>
+        <mat-select formControlName="countryCodeMaterialityThresholds" multiple>
           <mat-option *ngFor="let country of eeaCountries" [value]="country.code">
             {{country.name}} ({{country.code}})
           </mat-option>
@@ -58,7 +61,7 @@
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Discovery of the major ICT-related incident (field 2.7)</mat-label>
-        <mat-select formControlName="incidentDiscoverySource">
+        <mat-select formControlName="incidentDiscovery">
           <mat-option *ngFor="let option of incidentDiscoverySourceOptions" [value]="option.value">
             {{option.label}}
           </mat-option>
@@ -67,12 +70,23 @@
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Indication whether the incident originates from a third-party provider or another financial entity (field 2.8)</mat-label>
-        <textarea matInput formControlName="incidentOriginationSource" rows="3" style="resize: vertical;"></textarea>
+        <textarea matInput formControlName="originatesFromThirdPartyProvider" rows="3" style="resize: vertical;"></textarea>
       </mat-form-field>
 
+      <div class="radio-group-field">
+        <label class="radio-label">Activation of business continuity plan, if activated (field 2.9)</label>
+        <mat-radio-group formControlName="isBusinessContinuityActivated" class="radio-options">
+          <mat-radio-button [value]="true">Yes</mat-radio-button>
+          <mat-radio-button [value]="false">No</mat-radio-button>
+        </mat-radio-group>
+      </div>
+
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Other relevant information (field 2.9)</mat-label>
-        <textarea matInput formControlName="otherRelevantInformation" rows="3" style="resize: vertical;"></textarea>
+        <mat-label>Other relevant information (field 2.10)</mat-label>
+        <textarea matInput formControlName="otherInformation" rows="3" style="resize: vertical;"></textarea>
+        <mat-error *ngIf="incidentDetailsForm.get('otherInformation')?.hasError('pattern')">
+          Only alphanumeric characters, spaces, and basic punctuation (-_.,;:()) are allowed
+        </mat-error>
       </mat-form-field>
 
       <div class="button-group">

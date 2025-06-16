@@ -11,6 +11,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatRadioModule } from '@angular/material/radio';
 
 // Custom validator for incidentDuration
 export function incidentDurationValidator(): ValidatorFn {
@@ -19,6 +20,16 @@ export function incidentDurationValidator(): ValidatorFn {
     const value = control.value;
     if (!value) return null;
     return regex.test(value) ? null : { invalidIncidentDuration: true };
+  };
+}
+
+// Custom validator for minimum array items
+export function minItemsValidator(minItems: number): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    if (!control.value || !Array.isArray(control.value)) {
+      return null;
+    }
+    return control.value.length >= minItems ? null : { minItems: { requiredLength: minItems, actualLength: control.value.length } };
   };
 }
 
@@ -108,28 +119,28 @@ export const EEA_COUNTRIES = [
   { code: 'CZ', name: 'Czech Republic' },
   { code: 'DK', name: 'Denmark' },
   { code: 'EE', name: 'Estonia' },
+  { code: 'ES', name: 'Spain' },
   { code: 'FI', name: 'Finland' },
   { code: 'FR', name: 'France' },
   { code: 'DE', name: 'Germany' },
   { code: 'GR', name: 'Greece' },
   { code: 'HU', name: 'Hungary' },
+  { code: 'IS', name: 'Iceland' },
   { code: 'IE', name: 'Ireland' },
   { code: 'IT', name: 'Italy' },
-  { code: 'LV', name: 'Latvia' },
+  { code: 'LI', name: 'Liechtenstein' },
   { code: 'LT', name: 'Lithuania' },
   { code: 'LU', name: 'Luxembourg' },
+  { code: 'LV', name: 'Latvia' },
   { code: 'MT', name: 'Malta' },
   { code: 'NL', name: 'Netherlands' },
+  { code: 'NO', name: 'Norway' },
   { code: 'PL', name: 'Poland' },
   { code: 'PT', name: 'Portugal' },
   { code: 'RO', name: 'Romania' },
-  { code: 'SK', name: 'Slovakia' },
-  { code: 'SI', name: 'Slovenia' },
-  { code: 'ES', name: 'Spain' },
   { code: 'SE', name: 'Sweden' },
-  { code: 'IS', name: 'Iceland' },
-  { code: 'LI', name: 'Liechtenstein' },
-  { code: 'NO', name: 'Norway' }
+  { code: 'SI', name: 'Slovenia' },
+  { code: 'SK', name: 'Slovakia' }
 ];
 
 export const INCIDENT_DISCOVERY_SOURCE_OPTIONS = [
@@ -161,7 +172,8 @@ export const INCIDENT_DISCOVERY_SOURCE_OPTIONS = [
     MatCardModule,
     MatCheckboxModule,
     MatIconModule,
-    MatDividerModule
+    MatDividerModule,
+    MatRadioModule
   ],
   templateUrl: './incident-details-form.component.html',
   styleUrls: ['./incident-details-form.component.scss'],
@@ -189,7 +201,7 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
 
 
   get classificationTypes(): FormArray {
-    return this.incidentDetailsForm.get('classificationTypes') as FormArray;
+    return this.incidentDetailsForm.get('ClassificationType') as FormArray;
   }
 
   // ControlValueAccessor implementation
@@ -221,19 +233,18 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
 
   constructor(private fb: FormBuilder) {
     this.incidentDetailsForm = this.fb.group({
-      financialEntityCode: [''], // 2.1
+      financialEntityCode: ['', Validators.maxLength(32767)], // 2.1
       detectionDate: [null], // 2.2 (date part)
       detectionTime: [null], // 2.2 (time part)
       classificationDate: [null], // 2.3 (date part)
       classificationTime: [null], // 2.3 (time part)
-      incidentOccurrenceDate: [null], // Schema 2.6 (date part) - Note: HTML uses 2.6 for isBusinessContinuityActivated
-      incidentOccurrenceTime: [null], // Schema 2.6 (time part)
-      incidentDescription: ['', Validators.maxLength(1000)], // 2.4
-      classificationCriteria: [[]], // 2.5 - multiple choice field
-      affectedEEACountries: [[]], // 2.6
-      incidentDiscoverySource: [''], // 2.7
-      incidentOriginationSource: [''], // 2.8
-      otherRelevantInformation: [''], // 2.9
+      incidentDescription: ['', Validators.maxLength(32767)], // 2.4
+      ClassificationType: [[], [minItemsValidator(1)]], // 2.5 - multiple choice field with minItems: 1
+      countryCodeMaterialityThresholds: [[]], // 2.6 - array of country codes
+      incidentDiscovery: [''], // 2.7
+      originatesFromThirdPartyProvider: ['', Validators.maxLength(32767)], // 2.8
+      isBusinessContinuityActivated: [false], // 2.9 - boolean field for business continuity plan activation
+      otherInformation: ['', Validators.maxLength(32767)], // 2.10 -
     });
 
     // Disable ictThirdPartyProviderDetails by default
@@ -262,30 +273,27 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
     });
   }
 
-  private combineDateAndTime(date: Date | null, time: string | null): Date | null {
+  private combineDateAndTime(date: Date | null, time: string | null): string | null {
     if (!date || !time) return null;
     const [hours, minutes] = time.split(':').map(Number);
     const combinedDate = new Date(date);
     combinedDate.setHours(hours, minutes);
-    return combinedDate;
+    return combinedDate.toISOString(); // Convert to ISO 8601 string format
   }
 
   private updateFormValue(): void {
     const formValue = this.incidentDetailsForm.value;
     
-    // Combine Detection Date & Time
+    // Combine Detection Date & Time and convert to ISO string
     const detectionDateTime = this.combineDateAndTime(formValue.detectionDate, formValue.detectionTime);
-    // Combine Classification Date & Time
+    // Combine Classification Date & Time and convert to ISO string
     const classificationDateTime = this.combineDateAndTime(formValue.classificationDate, formValue.classificationTime);
-    // Combine Incident Occurrence Date & Time
-    const incidentOccurrenceDateTime = this.combineDateAndTime(formValue.incidentOccurrenceDate, formValue.incidentOccurrenceTime);
 
-    // Update the form value with combined date-times
+    // Update the form value with combined date-times as ISO strings
     const updatedValue = {
       ...formValue,
-      detectionDateTime,
-      classificationDateTime,
-      incidentOccurrenceDateTime
+      detectionDateTime, // Now this will be an ISO 8601 string
+      classificationDateTime // Now this will be an ISO 8601 string
     };
 
     this.onChange(updatedValue);

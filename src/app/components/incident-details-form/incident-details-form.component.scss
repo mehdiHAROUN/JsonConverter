@@ -58,4 +58,21 @@ mat-error, .mat-error {
 .half-width {
   flex: 1 1 0;
   min-width: 0;
+}
+
+.radio-group-field {
+  margin: 16px 0;
+  
+  .radio-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  .radio-options {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+  }
 } 
