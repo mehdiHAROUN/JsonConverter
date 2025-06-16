@@ -221,7 +221,7 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
 
   constructor(private fb: FormBuilder) {
     this.incidentDetailsForm = this.fb.group({
-      incidentReferenceCode: [''], // 2.1
+      financialEntityCode: [''], // 2.1
       detectionDate: [null], // 2.2 (date part)
       detectionTime: [null], // 2.2 (time part)
       classificationDate: [null], // 2.3 (date part)
@@ -426,15 +426,15 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
     const type = this.incidentType;
     const f = this.incidentDetailsForm;
 
-    // incident Reference Code, incidentDescription required for final_report and intermediate_report
+    // financialEntityCode, incidentDescription required for final_report and intermediate_report
     if (type === 'final_report' || type === 'intermediate_report') {
-      f.get('incidentReferenceCode')?.setValidators([Validators.required]);
+      f.get('financialEntityCode')?.setValidators([Validators.required]);
       f.get('incidentDescription')?.setValidators([Validators.required]);
     } else {
-      f.get('incidentReferenceCode')?.clearValidators();
+      f.get('financialEntityCode')?.clearValidators();
       f.get('incidentDescription')?.clearValidators();
     }
-    f.get('incidentReferenceCode')?.updateValueAndValidity({ onlySelf: true });
+    f.get('financialEntityCode')?.updateValueAndValidity({ onlySelf: true });
     f.get('incidentDescription')?.updateValueAndValidity({ onlySelf: true });
 
     // The following are required only for final_report
