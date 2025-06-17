@@ -181,13 +181,13 @@ export class ImpactAssessmentComponent implements OnInit {
 
   constructor(private fb: FormBuilder) {
     this.impactForm = this.fb.group({
-      incidentReferenceCodeProvidedByCompetentAuthority: ['', Validators.maxLength(100)], // field 3.1
+      competentAuthorityCode: ['', Validators.maxLength(32767)], // field 3.1
       occurrenceDate: [null], // field 3.2 (date part)
       occurrenceTime: [null], // field 3.2 (time part)
       recoveryDate: [null], // field 3.3 (date part)
       recoveryTime: [null], // field 3.3 (time part)
-      numberOfClientsAffected: [null, [Validators.min(0), Validators.pattern(/^\d+$/)]], // field 3.4
-      percentageOfClientsAffected: [null, [Validators.min(0), Validators.max(100), percentageValidator()]], // field 3.5
+      number: [null, [Validators.min(0), Validators.pattern(/^\d+$/)]], // field 3.4 (renamed from numberOfClientsAffected)
+      percentage: [null, [Validators.min(0), Validators.max(100), Validators.pattern(/^\d+$/)]], // field 3.5 (renamed from percentageOfClientsAffected, changed to integer)
       numberOfFinancialCounterpartsAffected: [null, [Validators.min(0), Validators.pattern(/^\d+$/)]], // field 3.6
       percentageOfFinancialCounterpartsAffected: [null, [Validators.min(0), Validators.max(100), percentageValidator()]], // field 3.7
       impactOnRelevantClientsOrFinancialCounterparts: [null], // field 3.8
@@ -221,12 +221,12 @@ export class ImpactAssessmentComponent implements OnInit {
     });
 
     // Set up value transformation for percentage fields
-    this.impactForm.get('percentageOfClientsAffected')?.valueChanges.subscribe(value => {
+    this.impactForm.get('percentage')?.valueChanges.subscribe(value => {
       if (value !== null && value !== '') {
-        // Round to 1 decimal place (half-up)
-        const roundedValue = Math.round(parseFloat(value) * 10) / 10;
-        if (roundedValue !== parseFloat(value)) {
-          this.impactForm.get('percentageOfClientsAffected')?.setValue(roundedValue, { emitEvent: false });
+        // Ensure integer value
+        const intValue = Math.round(parseFloat(value));
+        if (intValue !== parseFloat(value)) {
+          this.impactForm.get('percentage')?.setValue(intValue, { emitEvent: false });
         }
       }
     });
@@ -252,6 +252,82 @@ export class ImpactAssessmentComponent implements OnInit {
         }
       }
     });
+
+    // Set up computed incidentOccurrenceDateTime field
+    this.impactForm.get('occurrenceDate')?.valueChanges.subscribe(() => {
+      this.updateIncidentOccurrenceDateTime();
+    });
+
+    this.impactForm.get('occurrenceTime')?.valueChanges.subscribe(() => {
+      this.updateIncidentOccurrenceDateTime();
+    });
+
+    // Set up computed serviceRestorationDateTime field
+    this.impactForm.get('recoveryDate')?.valueChanges.subscribe(() => {
+      this.updateServiceRestorationDateTime();
+    });
+
+    this.impactForm.get('recoveryTime')?.valueChanges.subscribe(() => {
+      this.updateServiceRestorationDateTime();
+    });
+  }
+
+  private combineDateAndTime(date: Date | null, time: string | null): string | null {
+    if (!date || !time) return null;
+    const [hours, minutes] = time.split(':').map(Number);
+    const combinedDate = new Date(date);
+    combinedDate.setHours(hours, minutes);
+    return combinedDate.toISOString();
+  }
+
+  private updateIncidentOccurrenceDateTime(): void {
+    const occurrenceDate = this.impactForm.get('occurrenceDate')?.value;
+    const occurrenceTime = this.impactForm.get('occurrenceTime')?.value;
+    
+    const incidentOccurrenceDateTime = this.combineDateAndTime(occurrenceDate, occurrenceTime);
+    
+    // Update the form value with the combined date-time
+    const currentValue = this.impactForm.value;
+    const updatedValue = {
+      ...currentValue,
+      incidentOccurrenceDateTime
+    };
+    
+    // Emit the updated value if needed
+    // Note: This is a computed field, so we don't add it to the form controls
+    // but we can access it through a getter or method
+  }
+
+  private updateServiceRestorationDateTime(): void {
+    const recoveryDate = this.impactForm.get('recoveryDate')?.value;
+    const recoveryTime = this.impactForm.get('recoveryTime')?.value;
+    
+    const serviceRestorationDateTime = this.combineDateAndTime(recoveryDate, recoveryTime);
+    
+    // Update the form value with the combined date-time
+    const currentValue = this.impactForm.value;
+    const updatedValue = {
+      ...currentValue,
+      serviceRestorationDateTime
+    };
+    
+    // Emit the updated value if needed
+    // Note: This is a computed field, so we don't add it to the form controls
+    // but we can access it through a getter or method
+  }
+
+  // Getter for the computed incidentOccurrenceDateTime
+  get incidentOccurrenceDateTime(): string | null {
+    const occurrenceDate = this.impactForm.get('occurrenceDate')?.value;
+    const occurrenceTime = this.impactForm.get('occurrenceTime')?.value;
+    return this.combineDateAndTime(occurrenceDate, occurrenceTime);
+  }
+
+  // Getter for the computed serviceRestorationDateTime
+  get serviceRestorationDateTime(): string | null {
+    const recoveryDate = this.impactForm.get('recoveryDate')?.value;
+    const recoveryTime = this.impactForm.get('recoveryTime')?.value;
+    return this.combineDateAndTime(recoveryDate, recoveryTime);
   }
 
   ngOnInit(): void {
