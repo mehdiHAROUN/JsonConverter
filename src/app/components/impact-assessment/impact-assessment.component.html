@@ -232,7 +232,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Type of the major ICT-related incident (field 3.23)</mat-label>
-          <mat-select formControlName="incidentClassification" multiple>
+          <mat-select formControlName="IncidentType" multiple>
             <mat-option *ngFor="let option of typeOfMajorICTIncidentOptions" [value]="option.value">
               {{option.label}}
             </mat-option>
@@ -258,7 +258,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Other types of techniques (field 3.26)</mat-label>
-          <textarea matInput formControlName="otherTypesOfTechniques" rows="3" style="resize: vertical;"></textarea>
+          <textarea matInput formControlName="otherThreatTechniques" rows="3" style="resize: vertical;"></textarea>
           <mat-error *ngIf="impactForm.get('otherTypesOfTechniques')?.hasError('maxlength')">
             Description cannot exceed 1000 characters.
           </mat-error>
@@ -266,7 +266,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Information about affected functional areas and business processes (field 3.27)</mat-label>
-          <textarea matInput formControlName="informationAboutAffectedFunctionalAreas" rows="3" style="resize: vertical;"></textarea>
+          <textarea matInput formControlName="affectedFunctionalAreas" rows="3" style="resize: vertical;"></textarea>
           <mat-error *ngIf="impactForm.get('informationAboutAffectedFunctionalAreas')?.hasError('maxlength')">
             Information cannot exceed 1000 characters.
           </mat-error>
@@ -274,15 +274,16 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Affected infrastructure components supporting business processes (field 3.28)</mat-label>
-          <textarea matInput formControlName="affectedInfrastructureComponents" rows="3" style="resize: vertical;"></textarea>
-          <mat-error *ngIf="impactForm.get('affectedInfrastructureComponents')?.hasError('maxlength')">
-            Description cannot exceed 1000 characters.
-          </mat-error>
+          <mat-select formControlName="isAffectedInfrastructureComponents">
+            <mat-option value="yes">Yes</mat-option>
+            <mat-option value="no">No</mat-option>
+            <mat-option value="information_not_available">Information not available</mat-option>
+          </mat-select>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Information about affected infrastructure components supporting business processes (field 3.29)</mat-label>
-          <textarea matInput formControlName="informationAboutAffectedInfrastructureComponents" rows="3" style="resize: vertical;"></textarea>
+          <textarea matInput formControlName="affectedInfrastructureComponents" rows="3" style="resize: vertical;"></textarea>
           <mat-error *ngIf="impactForm.get('informationAboutAffectedInfrastructureComponents')?.hasError('maxlength')">
             Information cannot exceed 1000 characters.
           </mat-error>
@@ -290,7 +291,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Impact on the financial interest of clients (field 3.30)</mat-label>
-          <mat-select formControlName="impactOnFinancialInterestOfClients">
+          <mat-select formControlName="isImpactOnFinancialInterest">
             <mat-option *ngFor="let option of impactOnFinancialInterestOfClientsOptions" [value]="option.value">
               {{option.label}}
             </mat-option>
@@ -315,7 +316,7 @@
           <mat-label>Specification of 'other' authorities (field 3.32)</mat-label>
           <textarea 
             matInput 
-            formControlName="specificationOfOtherAuthorities" 
+            formControlName="reportingToOtherAuthoritiesOther" 
             placeholder="Please specify other authorities"
             rows="3"
             resize="both">
@@ -328,11 +329,11 @@
         <!-- Temporary actions/measures taken or planned to be taken to recover from the incident (field 3.33) -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Temporary actions/measures taken or planned to be taken to recover from the incident (field 3.33)</mat-label>
-          <mat-select formControlName="temporaryActionsMeasuresTaken">
-            <mat-option value="yes">Yes</mat-option>
-            <mat-option value="no">No</mat-option>
+          <mat-select formControlName="isTemporaryActionsMeasuresForRecovery">
+            <mat-option [value]="true">Yes</mat-option>
+            <mat-option [value]="false">No</mat-option>
           </mat-select>
-          <mat-error *ngIf="impactForm.get('temporaryActionsMeasuresTaken')?.hasError('required')">
+          <mat-error *ngIf="impactForm.get('isTemporaryActionsMeasuresForRecovery')?.hasError('required')">
             This field is required
           </mat-error>
         </mat-form-field>
@@ -342,7 +343,7 @@
           <mat-label>Description of any temporary actions and measures taken or planned to be taken to recover from the incident (field 3.34)</mat-label>
           <textarea 
             matInput 
-            formControlName="descriptionOfTemporaryActionsMeasures" 
+            formControlName="descriptionOfTemporaryActionsMeasuresForRecovery" 
             placeholder="Please describe any temporary actions and measures"
             rows="3"
             resize="both">

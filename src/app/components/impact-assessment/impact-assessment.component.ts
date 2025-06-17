@@ -150,9 +150,9 @@ export class ImpactAssessmentComponent implements OnInit {
 
   // Options for Threats and techniques used by the threat actor (field 3.25)
   threatsAndTechniquesUsedByThreatActorOptions = [
-    { value: 'Social engineering (including phishing)', label: 'Social engineering (including phishing)' },
-    { value: 'ddos', label: 'ddos' },
-    { value: 'Identity theft', label: 'Identity theft' },
+    { value: 'social_engineering_including_phishing', label: 'Social engineering (including phishing)' },
+    { value: 'ddos', label: '(D)DoS' },
+    { value: 'identity_theft', label: 'Identity theft' },
     { value: 'data_encryption_for_impact_including_ransomware', label: 'Data encryption for impact, including ransomware' },
     { value: 'resource_hijacking', label: 'Resource hijacking' },
     { value: 'data_exfiltration_and_manipulation_including_identity_theft', label: 'Data exfiltration and manipulation, including identity theft' },
@@ -205,19 +205,19 @@ export class ImpactAssessmentComponent implements OnInit {
       dataLosseMaterialityThresholds: [[]], // field 3.20
       dataLossesDescription: ['', Validators.maxLength(32767)], // field 3.21
       criticalServicesAffected: ['', Validators.maxLength(32767)], // field 3.22
-      incidentClassification: [[]], // field 3.23
+      IncidentType: [[]], // field 3.23
       otherIncidentClassification: ['', Validators.maxLength(32767)], // field 3.24
       threatTechniques: [[]], // field 3.25
-      otherTypesOfTechniques: ['', Validators.maxLength(1000)], // field 3.26
-      informationAboutAffectedFunctionalAreas: ['', Validators.maxLength(1000)], // field 3.27
-      affectedInfrastructureComponents: ['', Validators.maxLength(1000)], // field 3.28
-      informationAboutAffectedInfrastructureComponents: ['', Validators.maxLength(1000)], // field 3.29
-      impactOnFinancialInterestOfClients: [''], // field 3.30
+      otherThreatTechniques: ['', Validators.maxLength(32767)], // field 3.26
+      affectedFunctionalAreas: ['', Validators.maxLength(32767)], // field 3.27
+      isAffectedInfrastructureComponents: [''], // field 3.28
+      affectedInfrastructureComponents: ['', Validators.maxLength(32767)], // field 3.29
+      isImpactOnFinancialInterest: [''], // field 3.30
       reportingToOtherAuthorities: [[]], // field 3.31
-      specificationOfOtherAuthorities: ['', Validators.maxLength(1000)], // field 3.32
-      temporaryActionsMeasuresTaken: [null], // field 3.33
-      descriptionOfTemporaryActionsMeasures: ['', Validators.maxLength(1000)], // field 3.34
-      indicatorsOfCompromise: ['', Validators.maxLength(1000)] // field 3.35
+      reportingToOtherAuthoritiesOther: ['', Validators.maxLength(32767)], // field 3.32
+      isTemporaryActionsMeasuresForRecovery: [null], // field 3.33
+      descriptionOfTemporaryActionsMeasuresForRecovery: ['', Validators.maxLength(32767)], // field 3.34
+      indicatorsOfCompromise: ['', Validators.maxLength(32767)] // field 3.35
     });
 
     // Set up value transformation for percentage fields
