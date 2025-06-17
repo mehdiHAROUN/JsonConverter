@@ -125,9 +125,9 @@ export class ImpactAssessmentComponent implements OnInit {
     { value: 'clients', label: 'Clients' },
     { value: 'financial_counterparts', label: 'Financial counterparts' },
     { value: 'branch_of_financial_entity', label: 'Branch of the financial entity' },
-    { value: 'financial_entities_within_group', label: 'Financial entities within the group carrying out activities in the respective Member State' },
-    { value: 'financial_market_infrastructure', label: 'Financial market infrastructure' },
-    { value: 'third_party_providers', label: 'Third-party providers that may be common to other financial entities' }
+    { value: 'Financial entities within the group carrying out activities in the respective Member State', label: 'Financial entities within the group carrying out activities in the respective Member State' },
+    { value: 'Financial market infrastructure', label: 'Financial market infrastructure' },
+    { value: 'Third-party providers that may be common to other financial entities', label: 'Third-party providers that may be common to other financial entities' }
   ];
 
   // Options for Materiality thresholds for data losses (field 3.20)
@@ -150,12 +150,12 @@ export class ImpactAssessmentComponent implements OnInit {
 
   // Options for Threats and techniques used by the threat actor (field 3.25)
   threatsAndTechniquesUsedByThreatActorOptions = [
-    { value: 'social_engineering_phishing', label: 'Social engineering (including phishing)' },
-    { value: 'ddos', label: '(D)DoS' },
-    { value: 'identity_theft', label: 'Identity theft' },
-    { value: 'data_encryption_ransomware', label: 'Data encryption for impact, including ransomware' },
+    { value: 'Social engineering (including phishing)', label: 'Social engineering (including phishing)' },
+    { value: 'ddos', label: 'ddos' },
+    { value: 'Identity theft', label: 'Identity theft' },
+    { value: 'data_encryption_for_impact_including_ransomware', label: 'Data encryption for impact, including ransomware' },
     { value: 'resource_hijacking', label: 'Resource hijacking' },
-    { value: 'data_exfiltration_manipulation', label: 'Data exfiltration and manipulation, including identity theft' },
+    { value: 'data_exfiltration_and_manipulation_including_identity_theft', label: 'Data exfiltration and manipulation, including identity theft' },
     { value: 'data_destruction', label: 'Data destruction' },
     { value: 'defacement', label: 'Defacement' },
     { value: 'supply_chain_attack', label: 'Supply-chain attack' },
@@ -200,14 +200,14 @@ export class ImpactAssessmentComponent implements OnInit {
       incidentDuration: ['', [durationFormatValidator()]], // field 3.15
       serviceDowntime: ['', [durationFormatValidator()]], // field 3.16
       informationDurationServiceDowntimeActualOrEstimate: [''], // field 3.17
-      typesOfImpactInMemberStates: [[]], // field 3.18
-      descriptionOfImpactInOtherMemberStates: ['', Validators.maxLength(1000)], // field 3.19
-      materialityThresholdsDataLosses: [[]], // field 3.20
-      descriptionOfDataLosses: ['', Validators.maxLength(1000)], // field 3.21
-      classificationCriterionCriticalServicesAffected: ['', Validators.maxLength(1000)], // field 3.22
-      typeOfMajorICTIncident: [[]], // field 3.23
-      otherTypesOfIncidents: ['', Validators.maxLength(1000)], // field 3.24
-      threatsAndTechniquesUsedByThreatActor: [[]], // field 3.25
+      memberStatesImpactType: [[]], // field 3.18
+      memberStatesImpactTypeDescription: ['', Validators.maxLength(32767)], // field 3.19
+      dataLosseMaterialityThresholds: [[]], // field 3.20
+      dataLossesDescription: ['', Validators.maxLength(32767)], // field 3.21
+      criticalServicesAffected: ['', Validators.maxLength(32767)], // field 3.22
+      incidentClassification: [[]], // field 3.23
+      otherIncidentClassification: ['', Validators.maxLength(32767)], // field 3.24
+      threatTechniques: [[]], // field 3.25
       otherTypesOfTechniques: ['', Validators.maxLength(1000)], // field 3.26
       informationAboutAffectedFunctionalAreas: ['', Validators.maxLength(1000)], // field 3.27
       affectedInfrastructureComponents: ['', Validators.maxLength(1000)], // field 3.28

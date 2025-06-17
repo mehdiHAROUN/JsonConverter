@@ -139,7 +139,7 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
         LEI: [''],
         entityType: ['SUBMITTING_ENTITY']
       }, { validators: IncidentReportFormComponent.codeOrLeiRequiredValidator }),
-      affectedEntities: this.fb.array([
+      affectedEntity: this.fb.array([
         this.fb.group({
           name: [''],
           LEI: [''],
@@ -271,12 +271,12 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
     });
   }
 
-  get affectedEntities(): FormArray {
-    return this.incidentForm.get('affectedEntities') as FormArray;
+  get affectedEntity(): FormArray {
+    return this.incidentForm.get('affectedEntity') as FormArray;
   }
 
   addAffectedEntity(): void {
-    this.affectedEntities.push(this.fb.group({
+    this.affectedEntity.push(this.fb.group({
       name: [''],
       LEI: [''],
       affectedEntityType: [[]],

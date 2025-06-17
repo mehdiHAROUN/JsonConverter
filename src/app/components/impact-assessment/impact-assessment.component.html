@@ -190,7 +190,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Types of impact in the Member States (field 3.18)</mat-label>
-          <mat-select formControlName="typesOfImpactInMemberStates" multiple>
+          <mat-select formControlName="memberStatesImpactType" multiple>
             <mat-option *ngFor="let option of typesOfImpactInMemberStatesOptions" [value]="option.value">
               {{option.label}}
             </mat-option>
@@ -199,7 +199,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Description of how the major ICT-related incident has an impact in other Member States (field 3.19)</mat-label>
-          <textarea matInput formControlName="descriptionOfImpactInOtherMemberStates" rows="3" style="resize: vertical;"></textarea>
+          <textarea matInput formControlName="memberStatesImpactTypeDescription" rows="3" style="resize: vertical;"></textarea>
           <mat-error *ngIf="impactForm.get('descriptionOfImpactInOtherMemberStates')?.hasError('maxlength')">
             Description cannot exceed 1000 characters.
           </mat-error>
@@ -207,7 +207,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Materiality thresholds for the classification criterion 'Data losses' (field 3.20)</mat-label>
-          <mat-select formControlName="materialityThresholdsDataLosses" multiple>
+          <mat-select formControlName="dataLosseMaterialityThresholds" multiple>
             <mat-option *ngFor="let option of materialityThresholdsDataLossesOptions" [value]="option.value">
               {{option.label}}
             </mat-option>
@@ -216,7 +216,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Description of the data losses (field 3.21)</mat-label>
-          <textarea matInput formControlName="descriptionOfDataLosses" rows="3" style="resize: vertical;"></textarea>
+          <textarea matInput formControlName="dataLossesDescription" rows="3" style="resize: vertical;"></textarea>
           <mat-error *ngIf="impactForm.get('descriptionOfDataLosses')?.hasError('maxlength')">
             Description cannot exceed 1000 characters.
           </mat-error>
@@ -224,7 +224,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Classification criterion 'Critical services affected' (field 3.22)</mat-label>
-          <textarea matInput formControlName="classificationCriterionCriticalServicesAffected" rows="3" style="resize: vertical;"></textarea>
+          <textarea matInput formControlName="criticalServicesAffected" rows="3" style="resize: vertical;"></textarea>
           <mat-error *ngIf="impactForm.get('classificationCriterionCriticalServicesAffected')?.hasError('maxlength')">
             Description cannot exceed 1000 characters.
           </mat-error>
@@ -232,7 +232,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Type of the major ICT-related incident (field 3.23)</mat-label>
-          <mat-select formControlName="typeOfMajorICTIncident" multiple>
+          <mat-select formControlName="incidentClassification" multiple>
             <mat-option *ngFor="let option of typeOfMajorICTIncidentOptions" [value]="option.value">
               {{option.label}}
             </mat-option>
@@ -241,7 +241,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Other types of incidents (field 3.24)</mat-label>
-          <textarea matInput formControlName="otherTypesOfIncidents" rows="3" style="resize: vertical;"></textarea>
+          <textarea matInput formControlName="otherIncidentClassification" rows="3" style="resize: vertical;"></textarea>
           <mat-error *ngIf="impactForm.get('otherTypesOfIncidents')?.hasError('maxlength')">
             Description cannot exceed 1000 characters.
           </mat-error>
@@ -249,7 +249,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Threats and techniques used by the threat actor (field 3.25)</mat-label>
-          <mat-select formControlName="threatsAndTechniquesUsedByThreatActor" multiple>
+          <mat-select formControlName="threatTechniques" multiple>
             <mat-option *ngFor="let option of threatsAndTechniquesUsedByThreatActorOptions" [value]="option.value">
               {{option.label}}
             </mat-option>

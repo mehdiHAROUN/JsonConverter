@@ -57,8 +57,8 @@
           <!-- Affected Entities Card -->
           <mat-card class="entity-card">
             <mat-card-title>Affected Entities</mat-card-title>
-            <div formArrayName="affectedEntities">
-              <div *ngFor="let entity of affectedEntities.controls; let i = index" [formGroupName]="i" class="affected-entity-group">
+            <div formArrayName="affectedEntity">
+              <div *ngFor="let entity of affectedEntity.controls; let i = index" [formGroupName]="i" class="affected-entity-group">
                 <div class="entity-fields">
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Name (field 1.5)</mat-label>
