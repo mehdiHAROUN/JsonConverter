@@ -46,6 +46,9 @@
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>LEI (field 1.3b)</mat-label>
                 <input matInput formControlName="LEI">
+                <mat-error *ngIf="incidentForm.get('submittingEntity.LEI')?.hasError('pattern') && (incidentForm.get('submittingEntity.LEI')?.touched || formSubmitted)">
+                  LEI must be 20 characters: 18 alphanumeric characters followed by 2 digits
+                </mat-error>
               </mat-form-field>
               <input type="hidden" formControlName="entityType">
               <mat-error *ngIf="incidentForm.get('submittingEntity')?.hasError('codeOrLeiRequired') && (incidentForm.get('submittingEntity.code')?.touched || incidentForm.get('submittingEntity.LEI')?.touched || formSubmitted)">
@@ -67,33 +70,16 @@
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>LEI (field 1.6)</mat-label>
                     <input matInput formControlName="LEI">
+                    <mat-error *ngIf="entity.get('LEI')?.hasError('pattern') && entity.get('LEI')?.touched">
+                      LEI must be 20 characters: 18 alphanumeric characters followed by 2 digits
+                    </mat-error>
                   </mat-form-field>
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Entity Type (field 1.4)</mat-label>
                     <mat-select formControlName="affectedEntityType" multiple>
-                      <mat-option value="credit_institution">Credit Institution</mat-option>
-                      <mat-option value="payment_institution">Payment Institution</mat-option>
-                      <mat-option value="exempted_payment_institution">Exempted Payment Institution</mat-option>
-                      <mat-option value="account_information_service_provider">Account Information Service Provider</mat-option>
-                      <mat-option value="electronic_money_institution">Electronic Money Institution</mat-option>
-                      <mat-option value="exempted_electronic_money_institution">Exempted Electronic Money Institution</mat-option>
-                      <mat-option value="investment_firm">Investment Firm</mat-option>
-                      <mat-option value="crypto-asset_service_provider">Crypto-Asset Service Provider</mat-option>
-                      <mat-option value="issuer_of_asset-referenced_tokens">Issuer of Asset-Referenced Tokens</mat-option>
-                      <mat-option value="central_securities_depository">Central Securities Depository</mat-option>
-                      <mat-option value="central_counterparty">Central Counterparty</mat-option>
-                      <mat-option value="trading_venue">Trading Venue</mat-option>
-                      <mat-option value="trade_repository">Trade Repository</mat-option>
-                      <mat-option value="manager_of_alternative_investment_fund">Manager of Alternative Investment Fund</mat-option>
-                      <mat-option value="management_company">Management Company</mat-option>
-                      <mat-option value="data_reporting_service_provider">Data Reporting Service Provider</mat-option>
-                      <mat-option value="insurance_and_reinsurance_undertaking">Insurance and Reinsurance Undertaking</mat-option>
-                      <mat-option value="insurance_intermediary_reinsurance_intermediary_and_ancillary_insurance_intermediary">Insurance Intermediary, Reinsurance Intermediary and Ancillary Insurance Intermediary</mat-option>
-                      <mat-option value="institution_for_occupational_retirement_provision">Institution for Occupational Retirement Provision</mat-option>
-                      <mat-option value="credit_rating_agency">Credit Rating Agency</mat-option>  
-                      <mat-option value="administrator_of_critical_benchmarks">Administrator of Critical Benchmarks</mat-option>
-                      <mat-option value="crowdfunding_service_provider">Crowdfunding Service Provider</mat-option>
-                      <mat-option value="securitisation_repository">Securitisation Repository</mat-option>
+                      <mat-option *ngFor="let option of affectedEntityTypeOptions" [value]="option.value">
+                        {{ option.label }}
+                      </mat-option>
                     </mat-select>
                   </mat-form-field>
                   <input type="hidden" formControlName="entityType">
@@ -169,6 +155,12 @@
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>LEI (field 1.14)</mat-label>
                 <input matInput formControlName="LEI">
+                <mat-error *ngIf="incidentForm.get('ultimateParentUndertaking.LEI')?.hasError('required') && (incidentForm.get('ultimateParentUndertaking.LEI')?.touched || formSubmitted)">
+                  LEI is required
+                </mat-error>
+                <mat-error *ngIf="incidentForm.get('ultimateParentUndertaking.LEI')?.hasError('pattern') && (incidentForm.get('ultimateParentUndertaking.LEI')?.touched || formSubmitted)">
+                  LEI must be 20 characters: 18 alphanumeric characters followed by 2 digits
+                </mat-error>
               </mat-form-field>
               <input type="hidden" formControlName="entityType">
               <mat-error *ngIf="incidentForm.get('ultimateParentUndertaking')?.hasError('codeOrLeiRequired') && (incidentForm.get('ultimateParentUndertaking.LEI')?.touched || formSubmitted)">
