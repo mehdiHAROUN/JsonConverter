@@ -157,6 +157,16 @@ export const INCIDENT_DISCOVERY_SOURCE_OPTIONS = [
   { value: 'other', label: 'Other' }
 ];
 
+export enum ClassificationCriterion {
+  CLIENTS_FINANCIAL_COUNTERPARTS_AND_TRANSACTIONS_AFFECTED = 'clients_financial_counterparts_and_transactions_affected',
+  GEOGRAPHICAL_SPREAD = 'geographical_spread',
+  DATA_LOSSES = 'data_losses',
+  CRITICAL_SERVICES_AFFECTED = 'critical_services_affected',
+  ECONOMIC_IMPACT = 'economic_impact',
+  REPUTATIONAL_IMPACT = 'reputational_impact',
+  DURATION_AND_SERVICE_DOWNTIME = 'duration_and_service_downtime'
+}
+
 @Component({
   selector: 'app-incident-details-form',
   standalone: true,
@@ -198,11 +208,8 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
   classificationCriteriaOptions = CLASSIFICATION_CRITERIA_OPTIONS;
   eeaCountries = EEA_COUNTRIES;
   incidentDiscoverySourceOptions = INCIDENT_DISCOVERY_SOURCE_OPTIONS;
-
-
-  get classificationTypes(): FormArray {
-    return this.incidentDetailsForm.get('ClassificationType') as FormArray;
-  }
+  classificationCriterionOptions: { value: string; label: string }[] = [];
+  ClassificationCriterion = ClassificationCriterion;
 
   // ControlValueAccessor implementation
   onChange: any = () => {};
@@ -232,6 +239,12 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
   }
 
   constructor(private fb: FormBuilder) {
+    // Initialize classification criterion options
+    this.classificationCriterionOptions = Object.values(ClassificationCriterion).map(value => ({
+      value: value,
+      label: this.formatClassificationCriterionLabel(value)
+    }));
+
     this.incidentDetailsForm = this.fb.group({
       financialEntityCode: ['', Validators.maxLength(32767)], // 2.1
       detectionDate: [null], // 2.2 (date part)
@@ -239,7 +252,7 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
       classificationDate: [null], // 2.3 (date part)
       classificationTime: [null], // 2.3 (time part)
       incidentDescription: ['', Validators.maxLength(32767)], // 2.4
-      ClassificationType: [[], [minItemsValidator(1)]], // 2.5 - multiple choice field with minItems: 1
+      classificationCriterion: [''], // 2.5 - single choice field
       countryCodeMaterialityThresholds: [[]], // 2.6 - array of country codes
       incidentDiscovery: [''], // 2.7
       originatesFromThirdPartyProvider: ['', Validators.maxLength(32767)], // 2.8
@@ -304,95 +317,6 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
       this.updateFormValue();
     });
   }
-
-  removeClassificationType(index: number): void {
-    this.classificationTypes.removeAt(index);
-  }
-
-  updateClassificationTypeValidators(): void {
-    this.classificationTypes.controls.forEach((group: AbstractControl) => {
-      this.updateSingleClassificationTypeValidators(group as FormGroup);
-    });
-  }
-
-  private updateSingleClassificationTypeValidators(group: FormGroup): void {
-    const incidentClassificationValue = group.get('incidentClassification')?.value;
-    const otherIncidentClassificationControl = group.get('otherIncidentClassification');
-
-    if (incidentClassificationValue === 'other') {
-      otherIncidentClassificationControl?.enable();
-      otherIncidentClassificationControl?.setValidators(Validators.required);
-    } else {
-      otherIncidentClassificationControl?.disable();
-      otherIncidentClassificationControl?.clearValidators();
-      otherIncidentClassificationControl?.reset();
-    }
-    otherIncidentClassificationControl?.updateValueAndValidity({ emitEvent: false });
-
-
-    const criterion = group.get('criterion')?.value;
-    // Clear all conditional validators and disable/reset fields first
-    const fieldsToManage = [
-      'countryCodeMaterialityThresholds', 'memberStatesImpactType', 'memberStatesImpactTypeDescription',
-      'dataLosseMaterialityThresholds', 'dataLossesDescription',
-      'reputationalImpactType', 'reputationalImpactDescription',
-      'economicImpactMaterialityThreshold'
-    ];
-
-    fieldsToManage.forEach(fieldName => {
-      const control = group.get(fieldName);
-      control?.clearValidators();
-      control?.disable(); // Disable first
-      control?.reset(); // Reset to clear previous values
-    });
-    
-    // Enable and set validators based on criterion
-    if (criterion === 'geographical_spread') {
-      group.get('countryCodeMaterialityThresholds')?.enable();
-      group.get('countryCodeMaterialityThresholds')?.setValidators([Validators.required, Validators.minLength(1)]);
-      group.get('memberStatesImpactType')?.enable();
-      group.get('memberStatesImpactType')?.setValidators([Validators.required]);
-      // memberStatesImpactTypeDescription is conditional on memberStatesImpactType
-      const msImpactType = group.get('memberStatesImpactType')?.value;
-      if (msImpactType === 'other' && criterion === 'geographical_spread') { // Assuming 'other' is a possible value
-        group.get('memberStatesImpactTypeDescription')?.enable();
-        group.get('memberStatesImpactTypeDescription')?.setValidators([Validators.required, Validators.maxLength(1000)]);
-      }
-    } else if (criterion === 'data_losses') {
-      group.get('dataLosseMaterialityThresholds')?.enable();
-      group.get('dataLosseMaterialityThresholds')?.setValidators([Validators.required, Validators.minLength(1)]);
-      group.get('dataLossesDescription')?.enable();
-      group.get('dataLossesDescription')?.setValidators([Validators.required, Validators.maxLength(1000)]);
-    } else if (criterion === 'reputational_impact') {
-      group.get('reputationalImpactType')?.enable();
-      group.get('reputationalImpactType')?.setValidators([Validators.required, Validators.minLength(1)]);
-      group.get('reputationalImpactDescription')?.enable();
-      group.get('reputationalImpactDescription')?.setValidators([Validators.required, Validators.maxLength(1000)]);
-    } else if (criterion === 'economic_impact') {
-      group.get('economicImpactMaterialityThreshold')?.enable();
-      group.get('economicImpactMaterialityThreshold')?.setValidators([Validators.required]);
-    }
-    // No additional fields for 'duration_and_service_downtime' or 'number_of_affected_users' based on current understanding
-
-    fieldsToManage.forEach(fieldName => {
-      group.get(fieldName)?.updateValueAndValidity({ emitEvent: false });
-    });
-
-    // Conditional for memberStatesImpactTypeDescription
-    group.get('memberStatesImpactType')?.valueChanges.subscribe(value => {
-        const descControl = group.get('memberStatesImpactTypeDescription');
-        if (value === 'other' && criterion === 'geographical_spread') { // Check criterion again
-            descControl?.enable();
-            descControl?.setValidators([Validators.required, Validators.maxLength(1000)]);
-        } else {
-            descControl?.disable();
-            descControl?.clearValidators();
-            descControl?.reset();
-        }
-        descControl?.updateValueAndValidity({ emitEvent: false });
-    });
-  }
-
 
   updateIncidentTypeValidators(): void {
     const group = this.incidentDetailsForm.get('incidentType') as FormGroup;
@@ -474,5 +398,11 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
     const detailed = this.incidentDetailsForm.get('rootCausesDetailedClassification')?.value || [];
     const additional = this.incidentDetailsForm.get('rootCausesAdditionalClassification')?.value || [];
     return [...hl, ...detailed, ...additional].includes('Other');
+  }
+
+  formatClassificationCriterionLabel(value: string): string {
+    return value
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, l => l.toUpperCase());
   }
 }

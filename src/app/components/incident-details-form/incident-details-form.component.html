@@ -40,14 +40,11 @@
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Classification criteria (field 2.5)</mat-label>
-        <mat-select formControlName="ClassificationType" multiple>
-          <mat-option *ngFor="let option of classificationCriteriaOptions" [value]="option.value">
+        <mat-select formControlName="classificationCriterion">
+          <mat-option *ngFor="let option of classificationCriterionOptions" [value]="option.value">
             {{option.label}}
           </mat-option>
         </mat-select>
-        <mat-error *ngIf="incidentDetailsForm.get('ClassificationType')?.hasError('minItems')">
-          At least one classification criteria must be selected
-        </mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
