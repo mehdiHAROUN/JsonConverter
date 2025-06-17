@@ -4,7 +4,7 @@
       <!-- High-level classification of root causes of the incident (field 4.1) -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>High-level classification of root causes of the incident (field 4.1)</mat-label>
-        <mat-select formControlName="highLevelClassificationRootCauses" multiple>
+        <mat-select formControlName="rootCauseHLClassification" multiple>
           <mat-option *ngFor="let option of highLevelClassificationRootCausesOptions" [value]="option.value">
             {{ option.label }}
           </mat-option>
@@ -17,7 +17,7 @@
       <!-- Detailed classification of root causes of the incident (field 4.2) -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Detailed classification of root causes of the incident (field 4.2)</mat-label>
-        <mat-select formControlName="detailedClassificationRootCauses" multiple>
+        <mat-select formControlName="rootCausesDetailedClassification" multiple>
           <mat-option *ngFor="let option of detailedClassificationRootCausesOptions" [value]="option.value">
             {{ option.label }}
           </mat-option>
@@ -30,7 +30,7 @@
       <!-- Additional classification of root causes of the incident (field 4.3) -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Additional classification of root causes of the incident (field 4.3)</mat-label>
-        <mat-select formControlName="additionalClassificationRootCauses" multiple>
+        <mat-select formControlName="rootCausesAdditionalClassification" multiple>
           <mat-option *ngFor="let option of additionalClassificationRootCausesOptions" [value]="option.value">
             {{ option.label }}
           </mat-option>
@@ -45,7 +45,7 @@
         <mat-label>Other types of root cause types (field 4.4)</mat-label>
         <textarea 
           matInput 
-          formControlName="otherTypesOfRootCauseTypes" 
+          formControlName="rootCausesOther" 
           placeholder="Please specify other types of root causes"
           rows="3"
           resize="both">
@@ -60,7 +60,7 @@
         <mat-label>Information about the root causes of the incident (field 4.5)</mat-label>
         <textarea 
           matInput 
-          formControlName="informationAboutRootCauses" 
+          formControlName="rootCausesInformation" 
           placeholder="Please provide information about the root causes"
           rows="3"
           resize="both">
@@ -75,7 +75,7 @@
         <mat-label>Incident resolution (field 4.6)</mat-label>
         <textarea 
           matInput 
-          formControlName="incidentResolution" 
+          formControlName="incidentResolutionSummary" 
           placeholder="Please provide information about the incident resolution"
           rows="3"
           resize="both">
@@ -98,6 +98,9 @@
           <input matInput type="time" formControlName="incidentRootCauseAddressedTime">
         </mat-form-field>
       </div>
+      
+      <!-- Hidden field for combined date-time -->
+      <input type="hidden" formControlName="rootCauseAddressingDateTime">
 
       <!-- The incident was resolved (field 4.8) -->
       <div class="form-row">
@@ -112,13 +115,16 @@
           <input matInput type="time" formControlName="incidentWasResolvedTime">
         </mat-form-field>
       </div>
+      
+      <!-- Hidden field for combined incident resolution date-time -->
+      <input type="hidden" formControlName="incidentResolutionDateTime">
 
       <!-- Information if the permanent resolution date of the incidents differs from the initially planned implementation date (field 4.9) -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Information if the permanent resolution date of the incidents differs from the initially planned implementation date (field 4.9)</mat-label>
         <textarea 
           matInput 
-          formControlName="informationPermanentResolutionDateDiffers" 
+          formControlName="incidentResolutionVsPlannedImplementation" 
           placeholder="Please provide information about resolution date differences"
           rows="3"
           resize="both">
@@ -148,7 +154,7 @@
         <mat-label>Information relevant for resolution authorities (field 4.11)</mat-label>
         <textarea 
           matInput 
-          formControlName="informationRelevantForResolutionAuthorities" 
+          formControlName="informationRelevantToResolutionAuthorities" 
           placeholder="Please provide information relevant for resolution authorities"
           rows="3"
           resize="both">
@@ -163,7 +169,7 @@
         <mat-label>Materiality threshold for the classification criterion 'Economic impact' (field 4.12)</mat-label>
         <textarea 
           matInput 
-          formControlName="materialityThresholdEconomicImpact" 
+          formControlName="economicImpactMaterialityThreshold" 
           placeholder="Please provide materiality threshold information"
           rows="3"
           resize="both">
@@ -176,11 +182,11 @@
       <!-- Amount of gross direct and indirect costs and losses (field 4.13) -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Amount of gross direct and indirect costs and losses (thousands of EUR) (field 4.13)</mat-label>
-        <input matInput type="number" formControlName="amountOfGrossDirectAndIndirectCosts" placeholder="e.g., 2.5 for 2,500 EUR" step="0.1" min="0">
-        <mat-error *ngIf="reportingForm.get('amountOfGrossDirectAndIndirectCosts')?.hasError('min')">
+        <input matInput type="number" formControlName="grossAmountIndirectDirectCosts" placeholder="e.g., 2.5 for 2,500 EUR" step="0.1" min="0">
+        <mat-error *ngIf="reportingForm.get('grossAmountIndirectDirectCosts')?.hasError('min')">
           Amount must be 0 or greater
         </mat-error>
-        <mat-error *ngIf="reportingForm.get('amountOfGrossDirectAndIndirectCosts')?.hasError('invalidValue')">
+        <mat-error *ngIf="reportingForm.get('grossAmountIndirectDirectCosts')?.hasError('invalidValue')">
           Please enter a valid amount in thousands of EUR
         </mat-error>
       </mat-form-field>
@@ -188,11 +194,11 @@
       <!-- Amount of financial recoveries (field 4.14) -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Amount of financial recoveries (thousands of EUR) (field 4.14)</mat-label>
-        <input matInput type="number" formControlName="amountOfFinancialRecoveries" placeholder="e.g., 1.2 for 1,200 EUR" step="0.1" min="0">
-        <mat-error *ngIf="reportingForm.get('amountOfFinancialRecoveries')?.hasError('min')">
+        <input matInput type="number" formControlName="financialRecoveriesAmount" placeholder="e.g., 1.2 for 1,200 EUR" step="0.1" min="0">
+        <mat-error *ngIf="reportingForm.get('financialRecoveriesAmount')?.hasError('min')">
           Amount must be 0 or greater
         </mat-error>
-        <mat-error *ngIf="reportingForm.get('amountOfFinancialRecoveries')?.hasError('invalidValue')">
+        <mat-error *ngIf="reportingForm.get('financialRecoveriesAmount')?.hasError('invalidValue')">
           Please enter a valid amount in thousands of EUR
         </mat-error>
       </mat-form-field>
@@ -202,7 +208,7 @@
         <mat-label>Information on whether the non-major incidents have been recurring (field 4.15)</mat-label>
         <textarea 
           matInput 
-          formControlName="informationOnNonMajorIncidentsRecurring" 
+          formControlName="recurringNonMajorIncidentsDescription" 
           placeholder="Please provide information about recurring non-major incidents"
           rows="3"
           resize="both">
@@ -225,6 +231,9 @@
           <input matInput type="time" formControlName="occurrenceOfRecurringIncidentsTime">
         </mat-form-field>
       </div>
+      
+      <!-- Hidden field for combined recurring incidents occurrence date-time -->
+      <input type="hidden" formControlName="recurringIncidentsOccurrenceDateTime">
     </form>
   </mat-card-content>
 </mat-card> 
