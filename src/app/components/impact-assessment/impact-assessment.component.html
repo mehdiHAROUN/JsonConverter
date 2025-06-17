@@ -89,9 +89,9 @@
 
         <div class="form-section">
           <label class="field-label">Relevance of clients and financial counterparts' threshold (field 3.8)</label>
-          <mat-radio-group formControlName="impactOnRelevantClientsOrFinancialCounterparts" class="radio-group">
-            <mat-radio-button value="yes" class="radio-button">Yes</mat-radio-button>
-            <mat-radio-button value="no" class="radio-button">No</mat-radio-button>
+          <mat-radio-group formControlName="hasImpactOnRelevantClients" class="radio-group">
+            <mat-radio-button [value]="true" class="radio-button">Yes</mat-radio-button>
+            <mat-radio-button [value]="false" class="radio-button">No</mat-radio-button>
           </mat-radio-group>
         </div>
 
@@ -133,7 +133,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Reported Data Status (field 3.12)</mat-label>
-          <mat-select formControlName="reportedDataStatus" multiple>
+          <mat-select formControlName="numbersActualEstimate" multiple>
             <mat-option *ngFor="let option of reportedDataStatusOptions" [value]="option.value">
               {{option.label}}
             </mat-option>
@@ -142,7 +142,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Reputational impact (field 3.13)</mat-label>
-          <mat-select formControlName="reputationalImpact" multiple>
+          <mat-select formControlName="reputationalImpactType" multiple>
             <mat-option *ngFor="let option of reputationalImpactOptions" [value]="option.value">
               {{option.label}}
             </mat-option>
@@ -151,19 +151,19 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Contextual information about the reputational impact (field 3.14)</mat-label>
-          <textarea matInput formControlName="contextualInformationReputationalImpact" rows="3" style="resize: vertical;"></textarea>
-          <mat-error *ngIf="impactForm.get('contextualInformationReputationalImpact')?.hasError('maxlength')">
+          <textarea matInput formControlName="reputationalImpactDescription" rows="3" style="resize: vertical;"></textarea>
+          <mat-error *ngIf="impactForm.get('reputationalImpactDescription')?.hasError('maxlength')">
             Contextual information cannot exceed 1000 characters.
           </mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Duration of the major ICT-related incident (DD:HH:MM) (field 3.15)</mat-label>
-          <input matInput formControlName="durationOfIncident" placeholder="e.g., 02:15:30">
-          <mat-error *ngIf="impactForm.get('durationOfIncident')?.hasError('invalidDurationFormat')">
+          <input matInput formControlName="incidentDuration" placeholder="e.g., 02:15:30">
+          <mat-error *ngIf="impactForm.get('incidentDuration')?.hasError('invalidDurationFormat')">
             Please enter duration in DD:HH:MM format (e.g., 02:15:30).
           </mat-error>
-          <mat-error *ngIf="impactForm.get('durationOfIncident')?.hasError('invalidDays')">
+          <mat-error *ngIf="impactForm.get('incidentDuration')?.hasError('invalidDays')">
             Days must be between 0 and 99.
           </mat-error>
         </mat-form-field>
@@ -181,7 +181,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>The numbers for duration and service downtime are actual or estimates (field 3.17)</mat-label>
-          <mat-select formControlName="durationAndDowntimeInformationType">
+          <mat-select formControlName="informationDurationServiceDowntimeActualOrEstimate">
             <mat-option *ngFor="let option of durationAndDowntimeInformationTypeOptions" [value]="option.value">
               {{option.label}}
             </mat-option>

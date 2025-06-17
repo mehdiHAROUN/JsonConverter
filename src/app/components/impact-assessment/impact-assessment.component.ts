@@ -58,14 +58,14 @@ function durationFormatValidator(): ValidatorFn {
     if (!control.value) return null;
     
     const value = control.value.toString();
-    // Check DD:HH:MM format
-    const durationRegex = /^(\d{1,2}):([01]\d|2[0-3]):([0-5]\d)$/;
+    // Check DD:HH:MM format with up to 3 digits for days
+    const durationRegex = /^(\d{1,3}):([01]\d|2[0-3]):([0-5]\d)$/;
     if (!durationRegex.test(value)) return { invalidDurationFormat: true };
     
-    // Check if days is reasonable (0-99)
+    // Check if days is reasonable (0-999)
     const parts = value.split(':');
     const days = parseInt(parts[0]);
-    if (days < 0 || days > 99) return { invalidDays: true };
+    if (days < 0 || days > 999) return { invalidDays: true };
     
     return null;
   };
@@ -190,16 +190,16 @@ export class ImpactAssessmentComponent implements OnInit {
       percentage: [null, [Validators.min(0), Validators.max(100), Validators.pattern(/^\d+$/)]], // field 3.5 (renamed from percentageOfClientsAffected, changed to integer)
       numberOfFinancialCounterpartsAffected: [null, [Validators.min(0), Validators.pattern(/^\d+$/)]], // field 3.6
       percentageOfFinancialCounterpartsAffected: [null, [Validators.min(0), Validators.max(100), percentageValidator()]], // field 3.7
-      impactOnRelevantClientsOrFinancialCounterparts: [null], // field 3.8
+      hasImpactOnRelevantClients: [null], // field 3.8
       numberOfAffectedTransactions: [null, [Validators.min(0), Validators.pattern(/^\d+$/)]], // field 3.9
       percentageOfAffectedTransactions: [null, [Validators.min(0), Validators.max(100), percentageValidator()]], // field 3.10
       valueOfAffectedTransactions: [null, [Validators.min(0), transactionValueValidator()]], // field 3.11
       reportedDataStatus: [[]], // field 3.12
       reputationalImpact: [[]], // field 3.13
-      contextualInformationReputationalImpact: ['', Validators.maxLength(1000)], // field 3.14
-      durationOfIncident: ['', [durationFormatValidator()]], // field 3.15
+      reputationalImpactDescription: ['', Validators.maxLength(32767)], // field 3.14
+      incidentDuration: ['', [durationFormatValidator()]], // field 3.15
       serviceDowntime: ['', [durationFormatValidator()]], // field 3.16
-      durationAndDowntimeInformationType: [''], // field 3.17
+      informationDurationServiceDowntimeActualOrEstimate: [''], // field 3.17
       typesOfImpactInMemberStates: [[]], // field 3.18
       descriptionOfImpactInOtherMemberStates: ['', Validators.maxLength(1000)], // field 3.19
       materialityThresholdsDataLosses: [[]], // field 3.20
