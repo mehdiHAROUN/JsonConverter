@@ -252,7 +252,7 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
       classificationDate: [null], // 2.3 (date part)
       classificationTime: [null], // 2.3 (time part)
       incidentDescription: ['', Validators.maxLength(32767)], // 2.4
-      classificationCriterion: [''], // 2.5 - single choice field
+      classificationCriterion: [[]], // 2.5 - now an array for multiple choice
       countryCodeMaterialityThresholds: [[]], // 2.6 - array of country codes
       incidentDiscovery: [''], // 2.7
       originatesFromThirdPartyProvider: ['', Validators.maxLength(32767)], // 2.8

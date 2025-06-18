@@ -40,7 +40,7 @@
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Classification criteria (field 2.5)</mat-label>
-        <mat-select formControlName="classificationCriterion">
+        <mat-select formControlName="classificationCriterion" multiple>
           <mat-option *ngFor="let option of classificationCriterionOptions" [value]="option.value">
             {{option.label}}
           </mat-option>
