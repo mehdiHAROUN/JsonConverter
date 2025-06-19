@@ -254,14 +254,89 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
 
   onSubmit(): void {
     this.formSubmitted = true;
-    
-    if (this.incidentForm.valid) {
-      const formData: IncidentFormData = this.incidentForm.value;
-      console.log('Form submitted:', formData);
-      this.resetForm();
-    } else {
-      this.markFormGroupTouched(this.incidentForm);
+
+    // Section 1 validation logic
+    const f = this.incidentForm;
+    const missingFields: string[] = [];
+    // 1.1
+    if (!f.get('incidentSubmissionDetails.incidentSubmission')?.value) missingFields.push('1.1 Incident Submission Type');
+    // 1.15
+    if (!f.get('incidentSubmissionDetails.reportCurrency')?.value) missingFields.push('1.15 Report Currency');
+    // 1.2
+    if (!f.get('submittingEntity.name')?.value) missingFields.push('1.2 Submitting Entity Name');
+    // 1.3a/1.3b (at least one required)
+    const code = f.get('submittingEntity.code')?.value;
+    const lei = f.get('submittingEntity.LEI')?.value;
+    if (!code && !lei) missingFields.push('1.3a or 1.3b: At least one of Submitting Entity Code or LEI');
+    // 1.4, 1.5, 1.6 (affectedEntity is an array)
+    const affectedEntities = f.get('affectedEntity') as FormArray;
+    if (affectedEntities && affectedEntities.length > 0) {
+      affectedEntities.controls.forEach((ctrl, i) => {
+        if (!ctrl.get('affectedEntityType')?.value?.length) missingFields.push(`1.4 Affected Entity Type (row ${i+1})`);
+        if (!ctrl.get('name')?.value) missingFields.push(`1.5 Affected Entity Name (row ${i+1})`);
+        if (!ctrl.get('LEI')?.value) missingFields.push(`1.6 Affected Entity LEI (row ${i+1})`);
+      });
     }
+    // 1.7, 1.8, 1.9
+    if (!f.get('primaryContact.name')?.value) missingFields.push('1.7 Primary Contact Name');
+    if (!f.get('primaryContact.email')?.value || f.get('primaryContact.email')?.invalid) missingFields.push('1.8 Primary Contact Email (required/valid)');
+    if (!f.get('primaryContact.phone')?.value) missingFields.push('1.9 Primary Contact Phone');
+    // 1.10, 1.11, 1.12
+    if (!f.get('secondaryContact.name')?.value) missingFields.push('1.10 Secondary Contact Name');
+    if (!f.get('secondaryContact.email')?.value || f.get('secondaryContact.email')?.invalid) missingFields.push('1.11 Secondary Contact Email (required/valid)');
+    if (!f.get('secondaryContact.phone')?.value) missingFields.push('1.12 Secondary Contact Phone');
+    // 1.13, 1.14
+    if (!f.get('ultimateParentUndertaking.name')?.value) missingFields.push('1.13 Ultimate Parent Undertaking Name');
+    if (!f.get('ultimateParentUndertaking.LEI')?.value) missingFields.push('1.14 Ultimate Parent Undertaking LEI');
+
+    if (missingFields.length > 0) {
+      this.markFormGroupTouched(this.incidentForm);
+      alert('Please fill in the following required fields:\n' + missingFields.join('\n'));
+      return;
+    }
+
+    // If all Section 1 fields are valid, generate the file
+    const formValue = this.incidentForm.value;
+    const section1 = {
+      incidentSubmission: formValue.incidentSubmissionDetails?.incidentSubmission,
+      reportCurrency: formValue.incidentSubmissionDetails?.reportCurrency,
+      submittingEntity: {
+        name: formValue.submittingEntity?.name,
+        code: formValue.submittingEntity?.code,
+        LEI: formValue.submittingEntity?.LEI
+      },
+      affectedEntity: (formValue.affectedEntity || []).map((entity: any) => ({
+        affectedEntityType: entity.affectedEntityType,
+        name: entity.name,
+        LEI: entity.LEI
+      })),
+      primaryContact: {
+        name: formValue.primaryContact?.name,
+        email: formValue.primaryContact?.email,
+        phone: formValue.primaryContact?.phone
+      },
+      secondaryContact: {
+        name: formValue.secondaryContact?.name,
+        email: formValue.secondaryContact?.email,
+        phone: formValue.secondaryContact?.phone
+      },
+      ultimateParentUndertaking: {
+        name: formValue.ultimateParentUndertaking?.name,
+        LEI: formValue.ultimateParentUndertaking?.LEI
+      }
+    };
+    this.downloadJson(section1, 'section1-entity-information.json');
+  }
+
+  private downloadJson(data: any, filename: string): void {
+    const jsonStr = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
   }
 
   submitForm(): void {

@@ -169,29 +169,31 @@
             </div>
           </mat-card>
 
-          <!-- Report Currency Field -->
-          <div>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Report Currency (field 1.15)</mat-label>
-              <mat-select formControlName="reportCurrency">
-                <mat-option value="EUR">EUR</mat-option>
-                <mat-option value="BGN">BGN</mat-option>
-                <mat-option value="CZK">CZK</mat-option>
-                <mat-option value="DKK">DKK</mat-option>
-                <mat-option value="HUF">HUF</mat-option>
-                <mat-option value="PLN">PLN</mat-option>
-                <mat-option value="RON">RON</mat-option>
-                <mat-option value="ISK">ISK</mat-option>
-                <mat-option value="CHF">CHF</mat-option>
-                <mat-option value="NOK">NOK</mat-option>
-                <mat-option value="SEK">SEK</mat-option>
-              </mat-select>
-              <mat-error *ngIf="incidentForm.get('reportCurrency')?.hasError('required')">
-                Report currency is required
-              </mat-error>
-            </mat-form-field>
-          </div>
-
+          <!-- Report Currency Card -->
+          <mat-card class="entity-card">
+            <mat-card-title>Report Currency</mat-card-title>
+            <div formGroupName="incidentSubmissionDetails">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Report Currency (field 1.15)</mat-label>
+                <mat-select formControlName="reportCurrency">
+                  <mat-option value="EUR">EUR</mat-option>
+                  <mat-option value="BGN">BGN</mat-option>
+                  <mat-option value="CZK">CZK</mat-option>
+                  <mat-option value="DKK">DKK</mat-option>
+                  <mat-option value="HUF">HUF</mat-option>
+                  <mat-option value="PLN">PLN</mat-option>
+                  <mat-option value="RON">RON</mat-option>
+                  <mat-option value="ISK">ISK</mat-option>
+                  <mat-option value="CHF">CHF</mat-option>
+                  <mat-option value="NOK">NOK</mat-option>
+                  <mat-option value="SEK">SEK</mat-option>
+                </mat-select>
+                <mat-error *ngIf="incidentForm.get('incidentSubmissionDetails.reportCurrency')?.hasError('required')">
+                  Report currency is required
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </mat-card>
         </div>
       </mat-tab>
 
@@ -218,7 +220,7 @@
     </mat-tab-group>
 
     <div class="button-container">
-      <button mat-raised-button color="primary" type="submit" [disabled]="!incidentForm.valid">
+      <button mat-raised-button color="primary" type="submit">
         generate report
       </button>
     </div>

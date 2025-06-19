@@ -194,6 +194,7 @@ export class ImpactAssessmentComponent implements OnInit {
       numberOfAffectedTransactions: [null, [Validators.min(0), Validators.pattern(/^\d+$/)]], // field 3.9
       percentageOfAffectedTransactions: [null, [Validators.min(0), Validators.max(100), percentageValidator()]], // field 3.10
       valueOfAffectedTransactions: [null, [Validators.min(0), transactionValueValidator()]], // field 3.11
+      numbersActualEstimate: [[]], // field 3.12 - added to match template
       reportedDataStatus: [[]], // field 3.12
       reputationalImpactType: [[]], // field 3.13
       reputationalImpactDescription: ['', Validators.maxLength(32767)], // field 3.14
