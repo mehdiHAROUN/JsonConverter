@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators, AbstractControl, FormArray, ValidatorFn, ValidationErrors } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -134,6 +134,7 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
   formSubmitted = false;
   IncidentSubmissionType = IncidentSubmissionType;
   AffectedEntityType = AffectedEntityType;
+  @ViewChild(IncidentDetailsFormComponent) incidentDetailsFormComponent!: IncidentDetailsFormComponent;
 
   // Custom validator to ensure at least one of code or LEI is filled
   static codeOrLeiRequiredValidator: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
@@ -255,9 +256,16 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
   onSubmit(): void {
     this.formSubmitted = true;
 
-    // Section 1 validation logic
+    // Only proceed if 1.1 Incident Submission Type is 'initial_notification'
     const f = this.incidentForm;
+    const incidentSubmissionType = f.get('incidentSubmissionDetails.incidentSubmission')?.value;
+    if (incidentSubmissionType !== 'initial_notification') {
+      return;
+    }
+
     const missingFields: string[] = [];
+    const detailsForm = this.incidentDetailsFormComponent?.incidentDetailsForm;
+    const details = detailsForm?.value;
     // 1.1
     if (!f.get('incidentSubmissionDetails.incidentSubmission')?.value) missingFields.push('1.1 Incident Submission Type');
     // 1.15
@@ -289,43 +297,77 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
     if (!f.get('ultimateParentUndertaking.name')?.value) missingFields.push('1.13 Ultimate Parent Undertaking Name');
     if (!f.get('ultimateParentUndertaking.LEI')?.value) missingFields.push('1.14 Ultimate Parent Undertaking LEI');
 
+    // Section 2 validation logic
+    if (detailsForm) {
+      if (!detailsForm.get('financialEntityCode')?.value) missingFields.push('2.1 Incident Reference Code');
+      // 2.2 Detection Date & Time
+      if (!detailsForm.get('detectionDate')?.value || !detailsForm.get('detectionTime')?.value) missingFields.push('2.2 Detection Date & Time');
+      // 2.3 Classification Date & Time
+      if (!detailsForm.get('classificationDate')?.value || !detailsForm.get('classificationTime')?.value) missingFields.push('2.3 Classification Date & Time');
+      if (!detailsForm.get('incidentDescription')?.value) missingFields.push('2.4 Incident Description');
+      if (!detailsForm.get('classificationCriterion')?.value || detailsForm.get('classificationCriterion')?.value.length === 0) missingFields.push('2.5 Classification Criteria');
+      if (!detailsForm.get('countryCodeMaterialityThresholds')?.value || detailsForm.get('countryCodeMaterialityThresholds')?.value.length === 0) missingFields.push('2.6 Country Code Materiality Thresholds');
+      if (!detailsForm.get('incidentDiscovery')?.value) missingFields.push('2.7 Incident Discovery');
+      if (!detailsForm.get('originatesFromThirdPartyProvider')?.value) missingFields.push('2.8 Originates From Third Party Provider');
+      // 2.9 isBusinessContinuityActivated (boolean, but required)
+      if (detailsForm.get('isBusinessContinuityActivated')?.value === null || detailsForm.get('isBusinessContinuityActivated')?.value === undefined) missingFields.push('2.9 Is Business Continuity Activated');
+      // 2.10 Other Information
+      if (!detailsForm.get('otherInformation')?.value) missingFields.push('2.10 Other Information');
+    }
+
     if (missingFields.length > 0) {
       this.markFormGroupTouched(this.incidentForm);
+      if (detailsForm) {
+        this.markFormGroupTouched(detailsForm);
+      }
       alert('Please fill in the following required fields:\n' + missingFields.join('\n'));
       return;
     }
 
-    // If all Section 1 fields are valid, generate the file
-    const formValue = this.incidentForm.value;
+    // If all Section 1 and 2 fields are valid, generate the file
     const section1 = {
-      incidentSubmission: formValue.incidentSubmissionDetails?.incidentSubmission,
-      reportCurrency: formValue.incidentSubmissionDetails?.reportCurrency,
+      incidentSubmission: f.value.incidentSubmissionDetails?.incidentSubmission,
+      reportCurrency: f.value.incidentSubmissionDetails?.reportCurrency,
       submittingEntity: {
-        name: formValue.submittingEntity?.name,
-        code: formValue.submittingEntity?.code,
-        LEI: formValue.submittingEntity?.LEI
+        name: f.value.submittingEntity?.name,
+        code: f.value.submittingEntity?.code,
+        LEI: f.value.submittingEntity?.LEI
       },
-      affectedEntity: (formValue.affectedEntity || []).map((entity: any) => ({
+      affectedEntity: (f.value.affectedEntity || []).map((entity: any) => ({
         affectedEntityType: entity.affectedEntityType,
         name: entity.name,
         LEI: entity.LEI
       })),
       primaryContact: {
-        name: formValue.primaryContact?.name,
-        email: formValue.primaryContact?.email,
-        phone: formValue.primaryContact?.phone
+        name: f.value.primaryContact?.name,
+        email: f.value.primaryContact?.email,
+        phone: f.value.primaryContact?.phone
       },
       secondaryContact: {
-        name: formValue.secondaryContact?.name,
-        email: formValue.secondaryContact?.email,
-        phone: formValue.secondaryContact?.phone
+        name: f.value.secondaryContact?.name,
+        email: f.value.secondaryContact?.email,
+        phone: f.value.secondaryContact?.phone
       },
       ultimateParentUndertaking: {
-        name: formValue.ultimateParentUndertaking?.name,
-        LEI: formValue.ultimateParentUndertaking?.LEI
+        name: f.value.ultimateParentUndertaking?.name,
+        LEI: f.value.ultimateParentUndertaking?.LEI
       }
     };
-    this.downloadJson(section1, 'section1-entity-information.json');
+    const section2 = details ? {
+      financialEntityCode: details.financialEntityCode,
+      detectionDate: details.detectionDate,
+      detectionTime: details.detectionTime,
+      classificationDate: details.classificationDate,
+      classificationTime: details.classificationTime,
+      incidentDescription: details.incidentDescription,
+      classificationCriterion: details.classificationCriterion,
+      countryCodeMaterialityThresholds: details.countryCodeMaterialityThresholds,
+      incidentDiscovery: details.incidentDiscovery,
+      originatesFromThirdPartyProvider: details.originatesFromThirdPartyProvider,
+      isBusinessContinuityActivated: details.isBusinessContinuityActivated,
+      otherInformation: details.otherInformation
+    } : {};
+    this.downloadJson({ section1, section2 }, 'section1-section2-entity-information.json');
   }
 
   private downloadJson(data: any, filename: string): void {
