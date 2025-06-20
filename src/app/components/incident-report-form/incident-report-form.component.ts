@@ -136,6 +136,7 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
   AffectedEntityType = AffectedEntityType;
   @ViewChild(IncidentDetailsFormComponent) incidentDetailsFormComponent!: IncidentDetailsFormComponent;
   @ViewChild(ImpactAssessmentComponent) impactAssessmentComponent!: ImpactAssessmentComponent;
+  @ViewChild(ReportingToOtherAuthoritiesComponent) reportingToOtherAuthoritiesComponent!: ReportingToOtherAuthoritiesComponent;
 
   // Custom validator to ensure at least one of code or LEI is filled
   static codeOrLeiRequiredValidator: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
@@ -256,13 +257,15 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
 
   onSubmit(): void {
     this.formSubmitted = true;
-
+    
     const f = this.incidentForm;
     const incidentSubmissionType = f.get('incidentSubmissionDetails.incidentSubmission')?.value;
     const detailsForm = this.incidentDetailsFormComponent?.incidentDetailsForm;
     const impactForm = this.impactAssessmentComponent?.impactForm;
+    const reportingForm = this.reportingToOtherAuthoritiesComponent?.reportingForm;
     const details = detailsForm?.value;
     const impact = impactForm?.value;
+    const reporting = reportingForm?.value;
     const missingFields: string[] = [];
 
     // Section 1 validation (same as before)
@@ -303,8 +306,8 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
       if (!detailsForm.get('otherInformation')?.value) missingFields.push('2.10 Other Information');
     }
 
-    // Section 3 validation (for intermediate_report)
-    if (incidentSubmissionType === 'intermediate_report') {
+    // Section 3 validation (for intermediate_report and final_report)
+    if (incidentSubmissionType === 'intermediate_report' || incidentSubmissionType === 'final_report') {
       if (!impactForm) {
         missingFields.push('Section 3: Impact Assessment form is missing');
       } else {
@@ -346,11 +349,36 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
       }
     }
 
+    // Section 4 validation (for final_report)
+    if (incidentSubmissionType === 'final_report') {
+      if (!reportingForm) {
+        missingFields.push('Section 4: Reporting to Other Authorities form is missing');
+    } else {
+        if (!reportingForm.get('rootCauseHLClassification')?.value || reportingForm.get('rootCauseHLClassification')?.value.length === 0) missingFields.push('4.1 High-Level Classification of Root Causes of the Incident');
+        if (!reportingForm.get('rootCausesDetailedClassification')?.value || reportingForm.get('rootCausesDetailedClassification')?.value.length === 0) missingFields.push('4.2 Detailed Classification of Root Causes of the Incident');
+        if (!reportingForm.get('rootCausesAdditionalClassification')?.value || reportingForm.get('rootCausesAdditionalClassification')?.value.length === 0) missingFields.push('4.3 Additional Classification of Root Causes of the Incident');
+        if (!reportingForm.get('rootCausesOther')?.value) missingFields.push('4.4 Other Root Causes');
+        if (!reportingForm.get('rootCausesInformation')?.value) missingFields.push('4.5 Root Causes Information');
+        if (!reportingForm.get('incidentResolutionSummary')?.value) missingFields.push('4.6 Incident Resolution Summary');
+        if (!reportingForm.get('incidentRootCauseAddressedDate')?.value || !reportingForm.get('incidentRootCauseAddressedTime')?.value) missingFields.push('4.7 Incident Root Cause Addressed Date & Time');
+        if (!reportingForm.get('incidentWasResolvedDate')?.value || !reportingForm.get('incidentWasResolvedTime')?.value) missingFields.push('4.8 Incident Was Resolved Date & Time');
+        if (!reportingForm.get('incidentResolutionVsPlannedImplementation')?.value) missingFields.push('4.9 Incident Resolution vs Planned Implementation');
+        if (!reportingForm.get('assessmentOfRiskToCriticalFunctions')?.value) missingFields.push('4.10 Assessment of Risk to Critical Functions');
+        if (!reportingForm.get('informationRelevantToResolutionAuthorities')?.value) missingFields.push('4.11 Information Relevant to Resolution Authorities');
+        if (!reportingForm.get('economicImpactMaterialityThreshold')?.value) missingFields.push('4.12 Economic Impact Materiality Threshold');
+        if (!reportingForm.get('grossAmountIndirectDirectCosts')?.value) missingFields.push('4.13 Gross Amount of Indirect & Direct Costs');
+        if (!reportingForm.get('financialRecoveriesAmount')?.value) missingFields.push('4.14 Amount of Financial Recoveries');
+        if (!reportingForm.get('recurringNonMajorIncidentsDescription')?.value) missingFields.push('4.15 Description of Recurring Non-Major Incidents');
+        if (!reportingForm.get('occurrenceOfRecurringIncidentsDate')?.value || !reportingForm.get('occurrenceOfRecurringIncidentsTime')?.value) missingFields.push('4.16 Occurrence of Recurring Incidents Date & Time');
+      }
+    }
+
     // Only allow file generation if all required fields are filled/valid
     if (missingFields.length > 0) {
       this.markFormGroupTouched(this.incidentForm);
       if (detailsForm) this.markFormGroupTouched(detailsForm);
       if (impactForm) this.markFormGroupTouched(impactForm);
+      if (reportingForm) this.markFormGroupTouched(reportingForm);
       alert('Please fill in the following required fields:\n' + missingFields.join('\n'));
       return;
     }
@@ -437,9 +465,35 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
       descriptionOfTemporaryActionsMeasuresForRecovery: impact.descriptionOfTemporaryActionsMeasuresForRecovery,
       indicatorsOfCompromise: impact.indicatorsOfCompromise
     } : {};
+    const section4 = reporting ? {
+      rootCauseHLClassification: reporting.rootCauseHLClassification,
+      rootCausesDetailedClassification: reporting.rootCausesDetailedClassification,
+      rootCausesAdditionalClassification: reporting.rootCausesAdditionalClassification,
+      rootCausesOther: reporting.rootCausesOther,
+      rootCausesInformation: reporting.rootCausesInformation,
+      incidentResolutionSummary: reporting.incidentResolutionSummary,
+      incidentRootCauseAddressedDate: reporting.incidentRootCauseAddressedDate,
+      incidentRootCauseAddressedTime: reporting.incidentRootCauseAddressedTime,
+      rootCauseAddressingDateTime: reporting.rootCauseAddressingDateTime,
+      incidentWasResolvedDate: reporting.incidentWasResolvedDate,
+      incidentWasResolvedTime: reporting.incidentWasResolvedTime,
+      incidentResolutionDateTime: reporting.incidentResolutionDateTime,
+      incidentResolutionVsPlannedImplementation: reporting.incidentResolutionVsPlannedImplementation,
+      assessmentOfRiskToCriticalFunctions: reporting.assessmentOfRiskToCriticalFunctions,
+      informationRelevantToResolutionAuthorities: reporting.informationRelevantToResolutionAuthorities,
+      economicImpactMaterialityThreshold: reporting.economicImpactMaterialityThreshold,
+      grossAmountIndirectDirectCosts: reporting.grossAmountIndirectDirectCosts,
+      financialRecoveriesAmount: reporting.financialRecoveriesAmount,
+      recurringNonMajorIncidentsDescription: reporting.recurringNonMajorIncidentsDescription,
+      occurrenceOfRecurringIncidentsDate: reporting.occurrenceOfRecurringIncidentsDate,
+      occurrenceOfRecurringIncidentsTime: reporting.occurrenceOfRecurringIncidentsTime,
+      recurringIncidentsOccurrenceDateTime: reporting.recurringIncidentsOccurrenceDateTime
+    } : {};
 
     // File generation logic
-    if (incidentSubmissionType === 'intermediate_report') {
+    if (incidentSubmissionType === 'final_report') {
+      this.downloadJson({ section1, section2, section3, section4 }, 'section1-section2-section3-section4-final-report.json');
+    } else if (incidentSubmissionType === 'intermediate_report') {
       this.downloadJson({ section1, section2, section3 }, 'section1-section2-section3-intermediate-report.json');
     } else if (incidentSubmissionType === 'initial_notification') {
       this.downloadJson({ section1, section2 }, 'section1-section2-entity-information.json');
