@@ -135,6 +135,7 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
   IncidentSubmissionType = IncidentSubmissionType;
   AffectedEntityType = AffectedEntityType;
   @ViewChild(IncidentDetailsFormComponent) incidentDetailsFormComponent!: IncidentDetailsFormComponent;
+  @ViewChild(ImpactAssessmentComponent) impactAssessmentComponent!: ImpactAssessmentComponent;
 
   // Custom validator to ensure at least one of code or LEI is filled
   static codeOrLeiRequiredValidator: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
@@ -256,27 +257,21 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
   onSubmit(): void {
     this.formSubmitted = true;
 
-    // Only proceed if 1.1 Incident Submission Type is 'initial_notification'
     const f = this.incidentForm;
     const incidentSubmissionType = f.get('incidentSubmissionDetails.incidentSubmission')?.value;
-    if (incidentSubmissionType !== 'initial_notification') {
-      return;
-    }
-
-    const missingFields: string[] = [];
     const detailsForm = this.incidentDetailsFormComponent?.incidentDetailsForm;
+    const impactForm = this.impactAssessmentComponent?.impactForm;
     const details = detailsForm?.value;
-    // 1.1
+    const impact = impactForm?.value;
+    const missingFields: string[] = [];
+
+    // Section 1 validation (same as before)
     if (!f.get('incidentSubmissionDetails.incidentSubmission')?.value) missingFields.push('1.1 Incident Submission Type');
-    // 1.15
     if (!f.get('incidentSubmissionDetails.reportCurrency')?.value) missingFields.push('1.15 Report Currency');
-    // 1.2
     if (!f.get('submittingEntity.name')?.value) missingFields.push('1.2 Submitting Entity Name');
-    // 1.3a/1.3b (at least one required)
     const code = f.get('submittingEntity.code')?.value;
     const lei = f.get('submittingEntity.LEI')?.value;
     if (!code && !lei) missingFields.push('1.3a or 1.3b: At least one of Submitting Entity Code or LEI');
-    // 1.4, 1.5, 1.6 (affectedEntity is an array)
     const affectedEntities = f.get('affectedEntity') as FormArray;
     if (affectedEntities && affectedEntities.length > 0) {
       affectedEntities.controls.forEach((ctrl, i) => {
@@ -285,46 +280,82 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
         if (!ctrl.get('LEI')?.value) missingFields.push(`1.6 Affected Entity LEI (row ${i+1})`);
       });
     }
-    // 1.7, 1.8, 1.9
     if (!f.get('primaryContact.name')?.value) missingFields.push('1.7 Primary Contact Name');
     if (!f.get('primaryContact.email')?.value || f.get('primaryContact.email')?.invalid) missingFields.push('1.8 Primary Contact Email (required/valid)');
     if (!f.get('primaryContact.phone')?.value) missingFields.push('1.9 Primary Contact Phone');
-    // 1.10, 1.11, 1.12
     if (!f.get('secondaryContact.name')?.value) missingFields.push('1.10 Secondary Contact Name');
     if (!f.get('secondaryContact.email')?.value || f.get('secondaryContact.email')?.invalid) missingFields.push('1.11 Secondary Contact Email (required/valid)');
     if (!f.get('secondaryContact.phone')?.value) missingFields.push('1.12 Secondary Contact Phone');
-    // 1.13, 1.14
     if (!f.get('ultimateParentUndertaking.name')?.value) missingFields.push('1.13 Ultimate Parent Undertaking Name');
     if (!f.get('ultimateParentUndertaking.LEI')?.value) missingFields.push('1.14 Ultimate Parent Undertaking LEI');
 
-    // Section 2 validation logic
+    // Section 2 validation (same as before)
     if (detailsForm) {
       if (!detailsForm.get('financialEntityCode')?.value) missingFields.push('2.1 Incident Reference Code');
-      // 2.2 Detection Date & Time
       if (!detailsForm.get('detectionDate')?.value || !detailsForm.get('detectionTime')?.value) missingFields.push('2.2 Detection Date & Time');
-      // 2.3 Classification Date & Time
       if (!detailsForm.get('classificationDate')?.value || !detailsForm.get('classificationTime')?.value) missingFields.push('2.3 Classification Date & Time');
       if (!detailsForm.get('incidentDescription')?.value) missingFields.push('2.4 Incident Description');
       if (!detailsForm.get('classificationCriterion')?.value || detailsForm.get('classificationCriterion')?.value.length === 0) missingFields.push('2.5 Classification Criteria');
       if (!detailsForm.get('countryCodeMaterialityThresholds')?.value || detailsForm.get('countryCodeMaterialityThresholds')?.value.length === 0) missingFields.push('2.6 Country Code Materiality Thresholds');
       if (!detailsForm.get('incidentDiscovery')?.value) missingFields.push('2.7 Incident Discovery');
       if (!detailsForm.get('originatesFromThirdPartyProvider')?.value) missingFields.push('2.8 Originates From Third Party Provider');
-      // 2.9 isBusinessContinuityActivated (boolean, but required)
       if (detailsForm.get('isBusinessContinuityActivated')?.value === null || detailsForm.get('isBusinessContinuityActivated')?.value === undefined) missingFields.push('2.9 Is Business Continuity Activated');
-      // 2.10 Other Information
       if (!detailsForm.get('otherInformation')?.value) missingFields.push('2.10 Other Information');
     }
 
+    // Section 3 validation (for intermediate_report)
+    if (incidentSubmissionType === 'intermediate_report') {
+      if (!impactForm) {
+        missingFields.push('Section 3: Impact Assessment form is missing');
+      } else {
+        if (!impactForm.get('competentAuthorityCode')?.value) missingFields.push('3.1 Competent Authority Code');
+        if (!impactForm.get('occurrenceDate')?.value || !impactForm.get('occurrenceTime')?.value) missingFields.push('3.2 Incident Occurrence Date & Time');
+        if (!impactForm.get('recoveryDate')?.value || !impactForm.get('recoveryTime')?.value) missingFields.push('3.3 Service Restoration Date & Time');
+        if (!impactForm.get('number')?.value) missingFields.push('3.4 Number of Clients Affected');
+        if (!impactForm.get('percentage')?.value) missingFields.push('3.5 Percentage of Clients Affected');
+        if (!impactForm.get('numberOfFinancialCounterpartsAffected')?.value) missingFields.push('3.6 Number of Financial Counterparts Affected');
+        if (!impactForm.get('percentageOfFinancialCounterpartsAffected')?.value) missingFields.push('3.7 Percentage of Financial Counterparts Affected');
+        if (impactForm.get('hasImpactOnRelevantClients')?.value === null || impactForm.get('hasImpactOnRelevantClients')?.value === undefined) missingFields.push('3.8 Has Impact on Relevant Clients');
+        if (!impactForm.get('numberOfAffectedTransactions')?.value) missingFields.push('3.9 Number of Affected Transactions');
+        if (!impactForm.get('percentageOfAffectedTransactions')?.value) missingFields.push('3.10 Percentage of Affected Transactions');
+        if (!impactForm.get('valueOfAffectedTransactions')?.value) missingFields.push('3.11 Value of Affected Transactions');
+        if (!impactForm.get('numbersActualEstimate')?.value || impactForm.get('numbersActualEstimate')?.value.length === 0) missingFields.push('3.12 Reported Data Status');
+        if (!impactForm.get('reputationalImpactType')?.value || impactForm.get('reputationalImpactType')?.value.length === 0) missingFields.push('3.13 Reputational Impact Type');
+        if (!impactForm.get('reputationalImpactDescription')?.value) missingFields.push('3.14 Reputational Impact Description');
+        if (!impactForm.get('incidentDuration')?.value) missingFields.push('3.15 Incident Duration (DD:HH:MM)');
+        if (!impactForm.get('serviceDowntime')?.value) missingFields.push('3.16 Service Downtime (DD:HH:MM)');
+        if (!impactForm.get('informationDurationServiceDowntimeActualOrEstimate')?.value) missingFields.push('3.17 Duration and Downtime Information Type');
+        if (!impactForm.get('memberStatesImpactType')?.value || impactForm.get('memberStatesImpactType')?.value.length === 0) missingFields.push('3.18 Types of Impact in Member States');
+        if (!impactForm.get('memberStatesImpactTypeDescription')?.value) missingFields.push('3.19 Member States Impact Type Description');
+        if (!impactForm.get('dataLosseMaterialityThresholds')?.value || impactForm.get('dataLosseMaterialityThresholds')?.value.length === 0) missingFields.push('3.20 Materiality Thresholds for Data Losses');
+        if (!impactForm.get('dataLossesDescription')?.value) missingFields.push('3.21 Data Losses Description');
+        if (!impactForm.get('criticalServicesAffected')?.value) missingFields.push('3.22 Critical Services Affected');
+        if (!impactForm.get('IncidentType')?.value || impactForm.get('IncidentType')?.value.length === 0) missingFields.push('3.23 Type of the Major ICT-related Incident');
+        if (!impactForm.get('otherIncidentClassification')?.value) missingFields.push('3.24 Other Incident Classification');
+        if (!impactForm.get('threatTechniques')?.value || impactForm.get('threatTechniques')?.value.length === 0) missingFields.push('3.25 Threats and Techniques Used by Threat Actor');
+        if (!impactForm.get('otherThreatTechniques')?.value) missingFields.push('3.26 Other Threat Techniques');
+        if (!impactForm.get('affectedFunctionalAreas')?.value) missingFields.push('3.27 Affected Functional Areas');
+        if (!impactForm.get('isAffectedInfrastructureComponents')?.value) missingFields.push('3.28 Is Infrastructure Components Affected');
+        if (!impactForm.get('affectedInfrastructureComponents')?.value) missingFields.push('3.29 Affected Infrastructure Components');
+        if (!impactForm.get('isImpactOnFinancialInterest')?.value) missingFields.push('3.30 Impact on Financial Interest of Clients');
+        if (!impactForm.get('reportingToOtherAuthorities')?.value || impactForm.get('reportingToOtherAuthorities')?.value.length === 0) missingFields.push('3.31 Reporting to Other Authorities');
+        if (!impactForm.get('reportingToOtherAuthoritiesOther')?.value) missingFields.push('3.32 Other Authorities Description');
+        if (impactForm.get('isTemporaryActionsMeasuresForRecovery')?.value === null || impactForm.get('isTemporaryActionsMeasuresForRecovery')?.value === undefined) missingFields.push('3.33 Temporary Actions or Measures for Recovery');
+        if (!impactForm.get('descriptionOfTemporaryActionsMeasuresForRecovery')?.value) missingFields.push('3.34 Description of Temporary Actions/Measures');
+        if (!impactForm.get('indicatorsOfCompromise')?.value) missingFields.push('3.35 Indicators of Compromise');
+      }
+    }
+
+    // Only allow file generation if all required fields are filled/valid
     if (missingFields.length > 0) {
       this.markFormGroupTouched(this.incidentForm);
-      if (detailsForm) {
-        this.markFormGroupTouched(detailsForm);
-      }
+      if (detailsForm) this.markFormGroupTouched(detailsForm);
+      if (impactForm) this.markFormGroupTouched(impactForm);
       alert('Please fill in the following required fields:\n' + missingFields.join('\n'));
       return;
     }
 
-    // If all Section 1 and 2 fields are valid, generate the file
+    // Data extraction for JSON
     const section1 = {
       incidentSubmission: f.value.incidentSubmissionDetails?.incidentSubmission,
       reportCurrency: f.value.incidentSubmissionDetails?.reportCurrency,
@@ -367,7 +398,52 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
       isBusinessContinuityActivated: details.isBusinessContinuityActivated,
       otherInformation: details.otherInformation
     } : {};
-    this.downloadJson({ section1, section2 }, 'section1-section2-entity-information.json');
+    const section3 = impact ? {
+      competentAuthorityCode: impact.competentAuthorityCode,
+      occurrenceDate: impact.occurrenceDate,
+      occurrenceTime: impact.occurrenceTime,
+      recoveryDate: impact.recoveryDate,
+      recoveryTime: impact.recoveryTime,
+      number: impact.number,
+      percentage: impact.percentage,
+      numberOfFinancialCounterpartsAffected: impact.numberOfFinancialCounterpartsAffected,
+      percentageOfFinancialCounterpartsAffected: impact.percentageOfFinancialCounterpartsAffected,
+      hasImpactOnRelevantClients: impact.hasImpactOnRelevantClients,
+      numberOfAffectedTransactions: impact.numberOfAffectedTransactions,
+      percentageOfAffectedTransactions: impact.percentageOfAffectedTransactions,
+      valueOfAffectedTransactions: impact.valueOfAffectedTransactions,
+      numbersActualEstimate: impact.numbersActualEstimate,
+      reputationalImpactType: impact.reputationalImpactType,
+      reputationalImpactDescription: impact.reputationalImpactDescription,
+      incidentDuration: impact.incidentDuration,
+      serviceDowntime: impact.serviceDowntime,
+      informationDurationServiceDowntimeActualOrEstimate: impact.informationDurationServiceDowntimeActualOrEstimate,
+      memberStatesImpactType: impact.memberStatesImpactType,
+      memberStatesImpactTypeDescription: impact.memberStatesImpactTypeDescription,
+      dataLosseMaterialityThresholds: impact.dataLosseMaterialityThresholds,
+      dataLossesDescription: impact.dataLossesDescription,
+      criticalServicesAffected: impact.criticalServicesAffected,
+      IncidentType: impact.IncidentType,
+      otherIncidentClassification: impact.otherIncidentClassification,
+      threatTechniques: impact.threatTechniques,
+      otherThreatTechniques: impact.otherThreatTechniques,
+      affectedFunctionalAreas: impact.affectedFunctionalAreas,
+      isAffectedInfrastructureComponents: impact.isAffectedInfrastructureComponents,
+      affectedInfrastructureComponents: impact.affectedInfrastructureComponents,
+      isImpactOnFinancialInterest: impact.isImpactOnFinancialInterest,
+      reportingToOtherAuthorities: impact.reportingToOtherAuthorities,
+      reportingToOtherAuthoritiesOther: impact.reportingToOtherAuthoritiesOther,
+      isTemporaryActionsMeasuresForRecovery: impact.isTemporaryActionsMeasuresForRecovery,
+      descriptionOfTemporaryActionsMeasuresForRecovery: impact.descriptionOfTemporaryActionsMeasuresForRecovery,
+      indicatorsOfCompromise: impact.indicatorsOfCompromise
+    } : {};
+
+    // File generation logic
+    if (incidentSubmissionType === 'intermediate_report') {
+      this.downloadJson({ section1, section2, section3 }, 'section1-section2-section3-intermediate-report.json');
+    } else if (incidentSubmissionType === 'initial_notification') {
+      this.downloadJson({ section1, section2 }, 'section1-section2-entity-information.json');
+    }
   }
 
   private downloadJson(data: any, filename: string): void {
