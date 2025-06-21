@@ -313,6 +313,14 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
             otherClassificationControl?.clearValidators();
           }
           otherClassificationControl?.updateValueAndValidity();
+
+          const threatTechniquesControl = impactForm.get('threatTechniques');
+          if (incidentTypes && incidentTypes.includes('cybersecurity_related')) {
+            threatTechniquesControl?.setValidators([Validators.required]);
+          } else {
+            threatTechniquesControl?.clearValidators();
+          }
+          threatTechniquesControl?.updateValueAndValidity();
         });
     }
   }
@@ -441,7 +449,10 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           missingFields.push('3.24 Other Incident Classification');
         }
 
-        if (!impactForm.get('threatTechniques')?.value || impactForm.get('threatTechniques')?.value.length === 0) missingFields.push('3.25 Threats and Techniques Used by Threat Actor');
+        if (incidentTypes.includes('cybersecurity_related') && (!impactForm.get('threatTechniques')?.value || impactForm.get('threatTechniques')?.value.length === 0)) {
+          missingFields.push('3.25 Threats and Techniques Used by Threat Actor');
+        }
+
         if (!impactForm.get('otherThreatTechniques')?.value) missingFields.push('3.26 Other Threat Techniques');
         if (!impactForm.get('affectedFunctionalAreas')?.value) missingFields.push('3.27 Affected Functional Areas');
         if (!impactForm.get('isAffectedInfrastructureComponents')?.value) missingFields.push('3.28 Is Infrastructure Components Affected');
