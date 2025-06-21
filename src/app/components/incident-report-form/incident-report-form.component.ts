@@ -299,7 +299,12 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
       if (!detailsForm.get('classificationDate')?.value || !detailsForm.get('classificationTime')?.value) missingFields.push('2.3 Classification Date & Time');
       if (!detailsForm.get('incidentDescription')?.value) missingFields.push('2.4 Incident Description');
       if (!detailsForm.get('classificationCriterion')?.value || detailsForm.get('classificationCriterion')?.value.length === 0) missingFields.push('2.5 Classification Criteria');
-      if (!detailsForm.get('countryCodeMaterialityThresholds')?.value || detailsForm.get('countryCodeMaterialityThresholds')?.value.length === 0) missingFields.push('2.6 Country Code Materiality Thresholds');
+      // 2.6 Country Code Materiality Thresholds is required only if 'geographical_spread' is selected in 2.5
+      const classificationCriteria = detailsForm.get('classificationCriterion')?.value || [];
+      const isGeoSpreadChecked = classificationCriteria.includes('geographical_spread');
+      if (isGeoSpreadChecked && (!detailsForm.get('countryCodeMaterialityThresholds')?.value || detailsForm.get('countryCodeMaterialityThresholds')?.value.length === 0)) {
+        missingFields.push('2.6 Country Code Materiality Thresholds');
+      }
       if (!detailsForm.get('incidentDiscovery')?.value) missingFields.push('2.7 Incident Discovery');
       if (!detailsForm.get('originatesFromThirdPartyProvider')?.value) missingFields.push('2.8 Originates From Third Party Provider');
       if (detailsForm.get('isBusinessContinuityActivated')?.value === null || detailsForm.get('isBusinessContinuityActivated')?.value === undefined) missingFields.push('2.9 Is Business Continuity Activated');

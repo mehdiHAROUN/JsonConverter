@@ -284,6 +284,17 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
       detailsGroup?.get('ictThirdPartyProviderType')?.updateValueAndValidity();
       detailsGroup?.get('ictThirdPartyProviderCountry')?.updateValueAndValidity();
     });
+
+    // Conditional validator for 2.6 Country Code Materiality Thresholds
+    this.incidentDetailsForm.get('classificationCriterion')?.valueChanges.subscribe((criteria: string[]) => {
+      const countryCodeControl = this.incidentDetailsForm.get('countryCodeMaterialityThresholds');
+      if (criteria && criteria.includes('geographical_spread')) {
+        countryCodeControl?.setValidators([Validators.required]);
+      } else {
+        countryCodeControl?.clearValidators();
+      }
+      countryCodeControl?.updateValueAndValidity();
+    });
   }
 
   private combineDateAndTime(date: Date | null, time: string | null): string | null {
