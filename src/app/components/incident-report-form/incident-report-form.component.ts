@@ -250,6 +250,25 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
       });
   }
 
+  ngAfterViewInit(): void {
+    const detailsForm = this.incidentDetailsFormComponent?.incidentDetailsForm;
+    const impactForm = this.impactAssessmentComponent?.impactForm;
+
+    if (detailsForm && impactForm) {
+      detailsForm.get('classificationCriterion')?.valueChanges
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((criteria: string[]) => {
+          const reputationalImpactControl = impactForm.get('reputationalImpactType');
+          if (criteria && criteria.includes('reputational_impact')) {
+            reputationalImpactControl?.setValidators([Validators.required]);
+          } else {
+            reputationalImpactControl?.clearValidators();
+          }
+          reputationalImpactControl?.updateValueAndValidity();
+        });
+    }
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -328,7 +347,13 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
         if (!impactForm.get('percentageOfAffectedTransactions')?.value) missingFields.push('3.10 Percentage of Affected Transactions');
         if (!impactForm.get('valueOfAffectedTransactions')?.value) missingFields.push('3.11 Value of Affected Transactions');
         if (!impactForm.get('numbersActualEstimate')?.value || impactForm.get('numbersActualEstimate')?.value.length === 0) missingFields.push('3.12 Reported Data Status');
-        if (!impactForm.get('reputationalImpactType')?.value || impactForm.get('reputationalImpactType')?.value.length === 0) missingFields.push('3.13 Reputational Impact Type');
+        
+        const classificationCriteria = detailsForm.get('classificationCriterion')?.value || [];
+        const isReputationalImpactChecked = classificationCriteria.includes('reputational_impact');
+        if (isReputationalImpactChecked && (!impactForm.get('reputationalImpactType')?.value || impactForm.get('reputationalImpactType')?.value.length === 0)) {
+          missingFields.push('3.13 Reputational Impact Type');
+        }
+
         if (!impactForm.get('reputationalImpactDescription')?.value) missingFields.push('3.14 Reputational Impact Description');
         if (!impactForm.get('incidentDuration')?.value) missingFields.push('3.15 Incident Duration (DD:HH:MM)');
         if (!impactForm.get('serviceDowntime')?.value) missingFields.push('3.16 Service Downtime (DD:HH:MM)');
