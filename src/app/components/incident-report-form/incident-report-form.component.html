@@ -64,6 +64,14 @@
               <div *ngFor="let entity of affectedEntity.controls; let i = index" [formGroupName]="i" class="affected-entity-group">
                 <div class="entity-fields">
                   <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Entity Type (field 1.4)</mat-label>
+                    <mat-select formControlName="affectedEntityType" multiple>
+                      <mat-option *ngFor="let option of affectedEntityTypeOptions" [value]="option.value">
+                        {{ option.label }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Name (field 1.5)</mat-label>
                     <input matInput formControlName="name">
                   </mat-form-field>
@@ -73,14 +81,6 @@
                     <mat-error *ngIf="entity.get('LEI')?.hasError('pattern') && entity.get('LEI')?.touched">
                       LEI must be 20 characters: 18 alphanumeric characters followed by 2 digits
                     </mat-error>
-                  </mat-form-field>
-                  <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Entity Type (field 1.4)</mat-label>
-                    <mat-select formControlName="affectedEntityType" multiple>
-                      <mat-option *ngFor="let option of affectedEntityTypeOptions" [value]="option.value">
-                        {{ option.label }}
-                      </mat-option>
-                    </mat-select>
                   </mat-form-field>
                   <input type="hidden" formControlName="entityType">
                 </div>
