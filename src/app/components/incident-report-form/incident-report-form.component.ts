@@ -269,6 +269,14 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           }
           reputationalImpactControl?.updateValueAndValidity();
           reputationalImpactDescriptionControl?.updateValueAndValidity();
+
+          const durationDowntimeControl = impactForm.get('informationDurationServiceDowntimeActualOrEstimate');
+          if (criteria && criteria.includes('duration_and_service_downtime')) {
+            durationDowntimeControl?.setValidators([Validators.required]);
+          } else {
+            durationDowntimeControl?.clearValidators();
+          }
+          durationDowntimeControl?.updateValueAndValidity();
         });
     }
   }
@@ -364,7 +372,12 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
 
         if (!impactForm.get('incidentDuration')?.value) missingFields.push('3.15 Incident Duration (DD:HH:MM)');
         if (!impactForm.get('serviceDowntime')?.value) missingFields.push('3.16 Service Downtime (DD:HH:MM)');
-        if (!impactForm.get('informationDurationServiceDowntimeActualOrEstimate')?.value) missingFields.push('3.17 Duration and Downtime Information Type');
+        
+        const isDurationDowntimeChecked = classificationCriteria.includes('duration_and_service_downtime');
+        if (isDurationDowntimeChecked && !impactForm.get('informationDurationServiceDowntimeActualOrEstimate')?.value) {
+          missingFields.push('3.17 Duration and Downtime Information Type');
+        }
+
         if (!impactForm.get('memberStatesImpactType')?.value || impactForm.get('memberStatesImpactType')?.value.length === 0) missingFields.push('3.18 Types of Impact in Member States');
         if (!impactForm.get('memberStatesImpactTypeDescription')?.value) missingFields.push('3.19 Member States Impact Type Description');
         if (!impactForm.get('dataLosseMaterialityThresholds')?.value || impactForm.get('dataLosseMaterialityThresholds')?.value.length === 0) missingFields.push('3.20 Materiality Thresholds for Data Losses');
