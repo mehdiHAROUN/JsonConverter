@@ -291,12 +291,16 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           memberStatesImpactTypeDescriptionControl?.updateValueAndValidity();
 
           const dataLossesControl = impactForm.get('dataLosseMaterialityThresholds');
+          const dataLossesDescriptionControl = impactForm.get('dataLossesDescription');
           if (criteria && criteria.includes('data_losses')) {
             dataLossesControl?.setValidators([Validators.required]);
+            dataLossesDescriptionControl?.setValidators([Validators.required]);
           } else {
             dataLossesControl?.clearValidators();
+            dataLossesDescriptionControl?.clearValidators();
           }
           dataLossesControl?.updateValueAndValidity();
+          dataLossesDescriptionControl?.updateValueAndValidity();
         });
     }
   }
@@ -413,7 +417,10 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           missingFields.push('3.20 Materiality Thresholds for Data Losses');
         }
 
-        if (!impactForm.get('dataLossesDescription')?.value) missingFields.push('3.21 Data Losses Description');
+        if (isDataLossesChecked && !impactForm.get('dataLossesDescription')?.value) {
+          missingFields.push('3.21 Data Losses Description');
+        }
+
         if (!impactForm.get('criticalServicesAffected')?.value) missingFields.push('3.22 Critical Services Affected');
         if (!impactForm.get('IncidentType')?.value || impactForm.get('IncidentType')?.value.length === 0) missingFields.push('3.23 Type of the Major ICT-related Incident');
         if (!impactForm.get('otherIncidentClassification')?.value) missingFields.push('3.24 Other Incident Classification');
