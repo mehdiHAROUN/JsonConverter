@@ -277,6 +277,18 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
             durationDowntimeControl?.clearValidators();
           }
           durationDowntimeControl?.updateValueAndValidity();
+
+          const memberStatesImpactTypeControl = impactForm.get('memberStatesImpactType');
+          const memberStatesImpactTypeDescriptionControl = impactForm.get('memberStatesImpactTypeDescription');
+          if (criteria && criteria.includes('geographical_spread')) {
+            memberStatesImpactTypeControl?.setValidators([Validators.required]);
+            memberStatesImpactTypeDescriptionControl?.setValidators([Validators.required]);
+          } else {
+            memberStatesImpactTypeControl?.clearValidators();
+            memberStatesImpactTypeDescriptionControl?.clearValidators();
+          }
+          memberStatesImpactTypeControl?.updateValueAndValidity();
+          memberStatesImpactTypeDescriptionControl?.updateValueAndValidity();
         });
     }
   }
@@ -347,6 +359,11 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
       if (!impactForm) {
         missingFields.push('Section 3: Impact Assessment form is missing');
       } else {
+        const classificationCriteria = detailsForm?.get('classificationCriterion')?.value || [];
+        const isReputationalImpactChecked = classificationCriteria.includes('reputational_impact');
+        const isDurationDowntimeChecked = classificationCriteria.includes('duration_and_service_downtime');
+        const isGeoSpreadChecked = classificationCriteria.includes('geographical_spread');
+
         if (!impactForm.get('competentAuthorityCode')?.value) missingFields.push('3.1 Competent Authority Code');
         if (!impactForm.get('occurrenceDate')?.value || !impactForm.get('occurrenceTime')?.value) missingFields.push('3.2 Incident Occurrence Date & Time');
         if (!impactForm.get('recoveryDate')?.value || !impactForm.get('recoveryTime')?.value) missingFields.push('3.3 Service Restoration Date & Time');
@@ -360,8 +377,6 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
         if (!impactForm.get('valueOfAffectedTransactions')?.value) missingFields.push('3.11 Value of Affected Transactions');
         if (!impactForm.get('numbersActualEstimate')?.value || impactForm.get('numbersActualEstimate')?.value.length === 0) missingFields.push('3.12 Reported Data Status');
         
-        const classificationCriteria = detailsForm.get('classificationCriterion')?.value || [];
-        const isReputationalImpactChecked = classificationCriteria.includes('reputational_impact');
         if (isReputationalImpactChecked && (!impactForm.get('reputationalImpactType')?.value || impactForm.get('reputationalImpactType')?.value.length === 0)) {
           missingFields.push('3.13 Reputational Impact Type');
         }
@@ -373,13 +388,18 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
         if (!impactForm.get('incidentDuration')?.value) missingFields.push('3.15 Incident Duration (DD:HH:MM)');
         if (!impactForm.get('serviceDowntime')?.value) missingFields.push('3.16 Service Downtime (DD:HH:MM)');
         
-        const isDurationDowntimeChecked = classificationCriteria.includes('duration_and_service_downtime');
         if (isDurationDowntimeChecked && !impactForm.get('informationDurationServiceDowntimeActualOrEstimate')?.value) {
           missingFields.push('3.17 Duration and Downtime Information Type');
         }
 
-        if (!impactForm.get('memberStatesImpactType')?.value || impactForm.get('memberStatesImpactType')?.value.length === 0) missingFields.push('3.18 Types of Impact in Member States');
-        if (!impactForm.get('memberStatesImpactTypeDescription')?.value) missingFields.push('3.19 Member States Impact Type Description');
+        if (isGeoSpreadChecked && (!impactForm.get('memberStatesImpactType')?.value || impactForm.get('memberStatesImpactType')?.value.length === 0)) {
+          missingFields.push('3.18 Types of Impact in Member States');
+        }
+
+        if (isGeoSpreadChecked && !impactForm.get('memberStatesImpactTypeDescription')?.value) {
+          missingFields.push('3.19 Member States Impact Type Description');
+        }
+
         if (!impactForm.get('dataLosseMaterialityThresholds')?.value || impactForm.get('dataLosseMaterialityThresholds')?.value.length === 0) missingFields.push('3.20 Materiality Thresholds for Data Losses');
         if (!impactForm.get('dataLossesDescription')?.value) missingFields.push('3.21 Data Losses Description');
         if (!impactForm.get('criticalServicesAffected')?.value) missingFields.push('3.22 Critical Services Affected');
