@@ -289,6 +289,14 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           }
           memberStatesImpactTypeControl?.updateValueAndValidity();
           memberStatesImpactTypeDescriptionControl?.updateValueAndValidity();
+
+          const dataLossesControl = impactForm.get('dataLosseMaterialityThresholds');
+          if (criteria && criteria.includes('data_losses')) {
+            dataLossesControl?.setValidators([Validators.required]);
+          } else {
+            dataLossesControl?.clearValidators();
+          }
+          dataLossesControl?.updateValueAndValidity();
         });
     }
   }
@@ -363,6 +371,7 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
         const isReputationalImpactChecked = classificationCriteria.includes('reputational_impact');
         const isDurationDowntimeChecked = classificationCriteria.includes('duration_and_service_downtime');
         const isGeoSpreadChecked = classificationCriteria.includes('geographical_spread');
+        const isDataLossesChecked = classificationCriteria.includes('data_losses');
 
         if (!impactForm.get('competentAuthorityCode')?.value) missingFields.push('3.1 Competent Authority Code');
         if (!impactForm.get('occurrenceDate')?.value || !impactForm.get('occurrenceTime')?.value) missingFields.push('3.2 Incident Occurrence Date & Time');
@@ -400,7 +409,10 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           missingFields.push('3.19 Member States Impact Type Description');
         }
 
-        if (!impactForm.get('dataLosseMaterialityThresholds')?.value || impactForm.get('dataLosseMaterialityThresholds')?.value.length === 0) missingFields.push('3.20 Materiality Thresholds for Data Losses');
+        if (isDataLossesChecked && (!impactForm.get('dataLosseMaterialityThresholds')?.value || impactForm.get('dataLosseMaterialityThresholds')?.value.length === 0)) {
+          missingFields.push('3.20 Materiality Thresholds for Data Losses');
+        }
+
         if (!impactForm.get('dataLossesDescription')?.value) missingFields.push('3.21 Data Losses Description');
         if (!impactForm.get('criticalServicesAffected')?.value) missingFields.push('3.22 Critical Services Affected');
         if (!impactForm.get('IncidentType')?.value || impactForm.get('IncidentType')?.value.length === 0) missingFields.push('3.23 Type of the Major ICT-related Incident');
