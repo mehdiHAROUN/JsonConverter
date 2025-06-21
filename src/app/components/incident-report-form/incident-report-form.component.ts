@@ -346,6 +346,18 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           }
           otherAuthoritiesControl?.updateValueAndValidity();
         });
+
+      impactForm.get('isTemporaryActionsMeasuresForRecovery')?.valueChanges
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((isTemporary: boolean) => {
+          const descriptionControl = impactForm.get('descriptionOfTemporaryActionsMeasuresForRecovery');
+          if (isTemporary === true) {
+            descriptionControl?.setValidators([Validators.required]);
+          } else {
+            descriptionControl?.clearValidators();
+          }
+          descriptionControl?.updateValueAndValidity();
+        });
     }
   }
 
@@ -493,8 +505,12 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           missingFields.push('3.32 Other Authorities Description');
         }
 
-        if (impactForm.get('isTemporaryActionsMeasuresForRecovery')?.value === null || impactForm.get('isTemporaryActionsMeasuresForRecovery')?.value === undefined) missingFields.push('3.33 Temporary Actions or Measures for Recovery');
-        if (!impactForm.get('descriptionOfTemporaryActionsMeasuresForRecovery')?.value) missingFields.push('3.34 Description of Temporary Actions/Measures');
+        if (impactForm.get('isTemporaryActionsMeasuresForRecovery')?.value === null || impactForm.get('isTemporaryActionsMeasuresForRecovery')?.value === undefined) {
+          missingFields.push('3.33 Temporary Actions or Measures for Recovery');
+        } else if (impactForm.get('isTemporaryActionsMeasuresForRecovery')?.value === true && !impactForm.get('descriptionOfTemporaryActionsMeasuresForRecovery')?.value) {
+          missingFields.push('3.34 Description of Temporary Actions/Measures');
+        }
+
         if (!impactForm.get('indicatorsOfCompromise')?.value) missingFields.push('3.35 Indicators of Compromise');
       }
     }
