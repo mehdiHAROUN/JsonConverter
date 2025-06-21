@@ -315,12 +315,16 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           otherClassificationControl?.updateValueAndValidity();
 
           const threatTechniquesControl = impactForm.get('threatTechniques');
+          const indicatorsOfCompromiseControl = impactForm.get('indicatorsOfCompromise');
           if (incidentTypes && incidentTypes.includes('cybersecurity_related')) {
             threatTechniquesControl?.setValidators([Validators.required]);
+            indicatorsOfCompromiseControl?.setValidators([Validators.required]);
           } else {
             threatTechniquesControl?.clearValidators();
+            indicatorsOfCompromiseControl?.clearValidators();
           }
           threatTechniquesControl?.updateValueAndValidity();
+          indicatorsOfCompromiseControl?.updateValueAndValidity();
         });
 
       impactForm.get('threatTechniques')?.valueChanges
@@ -511,7 +515,9 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           missingFields.push('3.34 Description of Temporary Actions/Measures');
         }
 
-        if (!impactForm.get('indicatorsOfCompromise')?.value) missingFields.push('3.35 Indicators of Compromise');
+        if (incidentTypes.includes('cybersecurity_related') && !impactForm.get('indicatorsOfCompromise')?.value) {
+          missingFields.push('3.35 Indicators of Compromise');
+        }
       }
     }
 
