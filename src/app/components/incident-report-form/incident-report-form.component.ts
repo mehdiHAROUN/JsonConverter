@@ -334,6 +334,18 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           }
           otherThreatsControl?.updateValueAndValidity();
         });
+
+      impactForm.get('reportingToOtherAuthorities')?.valueChanges
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((authorities: string[]) => {
+          const otherAuthoritiesControl = impactForm.get('reportingToOtherAuthoritiesOther');
+          if (authorities && authorities.includes('other')) {
+            otherAuthoritiesControl?.setValidators([Validators.required]);
+          } else {
+            otherAuthoritiesControl?.clearValidators();
+          }
+          otherAuthoritiesControl?.updateValueAndValidity();
+        });
     }
   }
 
@@ -475,7 +487,12 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
         if (!impactForm.get('affectedInfrastructureComponents')?.value) missingFields.push('3.29 Affected Infrastructure Components');
         if (!impactForm.get('isImpactOnFinancialInterest')?.value) missingFields.push('3.30 Impact on Financial Interest of Clients');
         if (!impactForm.get('reportingToOtherAuthorities')?.value || impactForm.get('reportingToOtherAuthorities')?.value.length === 0) missingFields.push('3.31 Reporting to Other Authorities');
-        if (!impactForm.get('reportingToOtherAuthoritiesOther')?.value) missingFields.push('3.32 Other Authorities Description');
+
+        const reportedAuthorities = impactForm.get('reportingToOtherAuthorities')?.value || [];
+        if (reportedAuthorities.includes('other') && !impactForm.get('reportingToOtherAuthoritiesOther')?.value) {
+          missingFields.push('3.32 Other Authorities Description');
+        }
+
         if (impactForm.get('isTemporaryActionsMeasuresForRecovery')?.value === null || impactForm.get('isTemporaryActionsMeasuresForRecovery')?.value === undefined) missingFields.push('3.33 Temporary Actions or Measures for Recovery');
         if (!impactForm.get('descriptionOfTemporaryActionsMeasuresForRecovery')?.value) missingFields.push('3.34 Description of Temporary Actions/Measures');
         if (!impactForm.get('indicatorsOfCompromise')?.value) missingFields.push('3.35 Indicators of Compromise');
