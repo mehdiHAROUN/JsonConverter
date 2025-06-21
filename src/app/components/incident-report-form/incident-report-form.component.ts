@@ -322,6 +322,18 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           }
           threatTechniquesControl?.updateValueAndValidity();
         });
+
+      impactForm.get('threatTechniques')?.valueChanges
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((threats: string[]) => {
+          const otherThreatsControl = impactForm.get('otherThreatTechniques');
+          if (threats && threats.includes('other')) {
+            otherThreatsControl?.setValidators([Validators.required]);
+          } else {
+            otherThreatsControl?.clearValidators();
+          }
+          otherThreatsControl?.updateValueAndValidity();
+        });
     }
   }
 
@@ -453,7 +465,11 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           missingFields.push('3.25 Threats and Techniques Used by Threat Actor');
         }
 
-        if (!impactForm.get('otherThreatTechniques')?.value) missingFields.push('3.26 Other Threat Techniques');
+        const threatTechniques = impactForm.get('threatTechniques')?.value || [];
+        if (threatTechniques.includes('other') && !impactForm.get('otherThreatTechniques')?.value) {
+          missingFields.push('3.26 Other Threat Techniques');
+        }
+
         if (!impactForm.get('affectedFunctionalAreas')?.value) missingFields.push('3.27 Affected Functional Areas');
         if (!impactForm.get('isAffectedInfrastructureComponents')?.value) missingFields.push('3.28 Is Infrastructure Components Affected');
         if (!impactForm.get('affectedInfrastructureComponents')?.value) missingFields.push('3.29 Affected Infrastructure Components');
