@@ -259,12 +259,16 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe((criteria: string[]) => {
           const reputationalImpactControl = impactForm.get('reputationalImpactType');
+          const reputationalImpactDescriptionControl = impactForm.get('reputationalImpactDescription');
           if (criteria && criteria.includes('reputational_impact')) {
             reputationalImpactControl?.setValidators([Validators.required]);
+            reputationalImpactDescriptionControl?.setValidators([Validators.required]);
           } else {
             reputationalImpactControl?.clearValidators();
+            reputationalImpactDescriptionControl?.clearValidators();
           }
           reputationalImpactControl?.updateValueAndValidity();
+          reputationalImpactDescriptionControl?.updateValueAndValidity();
         });
     }
   }
@@ -354,7 +358,10 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           missingFields.push('3.13 Reputational Impact Type');
         }
 
-        if (!impactForm.get('reputationalImpactDescription')?.value) missingFields.push('3.14 Reputational Impact Description');
+        if (isReputationalImpactChecked && !impactForm.get('reputationalImpactDescription')?.value) {
+          missingFields.push('3.14 Reputational Impact Description');
+        }
+
         if (!impactForm.get('incidentDuration')?.value) missingFields.push('3.15 Incident Duration (DD:HH:MM)');
         if (!impactForm.get('serviceDowntime')?.value) missingFields.push('3.16 Service Downtime (DD:HH:MM)');
         if (!impactForm.get('informationDurationServiceDowntimeActualOrEstimate')?.value) missingFields.push('3.17 Duration and Downtime Information Type');
