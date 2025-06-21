@@ -302,6 +302,18 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           dataLossesControl?.updateValueAndValidity();
           dataLossesDescriptionControl?.updateValueAndValidity();
         });
+
+      impactForm.get('IncidentType')?.valueChanges
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((incidentTypes: string[]) => {
+          const otherClassificationControl = impactForm.get('otherIncidentClassification');
+          if (incidentTypes && incidentTypes.includes('other')) {
+            otherClassificationControl?.setValidators([Validators.required]);
+          } else {
+            otherClassificationControl?.clearValidators();
+          }
+          otherClassificationControl?.updateValueAndValidity();
+        });
     }
   }
 
@@ -423,7 +435,12 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
 
         if (!impactForm.get('criticalServicesAffected')?.value) missingFields.push('3.22 Critical Services Affected');
         if (!impactForm.get('IncidentType')?.value || impactForm.get('IncidentType')?.value.length === 0) missingFields.push('3.23 Type of the Major ICT-related Incident');
-        if (!impactForm.get('otherIncidentClassification')?.value) missingFields.push('3.24 Other Incident Classification');
+
+        const incidentTypes = impactForm.get('IncidentType')?.value || [];
+        if (incidentTypes.includes('other') && !impactForm.get('otherIncidentClassification')?.value) {
+          missingFields.push('3.24 Other Incident Classification');
+        }
+
         if (!impactForm.get('threatTechniques')?.value || impactForm.get('threatTechniques')?.value.length === 0) missingFields.push('3.25 Threats and Techniques Used by Threat Actor');
         if (!impactForm.get('otherThreatTechniques')?.value) missingFields.push('3.26 Other Threat Techniques');
         if (!impactForm.get('affectedFunctionalAreas')?.value) missingFields.push('3.27 Affected Functional Areas');
