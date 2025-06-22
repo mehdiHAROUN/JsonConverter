@@ -253,6 +253,7 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
   ngAfterViewInit(): void {
     const detailsForm = this.incidentDetailsFormComponent?.incidentDetailsForm;
     const impactForm = this.impactAssessmentComponent?.impactForm;
+    const reportingForm = this.reportingToOtherAuthoritiesComponent?.reportingForm;
 
     if (detailsForm && impactForm) {
       detailsForm.get('classificationCriterion')?.valueChanges
@@ -361,6 +362,26 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
             descriptionControl?.clearValidators();
           }
           descriptionControl?.updateValueAndValidity();
+        });
+    }
+
+    if (reportingForm) {
+      reportingForm.get('rootCausesDetailedClassification')?.valueChanges
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((detailed: string[]) => {
+          const otherRootCauseControl = reportingForm.get('rootCausesOther');
+          const requiredValues = [
+            'process_failure_other',
+            'system_failure_other',
+            'human_error_other',
+            'external_event_other'
+          ];
+          if (detailed && detailed.some(val => requiredValues.includes(val))) {
+            otherRootCauseControl?.setValidators([Validators.required]);
+          } else {
+            otherRootCauseControl?.clearValidators();
+          }
+          otherRootCauseControl?.updateValueAndValidity();
         });
     }
   }
@@ -529,7 +550,14 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
         if (!reportingForm.get('rootCauseHLClassification')?.value || reportingForm.get('rootCauseHLClassification')?.value.length === 0) missingFields.push('4.1 High-Level Classification of Root Causes of the Incident');
         if (!reportingForm.get('rootCausesDetailedClassification')?.value || reportingForm.get('rootCausesDetailedClassification')?.value.length === 0) missingFields.push('4.2 Detailed Classification of Root Causes of the Incident');
         if (!reportingForm.get('rootCausesAdditionalClassification')?.value || reportingForm.get('rootCausesAdditionalClassification')?.value.length === 0) missingFields.push('4.3 Additional Classification of Root Causes of the Incident');
-        if (!reportingForm.get('rootCausesOther')?.value) missingFields.push('4.4 Other Root Causes');
+        const detailed = reportingForm.get('rootCausesDetailedClassification')?.value || [];
+        const requireOther = detailed.some((val: string) => [
+          'process_failure_other',
+          'system_failure_other',
+          'human_error_other',
+          'external_event_other'
+        ].includes(val));
+        if (requireOther && !reportingForm.get('rootCausesOther')?.value) missingFields.push('4.4 Other Root Causes');
         if (!reportingForm.get('rootCausesInformation')?.value) missingFields.push('4.5 Root Causes Information');
         if (!reportingForm.get('incidentResolutionSummary')?.value) missingFields.push('4.6 Incident Resolution Summary');
         if (!reportingForm.get('incidentRootCauseAddressedDate')?.value || !reportingForm.get('incidentRootCauseAddressedTime')?.value) missingFields.push('4.7 Incident Root Cause Addressed Date & Time');
