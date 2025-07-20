@@ -8,6 +8,32 @@
   .mat-card-content {
     padding: 0;
   }
+}
+
+:host {
+  display: block;
+}
+
+.entity-section {
+  padding: 1.5rem;
+  background-color: transparent;
+
+  .form-section {
+    background-color: #fdfdfd;
+    padding: 1.5rem 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border: 1px solid #eee;
+
+    h4 {
+      color: #333;
+      margin: 0 0 1.5rem 0;
+      font-size: 1.2rem;
+      font-weight: 500;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e0e0e0;
+    }
+  }
 
   .full-width {
     width: 100%;
@@ -15,8 +41,8 @@
 
   .form-row {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    gap: 1.5rem;
+    align-items: flex-start;
 
     .half-width {
       flex: 1;
@@ -27,7 +53,12 @@
     margin-bottom: 1rem;
   }
 
-  .mat-mdc-form-field-error {
-    font-size: 14px;
+  textarea[matInput] {
+    min-height: 60px;
+    resize: vertical;
   }
-} 
+
+  .mat-mdc-form-field-error {
+    font-size: 12px;
+  }
+}

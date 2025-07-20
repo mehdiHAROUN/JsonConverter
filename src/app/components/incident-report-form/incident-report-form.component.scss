@@ -1,41 +1,144 @@
 .incident-report-form {
-  max-width: 1100px;
-  margin: 3rem auto;
-  padding: 3rem 2.5rem 2.5rem 2.5rem;
-  background-color: #f5f7fa;
-  border-radius: 18px;
-  box-shadow: 0 6px 32px rgba(0,0,0,0.13);
-  min-height: 80vh;
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+
+  // Indicateur de sauvegarde automatique
+  .auto-save-indicator {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    background: rgba(76, 175, 80, 0.9);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 1000;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+
+    &.saving {
+      background: rgba(255, 152, 0, 0.9);
+      
+      mat-icon {
+        animation: spin 1s linear infinite;
+      }
+    }
+
+    &.has-data {
+      background: rgba(76, 175, 80, 0.9);
+    }
+
+    &:not(.has-data):not(.saving) {
+      background: rgba(158, 158, 158, 0.9);
+    }
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    .clear-data-btn {
+      width: 24px;
+      height: 24px;
+      margin-left: 4px;
+      
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+    }
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 
   h2 {
-    color: #263238;
+    color: #222b45;
     margin-bottom: 2.5rem;
     text-align: center;
-    font-size: 2.5rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    font-size: 2.7rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.04);
   }
 
   form {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
   }
 
   .mat-mdc-tab-group {
     margin-bottom: 2.5rem;
+    width: 100%;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    background: #fff;
+    border-radius: 0; // Suppression du border-radius
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    padding: 0 0.5rem;
+    overflow-x: auto;
+
+    .mat-mdc-tab-header {
+      border-bottom: 1px solid #e0e6ed;
+
+      .mat-mdc-tab-labels {
+        .mat-mdc-tab-label {
+          font-weight: 600;
+          color: #222b45;
+          opacity: 0.85;
+          min-width: 120px;
+          padding: 0.7rem 1.5rem;
+          border-radius: 8px 8px 0 0;
+          transition: background 0.2s;
+        }
+
+        .mat-mdc-tab-label-active {
+          color: #1976d2;
+          background: #f5faff;
+          border-bottom: 2.5px solid #1976d2;
+        }
+      }
+    }
   }
 
   .tab-content {
-    padding: 2rem 0;
+    padding: 1.5rem 0.5rem 1.5rem 0.5rem;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    width: 100%;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    overflow-x: auto;
   }
 
   .full-width {
     width: 100%;
+    max-width: 100vw;
   }
 
   .button-container {
@@ -64,41 +167,136 @@
     margin-bottom: 1.2rem;
   }
 
-  ::ng-deep {
-    .mat-mdc-tab-body-content {
-      overflow: visible;
+  .form-header-row {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto 2rem auto;
+    
+    .form-header-content {
+      display: flex;
+      align-items: flex-start;
+      gap: 2rem;
+
+      .incident-type-field {
+        flex: 1;
+        margin-top: 2px;
+        
+        mat-form-field {
+          width: 100%;
+          margin-bottom: 0;
+        }
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        
+        @media (max-width: 768px) {
+          flex-direction: column;
+          gap: 8px;
+        }
+      }
+
+      button {
+        margin: 0;
+        height: 56px;
+        min-width: 160px;
+        border-radius: 2px;
+        font-size: 1rem;
+        font-weight: 500;
+        border-style: solid;
+        border-width: 1px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.2s ease;
+
+        &:hover {
+          box-shadow: 0 1px 1px rgba(25, 118, 210, 0.4);
+        }
+
+        // Style spécifique pour le bouton de suppression de sauvegarde
+        &[color="warn"] {
+          margin-left: 12px;
+          min-width: 140px;
+          font-size: 0.9rem;
+          
+          mat-icon {
+            margin-right: 6px;
+            font-size: 18px;
+          }
+
+          &:hover {
+            box-shadow: 0 1px 1px rgba(244, 67, 54, 0.4);
+            background-color: rgba(244, 67, 54, 0.04);
+          }
+        }
+      }
     }
   }
 }
 
 .entity-card {
-  margin-bottom: 2.5rem;
-  padding: 2rem 2rem 1.5rem 2rem;
-  border-radius: 14px;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.10);
+  margin-bottom: 1.5rem;
+  padding: 0;
+  border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
   background: #fff;
+  width: 100%;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  overflow-x: auto;
+  border: 1px solid #e0e6ed;
 
   .mat-card-title {
-    font-size: 1.35rem;
+    font-size: 1.15rem;
     font-weight: 700;
-    margin-bottom: 2rem;
+    margin-bottom: 0;
     color: #1976d2;
     letter-spacing: 0.5px;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #e0e0e0;
+    padding: 1.1rem 1.5rem 0.5rem 1.5rem;
+    border-bottom: 1px solid #e0e6ed;
+    background: #f8fafc;
+    border-radius: 10px 10px 0 0;
   }
 
   .entity-fields, 
   [formGroupName], 
   [formGroup] {
-    margin-top: 1rem;
+    margin-top: 0;
+    padding: 1.2rem 1.5rem 1.2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .entity-fields mat-form-field, 
+  [formGroupName] mat-form-field, 
+  [formGroup] mat-form-field {
+    background: #f9fbfd;
+    border-radius: 6px;
+    padding: 0.2rem 0.7rem;
+    transition: box-shadow 0.2s;
+  }
+
+  .entity-fields mat-form-field:hover, 
+  [formGroupName] mat-form-field:hover, 
+  [formGroup] mat-form-field:hover {
+    box-shadow: 0 2px 8px rgba(25,118,210,0.07);
   }
 }
 
+// Style pour les listes façon "tableau"
 .affected-entity-group {
-  margin-bottom: 2rem;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 0.7rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid #e0e6ed;
+  background: #fcfdff;
+  border-radius: 0 0 8px 8px;
+  transition: background 0.2s;
+
+
 }
 
 .entity-row {
@@ -138,4 +336,13 @@ button[mat-raised-button] {
 .entity-fields mat-form-field {
   width: 100%;
   margin-bottom: 0;
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+  height: 100%;
 }

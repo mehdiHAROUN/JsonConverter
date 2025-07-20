@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators, AbstractControl, FormArray, ValidatorFn, ValidationErrors } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,13 +10,15 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatIconModule } from '@angular/material/icon';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { IncidentDetailsFormComponent } from '../incident-details-form/incident-details-form.component';
 import { ImpactAssessmentComponent } from '../impact-assessment/impact-assessment.component';
 import { ReportingToOtherAuthoritiesComponent } from '../reporting-to-other-authorities/reporting-to-other-authorities.component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { FormPersistenceService } from '../../core/services/form-persistence.service';
+import { FormPersistenceDirective } from '../../shared/directives/form-persistence.directive';
+import { MatIconModule } from '@angular/material/icon';
 
 export enum IncidentSubmissionType {
   INITIAL_NOTIFICATION = 'initial_notification',
@@ -70,28 +72,28 @@ interface IncidentFormData {
   submissionDate: Date;
   reporterName: string;
   reporterRole: string;
-  
+
   // Entity Information
   entityName: string;
   entityType: string;
   entityLocation: string;
-  
+
   // Contact Information
   contactName: string;
   contactEmail: string;
   contactPhone: string;
-  
+
   // Incident Details
   incidentTitle: string;
   incidentDate: Date;
   incidentDescription: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
-  
+
   // Impact Assessment
   financialImpact: number;
   operationalImpact: string;
   customerImpact: string;
-  
+
   // Reporting to Other Authorities
   reportedToAuthorities: boolean;
   authorityName: string;
@@ -111,21 +113,22 @@ const PHONE_REGEX = /^\+?[1-9]\d{1,14}(\s?\(\d+\))?([-\s.]?\d+)*$/;
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
+    MatIconModule,
     MatDatepickerModule,
     MatNativeDateModule,
     MatCheckboxModule,
     MatTabsModule,
     MatCardModule,
     MatDividerModule,
-    MatIconModule,
     IncidentDetailsFormComponent,
     ImpactAssessmentComponent,
-    ReportingToOtherAuthoritiesComponent
+    ReportingToOtherAuthoritiesComponent,
+    FormPersistenceDirective
   ],
   templateUrl: './incident-report-form.component.html',
   styleUrl: './incident-report-form.component.scss'
 })
-export class IncidentReportFormComponent implements OnInit, OnDestroy {
+export class IncidentReportFormComponent implements OnInit, OnDestroy, AfterViewInit {
   incidentForm: FormGroup;
   incidentSubmissionTypes = Object.values(IncidentSubmissionType);
   reportCurrencies = REPORT_CURRENCIES;
@@ -134,6 +137,11 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
   formSubmitted = false;
   IncidentSubmissionType = IncidentSubmissionType;
   AffectedEntityType = AffectedEntityType;
+  
+  // Form persistence
+  private formPersistence: ReturnType<FormPersistenceService['registerForm']> | null = null;
+  isSaving = false;
+  
   @ViewChild(IncidentDetailsFormComponent) incidentDetailsFormComponent!: IncidentDetailsFormComponent;
   @ViewChild(ImpactAssessmentComponent) impactAssessmentComponent!: ImpactAssessmentComponent;
   @ViewChild(ReportingToOtherAuthoritiesComponent) reportingToOtherAuthoritiesComponent!: ReportingToOtherAuthoritiesComponent;
@@ -157,7 +165,10 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
     return null;
   };
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private formPersistenceService: FormPersistenceService
+  ) {
     // Initialize affected entity type options
     this.affectedEntityTypeOptions = Object.values(AffectedEntityType).map(value => ({
       value: value,
@@ -167,39 +178,39 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
     this.incidentForm = this.fb.group({
       incidentSubmissionDetails: this.fb.group({
         incidentSubmission: ['', Validators.required],
-        reportCurrency: ['', Validators.required]
+        reportCurrency: ['EUR', Validators.required]
       }),
       // --- Entity Information ---
       submittingEntity: this.fb.group({
-        name: ['', Validators.maxLength(32767)],
+        name: ['ENGIE GLOBAL MARKETS', [Validators.required, Validators.maxLength(32767)]],
         code: ['', Validators.maxLength(32767)],
-        LEI: ['', [Validators.pattern(/^[A-Z0-9]{18}[0-9]{2}$/)]],
+        LEI: ['5493003C3KJ2TY7MBZ44', [Validators.pattern(/^[A-Z0-9]{18}[0-9]{2}$/)]],
         entityType: ['SUBMITTING_ENTITY']
       }, { validators: IncidentReportFormComponent.codeOrLeiRequiredValidator }),
       affectedEntity: this.fb.array([
         this.fb.group({
-          name: ['', Validators.maxLength(32767)],
-          LEI: ['', [Validators.pattern(/^[A-Z0-9]{18}[0-9]{2}$/)]],
-          affectedEntityType: [[]], // optional multi-select
+          name: [''],
+          LEI: ['', [Validators.required, Validators.pattern(/^[A-Z0-9]{18}[0-9]{2}$/)]],
+          affectedEntityType: [['investment_firm']], // default value set here
           entityType: ['AFFECTED_ENTITY']
         })
       ]),
       ultimateParentUndertaking: this.fb.group({
-        name: ['', Validators.maxLength(32767)],
-        LEI: ['', [Validators.pattern(/^[A-Z0-9]{18}[0-9]{2}$/)]],
+        name: ['ENGIE', [Validators.maxLength(32767)]],
+        LEI: ['LAXUQCHT4FH58LRZDY46', [Validators.pattern(/^[A-Z0-9]{18}[0-9]{2}$/)]],
         entityType: ['ULTIMATE_PARENT_UNDERTAKING_ENTITY']
-      }, { validators: IncidentReportFormComponent.leiRequiredValidator }),
+      }),
       // --- End Entity Information ---
       // --- Contact Information ---
       primaryContact: this.fb.group({
-        name: ['', Validators.maxLength(32767)],
+        name: ['', [Validators.required, Validators.maxLength(32767)]],
         email: ['', [Validators.required, Validators.email]],
-        phone: ['', [Validators.pattern(PHONE_REGEX)]]
+        phone: ['', [Validators.required, Validators.pattern(PHONE_REGEX)]]
       }),
       secondaryContact: this.fb.group({
-        name: ['', Validators.maxLength(32767)],
+        name: ['', [Validators.required, Validators.maxLength(32767)]],
         email: ['', [Validators.required, Validators.email]],
-        phone: ['', [Validators.pattern(PHONE_REGEX)]]
+        phone: ['', [Validators.required, Validators.pattern(PHONE_REGEX)]]
       }),
       // --- End Contact Information ---
       // --- Incident Details ---
@@ -243,6 +254,111 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Initialize form persistence
+    this.formPersistence = this.formPersistenceService.registerForm(
+      'incident-report-form',
+      this.incidentForm,
+      {
+        autoSave: true,
+        excludeFields: ['password', 'confirmPassword'], // Exclude sensitive fields
+        expiryHours: 48 // Keep data for 48 hours
+      }
+    );
+    
+    // Listen to form changes to trigger tab label updates
+    this.incidentForm.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        // Trigger change detection for tab labels
+        // This ensures the warning icon appears/disappears as needed
+      });
+    
+    this.incidentForm.get('incidentSubmissionDetails.incidentSubmission')?.valueChanges.subscribe((type: string) => {
+      const impactForm = this.impactAssessmentComponent?.impactForm;
+      const reportingForm = this.reportingToOtherAuthoritiesComponent?.reportingForm;
+      const incidentDetailsForm = this.incidentDetailsFormComponent?.incidentDetailsForm;
+      
+      // Handle Major Incident Reclassified as Non-Major - only specific fields required
+      if (type === 'major_incident_reclassified_as_non-major') {
+        this.handleMajorIncidentReclassifiedValidation();
+        return;
+      } else {
+        // Restore normal validators for other incident types
+        this.restoreNormalValidators();
+      }
+      
+      if (!impactForm) return;
+      const requiredFields = [
+        'competentAuthorityCode', 'occurrenceDate', 'occurrenceTime', 'recoveryDate', 'recoveryTime',
+        'number', 'percentage', 'numberOfFinancialCounterpartsAffected', 'percentageOfFinancialCounterpartsAffected',
+        'hasImpactOnRelevantClients', 'numberOfAffectedTransactions', 'percentageOfAffectedTransactions',
+        'valueOfAffectedTransactions', 'numbersActualEstimate', 'criticalServicesAffected', 'IncidentType',
+        'affectedFunctionalAreas', 'isAffectedInfrastructureComponents', 'affectedInfrastructureComponents',
+        'isImpactOnFinancialInterest', 'reportingToOtherAuthorities', 'isTemporaryActionsMeasuresForRecovery'
+      ];
+      requiredFields.forEach(field => {
+        const control = impactForm.get(field);
+        if (!control) return;
+        if (type === 'intermediate_report' || type === 'final_report') {
+          control.setValidators([Validators.required]);
+        } else {
+          control.clearValidators();
+        }
+        control.updateValueAndValidity();
+      });
+
+      // --- Added for fields required only for final_report (section 4) ---
+      if (reportingForm) {
+        const section4Fields = [
+          'rootCauseHLClassification',
+          'rootCausesDetailedClassification',
+          'rootCausesAdditionalClassification',
+          'rootCausesInformation',
+          'incidentResolutionSummary',
+          'incidentRootCauseAddressedDate',
+          'incidentRootCauseAddressedTime',
+          'incidentWasResolvedDate',
+          'incidentWasResolvedTime',
+          'incidentResolutionVsPlannedImplementation',
+          'assessmentOfRiskToCriticalFunctions',
+          'informationRelevantToResolutionAuthorities',
+          'economicImpactMaterialityThreshold',
+          'grossAmountIndirectDirectCosts',
+          'financialRecoveriesAmount',
+          'recurringNonMajorIncidentsDescription',
+          'occurrenceOfRecurringIncidentsDate',
+          'recurringIncidentDate',
+        ];
+        section4Fields.forEach(field => {
+          const control = reportingForm.get(field);
+          if (!control) return;
+          if (type === 'final_report') {
+            control.setValidators([Validators.required]);
+          } else {
+            control.clearValidators();
+          }
+          control.updateValueAndValidity();
+        });
+        // Handling of the rootCausesOther field which depends on a value in rootCausesDetailedClassification
+        const detailed = reportingForm.get('rootCausesDetailedClassification')?.value || [];
+        const requireOther = Array.isArray(detailed) && detailed.some((val: string) => [
+          'process_failure_other',
+          'system_failure_other',
+          'human_error_other',
+          'external_event_other'
+        ].includes(val));
+        const otherControl = reportingForm.get('rootCausesOther');
+        if (otherControl) {
+          if (type === 'final_report' && requireOther) {
+            otherControl.setValidators([Validators.required]);
+          } else {
+            otherControl.clearValidators();
+          }
+          otherControl.updateValueAndValidity();
+        }
+      }
+    });
+
     this.incidentForm.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(value => {
@@ -251,16 +367,56 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    const detailsForm = this.incidentDetailsFormComponent?.incidentDetailsForm;
-    const impactForm = this.impactAssessmentComponent?.impactForm;
-    const reportingForm = this.reportingToOtherAuthoritiesComponent?.reportingForm;
+    const incidentSubmissionControl = this.incidentForm.get('incidentSubmissionDetails.incidentSubmission');
 
-    if (detailsForm && impactForm) {
+    const toggleControls = (enable: boolean) => {
+      const reportCurrencyControl = this.incidentForm.get('incidentSubmissionDetails.reportCurrency');
+      if (enable) {
+        reportCurrencyControl?.enable({ emitEvent: false });
+      } else {
+        reportCurrencyControl?.disable({ emitEvent: false });
+      }
+
+      Object.keys(this.incidentForm.controls).forEach(key => {
+        if (key !== 'incidentSubmissionDetails') {
+          const control = this.incidentForm.get(key);
+          if (enable) {
+            control?.enable({ emitEvent: false });
+          } else {
+            control?.disable({ emitEvent: false });
+          }
+        }
+      });
+
+      if (this.incidentDetailsFormComponent?.incidentDetailsForm) {
+        enable ? this.incidentDetailsFormComponent.incidentDetailsForm.enable({ emitEvent: false }) : this.incidentDetailsFormComponent.incidentDetailsForm.disable({ emitEvent: false });
+      }
+      if (this.impactAssessmentComponent?.impactForm) {
+        enable ? this.impactAssessmentComponent.impactForm.enable({ emitEvent: false }) : this.impactAssessmentComponent.impactForm.disable({ emitEvent: false });
+      }
+      if (this.reportingToOtherAuthoritiesComponent?.reportingForm) {
+        enable ? this.reportingToOtherAuthoritiesComponent.reportingForm.enable({ emitEvent: false }) : this.reportingToOtherAuthoritiesComponent.reportingForm.disable({ emitEvent: false });
+      }
+    };
+
+    toggleControls(!!incidentSubmissionControl?.value);
+
+    incidentSubmissionControl?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(value => {
+        toggleControls(!!value);
+      });
+
+    const detailsForm = this.incidentDetailsFormComponent?.incidentDetailsForm;
+    const impactFormLocal = this.impactAssessmentComponent?.impactForm;
+    const reportingFormLocal = this.reportingToOtherAuthoritiesComponent?.reportingForm;
+
+    if (detailsForm && impactFormLocal) {
       detailsForm.get('classificationCriterion')?.valueChanges
         .pipe(takeUntil(this.destroy$))
         .subscribe((criteria: string[]) => {
-          const reputationalImpactControl = impactForm.get('reputationalImpactType');
-          const reputationalImpactDescriptionControl = impactForm.get('reputationalImpactDescription');
+          const reputationalImpactControl = impactFormLocal.get('reputationalImpactType');
+          const reputationalImpactDescriptionControl = impactFormLocal.get('reputationalImpactDescription');
           if (criteria && criteria.includes('reputational_impact')) {
             reputationalImpactControl?.setValidators([Validators.required]);
             reputationalImpactDescriptionControl?.setValidators([Validators.required]);
@@ -271,7 +427,7 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           reputationalImpactControl?.updateValueAndValidity();
           reputationalImpactDescriptionControl?.updateValueAndValidity();
 
-          const durationDowntimeControl = impactForm.get('informationDurationServiceDowntimeActualOrEstimate');
+          const durationDowntimeControl = impactFormLocal.get('informationDurationServiceDowntimeActualOrEstimate');
           if (criteria && criteria.includes('duration_and_service_downtime')) {
             durationDowntimeControl?.setValidators([Validators.required]);
           } else {
@@ -279,8 +435,8 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           }
           durationDowntimeControl?.updateValueAndValidity();
 
-          const memberStatesImpactTypeControl = impactForm.get('memberStatesImpactType');
-          const memberStatesImpactTypeDescriptionControl = impactForm.get('memberStatesImpactTypeDescription');
+          const memberStatesImpactTypeControl = impactFormLocal.get('memberStatesImpactType');
+          const memberStatesImpactTypeDescriptionControl = impactFormLocal.get('memberStatesImpactTypeDescription');
           if (criteria && criteria.includes('geographical_spread')) {
             memberStatesImpactTypeControl?.setValidators([Validators.required]);
             memberStatesImpactTypeDescriptionControl?.setValidators([Validators.required]);
@@ -291,8 +447,8 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           memberStatesImpactTypeControl?.updateValueAndValidity();
           memberStatesImpactTypeDescriptionControl?.updateValueAndValidity();
 
-          const dataLossesControl = impactForm.get('dataLosseMaterialityThresholds');
-          const dataLossesDescriptionControl = impactForm.get('dataLossesDescription');
+          const dataLossesControl = impactFormLocal.get('dataLosseMaterialityThresholds');
+          const dataLossesDescriptionControl = impactFormLocal.get('dataLossesDescription');
           if (criteria && criteria.includes('data_losses')) {
             dataLossesControl?.setValidators([Validators.required]);
             dataLossesDescriptionControl?.setValidators([Validators.required]);
@@ -304,10 +460,10 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           dataLossesDescriptionControl?.updateValueAndValidity();
         });
 
-      impactForm.get('IncidentType')?.valueChanges
+      impactFormLocal.get('IncidentType')?.valueChanges
         .pipe(takeUntil(this.destroy$))
         .subscribe((incidentTypes: string[]) => {
-          const otherClassificationControl = impactForm.get('otherIncidentClassification');
+          const otherClassificationControl = impactFormLocal.get('otherIncidentClassification');
           if (incidentTypes && incidentTypes.includes('other')) {
             otherClassificationControl?.setValidators([Validators.required]);
           } else {
@@ -315,8 +471,8 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           }
           otherClassificationControl?.updateValueAndValidity();
 
-          const threatTechniquesControl = impactForm.get('threatTechniques');
-          const indicatorsOfCompromiseControl = impactForm.get('indicatorsOfCompromise');
+          const threatTechniquesControl = impactFormLocal.get('threatTechniques');
+          const indicatorsOfCompromiseControl = impactFormLocal.get('indicatorsOfCompromise');
           if (incidentTypes && incidentTypes.includes('cybersecurity_related')) {
             threatTechniquesControl?.setValidators([Validators.required]);
             indicatorsOfCompromiseControl?.setValidators([Validators.required]);
@@ -328,10 +484,10 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           indicatorsOfCompromiseControl?.updateValueAndValidity();
         });
 
-      impactForm.get('threatTechniques')?.valueChanges
+      impactFormLocal.get('threatTechniques')?.valueChanges
         .pipe(takeUntil(this.destroy$))
         .subscribe((threats: string[]) => {
-          const otherThreatsControl = impactForm.get('otherThreatTechniques');
+          const otherThreatsControl = impactFormLocal.get('otherThreatTechniques');
           if (threats && threats.includes('other')) {
             otherThreatsControl?.setValidators([Validators.required]);
           } else {
@@ -340,10 +496,10 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           otherThreatsControl?.updateValueAndValidity();
         });
 
-      impactForm.get('reportingToOtherAuthorities')?.valueChanges
+      impactFormLocal.get('reportingToOtherAuthorities')?.valueChanges
         .pipe(takeUntil(this.destroy$))
         .subscribe((authorities: string[]) => {
-          const otherAuthoritiesControl = impactForm.get('reportingToOtherAuthoritiesOther');
+          const otherAuthoritiesControl = impactFormLocal.get('reportingToOtherAuthoritiesOther');
           if (authorities && authorities.includes('other')) {
             otherAuthoritiesControl?.setValidators([Validators.required]);
           } else {
@@ -352,10 +508,10 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
           otherAuthoritiesControl?.updateValueAndValidity();
         });
 
-      impactForm.get('isTemporaryActionsMeasuresForRecovery')?.valueChanges
+      impactFormLocal.get('isTemporaryActionsMeasuresForRecovery')?.valueChanges
         .pipe(takeUntil(this.destroy$))
         .subscribe((isTemporary: boolean) => {
-          const descriptionControl = impactForm.get('descriptionOfTemporaryActionsMeasuresForRecovery');
+          const descriptionControl = impactFormLocal.get('descriptionOfTemporaryActionsMeasuresForRecovery');
           if (isTemporary === true) {
             descriptionControl?.setValidators([Validators.required]);
           } else {
@@ -365,11 +521,11 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
         });
     }
 
-    if (reportingForm) {
-      reportingForm.get('rootCausesDetailedClassification')?.valueChanges
+    if (reportingFormLocal) {
+      reportingFormLocal.get('rootCausesDetailedClassification')?.valueChanges
         .pipe(takeUntil(this.destroy$))
         .subscribe((detailed: string[]) => {
-          const otherRootCauseControl = reportingForm.get('rootCausesOther');
+          const otherRootCauseControl = reportingFormLocal.get('rootCausesOther');
           const requiredValues = [
             'process_failure_other',
             'system_failure_other',
@@ -391,9 +547,382 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  /**
+   * Deletes all saved data for the form and its sub-forms
+   */
+  clearAllSavedData(): void {
+    this.showConfirmationDialog(
+      'Delete saved data',
+      'Are you sure you want to delete all saved data for this form?',
+      'This action is irreversible and will erase all previously filled fields.',
+      () => {
+        try {
+          console.log('Starting to clear all saved data...');
+          
+          // Clear specific form data
+          this.formPersistenceService.clearFormData('incident-report-form');
+          this.formPersistenceService.clearFormData('incident-details');
+          this.formPersistenceService.clearFormData('impact-assessment');
+          this.formPersistenceService.clearFormData('reporting-authorities');
+          
+          // Also use the clearAllFormData method as a fallback
+          this.formPersistenceService.clearAllFormData();
+          
+          console.log('Form data cleared from localStorage');
+          
+          // Reset the main form
+          this.initializeFormWithDefaults();
+          
+          // Reset child components
+          this.resetChildComponents();
+          
+          console.log('Saved data successfully deleted');
+          this.showTemporaryNotification('All saved data has been deleted', 'success');
+        } catch (error) {
+          console.error('Error clearing saved data:', error);
+          this.showTemporaryNotification('Error occurred while clearing data', 'error');
+        }
+      }
+    );
+  }
+
+  /**
+   * Checks if any saved data exists for this form or its sub-forms
+   */
+  hasFormData(): boolean {
+    return this.formPersistenceService.hasFormData('incident-report-form') ||
+           this.formPersistenceService.hasFormData('incident-details') ||
+           this.formPersistenceService.hasFormData('impact-assessment') ||
+           this.formPersistenceService.hasFormData('reporting-authorities');
+  }
+
+  /**
+   * Resets the main form to its default values
+   */
+  private initializeFormWithDefaults(): void {
+    // Reset the entire form to default values
+    this.incidentForm.patchValue({
+      incidentSubmissionDetails: {
+        incidentSubmission: '',
+        reportCurrency: 'EUR'
+      },
+      submittingEntity: {
+        name: 'ENGIE GLOBAL MARKETS',
+        code: '',
+        LEI: '5493003C3KJ2TY7MBZ44',
+        entityType: 'SUBMITTING_ENTITY'
+      },
+      ultimateParentUndertaking: {
+        name: 'ENGIE',
+        LEI: 'LAXUQCHT4FH58LRZDY46',
+        entityType: 'ULTIMATE_PARENT_UNDERTAKING_ENTITY'
+      },
+      primaryContact: {
+        name: '',
+        email: '',
+        phone: ''
+      },
+      secondaryContact: {
+        name: '',
+        email: '',
+        phone: ''
+      },
+      incidentDetails: null,
+      entityName: '',
+      entityType: '',
+      entityLocation: '',
+      contactName: '',
+      contactEmail: '',
+      contactPhone: '',
+      reportedToAuthorities: false,
+      authorityName: '',
+      reportReference: ''
+    });
+
+    // Reset affected entities array - keep only one with default values
+    while (this.affectedEntity.length > 1) {
+      this.affectedEntity.removeAt(this.affectedEntity.length - 1);
+    }
+    
+    // Reset the first affected entity to default values
+    this.affectedEntity.at(0)?.patchValue({
+      name: '',
+      LEI: '',
+      affectedEntityType: ['investment_firm'],
+      entityType: 'AFFECTED_ENTITY'
+    });
+    
+    // Mark the form as pristine
+    this.incidentForm.markAsPristine();
+    this.incidentForm.markAsUntouched();
+    
+    console.log('Main form reset to default values');
+  }
+
+  /**
+   * Resets the child components' forms to their default values
+   */
+  private resetChildComponents(): void {
+    setTimeout(() => {
+      // Reset Incident Details form to default values
+      if (this.incidentDetailsFormComponent) {
+        this.incidentDetailsFormComponent.resetToDefaults();
+        console.log('Incident Details form reset to default values');
+      } else {
+        console.warn('Incident Details component not available for reset');
+      }
+      
+      // Reset Impact Assessment form to default values
+      if (this.impactAssessmentComponent?.impactForm) {
+        this.impactAssessmentComponent.impactForm.reset();
+        this.impactAssessmentComponent.impactForm.markAsPristine();
+        this.impactAssessmentComponent.impactForm.markAsUntouched();
+        console.log('Impact Assessment form reset to default values');
+      } else {
+        console.warn('Impact Assessment component not available for reset');
+      }
+      
+      // Reset Reporting to Other Authorities form to default values
+      if (this.reportingToOtherAuthoritiesComponent?.reportingForm) {
+        this.reportingToOtherAuthoritiesComponent.reportingForm.reset();
+        this.reportingToOtherAuthoritiesComponent.reportingForm.markAsPristine();
+        this.reportingToOtherAuthoritiesComponent.reportingForm.markAsUntouched();
+        console.log('Reporting to Other Authorities form reset to default values');
+      } else {
+        console.warn('Reporting to Other Authorities component not available for reset');
+      }
+    }, 100);
+  }
+
+  /**
+   * Displays a custom confirmation dialog box
+   */
+  private showConfirmationDialog(
+    title: string,
+    message: string,
+    details: string,
+    onConfirm: () => void
+  ): void {
+    // Create the overlay
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      backdrop-filter: blur(2px);
+    `;
+
+    // Create the popup
+    const popup = document.createElement('div');
+    popup.style.cssText = `
+      background: white;
+      border-radius: 4px;
+      padding: 24px;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      animation: popupSlideIn 0.3s ease-out;
+      font-family: 'Roboto', sans-serif;
+    `;
+
+    // Ajouter l'animation CSS
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes popupSlideIn {
+        from {
+          transform: scale(0.7) translateY(-20px);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1) translateY(0);
+          opacity: 1;
+        }
+      }
+      .confirm-btn {
+        background: #f44336;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background 0.2s ease;
+      }
+      .confirm-btn:hover {
+        background: #d32f2f;
+      }
+      .cancel-btn {
+        background: #e0e0e0;
+        color: #424242;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        margin-right: 12px;
+        transition: background 0.2s ease;
+      }
+      .cancel-btn:hover {
+        background: #d5d5d5;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Contenu de la popup
+    popup.innerHTML = `
+      <div style="display: flex; align-items: flex-start; margin-bottom: 20px;">
+        <div style="
+          background: #fff3e0;
+          border-radius: 50%;
+          width: 48px;
+          height: 48px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-right: 16px;
+          flex-shrink: 0;
+        ">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="#ff9800">
+            <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+          </svg>
+        </div>
+        <div style="flex: 1;">
+          <h3 style="
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #212121;
+          ">${title}</h3>
+          <p style="
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            color: #424242;
+            line-height: 1.5;
+          ">${message}</p>
+          <p style="
+            margin: 0;
+            font-size: 13px;
+            color: #757575;
+            line-height: 1.4;
+          ">${details}</p>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="cancel-btn" id="cancelBtn">Cancel</button>
+        <button class="confirm-btn" id="confirmBtn">Delete</button>
+      </div>
+    `;
+
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+
+    // Handle events
+    const confirmBtn = popup.querySelector('#confirmBtn') as HTMLButtonElement;
+    const cancelBtn = popup.querySelector('#cancelBtn') as HTMLButtonElement;
+
+    const closeDialog = () => {
+      overlay.remove();
+      style.remove();
+    };
+
+    confirmBtn.addEventListener('click', () => {
+      onConfirm();
+      closeDialog();
+    });
+
+    cancelBtn.addEventListener('click', closeDialog);
+
+    // Fermer en cliquant sur l'overlay
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        closeDialog();
+      }
+    });
+
+    // Close with Escape key
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeDialog();
+        document.removeEventListener('keydown', handleKeyDown);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+  }
+
+  /**
+   * Displays a temporary notification
+   */
+  private showTemporaryNotification(message: string, type: 'success' | 'error' | 'info' = 'info'): void {
+    // Colors based on type
+    const colors = {
+      success: '#4CAF50',
+      error: '#f44336',
+      info: '#2196F3'
+    };
+
+    // Create a temporary notification element
+    const notification = document.createElement('div');
+    notification.textContent = message;
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${colors[type]};
+      color: white;
+      padding: 12px 24px;
+      border-radius: 6px;
+      z-index: 10001;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      animation: slideIn 0.3s ease;
+      min-width: 200px;
+      text-align: center;
+    `;
+    
+    // Add CSS animation
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    document.body.appendChild(notification);
+    
+    // Exit animation and removal after 3 seconds
+    setTimeout(() => {
+      notification.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => {
+        notification.remove();
+        style.remove();
+      }, 300);
+    }, 3000);
+  }
+
   onSubmit(): void {
     this.formSubmitted = true;
-    
+
+    // Marquer tous les groupes du premier onglet comme "touched" pour déclencher la validation et l'icône ⚠️
+    this.submittingEntityGroup.markAllAsTouched();
+    this.ultimateParentUndertakingGroup.markAllAsTouched();
+    this.affectedEntity.controls.forEach(ctrl => ctrl.markAllAsTouched());
+
     const f = this.incidentForm;
     const incidentSubmissionType = f.get('incidentSubmissionDetails.incidentSubmission')?.value;
     const detailsForm = this.incidentDetailsFormComponent?.incidentDetailsForm;
@@ -404,47 +933,74 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
     const reporting = reportingForm?.value;
     const missingFields: string[] = [];
 
-    // Section 1 validation (same as before)
-    if (!f.get('incidentSubmissionDetails.incidentSubmission')?.value) missingFields.push('1.1 Incident Submission Type');
-    if (!f.get('incidentSubmissionDetails.reportCurrency')?.value) missingFields.push('1.15 Report Currency');
-    if (!f.get('submittingEntity.name')?.value) missingFields.push('1.2 Submitting Entity Name');
-    const code = f.get('submittingEntity.code')?.value;
-    const lei = f.get('submittingEntity.LEI')?.value;
-    if (!code && !lei) missingFields.push('1.3a or 1.3b: At least one of Submitting Entity Code or LEI');
-    const affectedEntities = f.get('affectedEntity') as FormArray;
-    if (affectedEntities && affectedEntities.length > 0) {
-      affectedEntities.controls.forEach((ctrl, i) => {
-        if (!ctrl.get('affectedEntityType')?.value?.length) missingFields.push(`1.4 Affected Entity Type (row ${i+1})`);
-        if (!ctrl.get('name')?.value) missingFields.push(`1.5 Affected Entity Name (row ${i+1})`);
-        if (!ctrl.get('LEI')?.value) missingFields.push(`1.6 Affected Entity LEI (row ${i+1})`);
-      });
-    }
-    if (!f.get('primaryContact.name')?.value) missingFields.push('1.7 Primary Contact Name');
-    if (!f.get('primaryContact.email')?.value || f.get('primaryContact.email')?.invalid) missingFields.push('1.8 Primary Contact Email (required/valid)');
-    if (!f.get('primaryContact.phone')?.value) missingFields.push('1.9 Primary Contact Phone');
-    if (!f.get('secondaryContact.name')?.value) missingFields.push('1.10 Secondary Contact Name');
-    if (!f.get('secondaryContact.email')?.value || f.get('secondaryContact.email')?.invalid) missingFields.push('1.11 Secondary Contact Email (required/valid)');
-    if (!f.get('secondaryContact.phone')?.value) missingFields.push('1.12 Secondary Contact Phone');
-    if (!f.get('ultimateParentUndertaking.name')?.value) missingFields.push('1.13 Ultimate Parent Undertaking Name');
-    if (!f.get('ultimateParentUndertaking.LEI')?.value) missingFields.push('1.14 Ultimate Parent Undertaking LEI');
-
-    // Section 2 validation (same as before)
-    if (detailsForm) {
-      if (!detailsForm.get('financialEntityCode')?.value) missingFields.push('2.1 Incident Reference Code');
-      if (!detailsForm.get('detectionDate')?.value || !detailsForm.get('detectionTime')?.value) missingFields.push('2.2 Detection Date & Time');
-      if (!detailsForm.get('classificationDate')?.value || !detailsForm.get('classificationTime')?.value) missingFields.push('2.3 Classification Date & Time');
-      if (!detailsForm.get('incidentDescription')?.value) missingFields.push('2.4 Incident Description');
-      if (!detailsForm.get('classificationCriterion')?.value || detailsForm.get('classificationCriterion')?.value.length === 0) missingFields.push('2.5 Classification Criteria');
-      // 2.6 Country Code Materiality Thresholds is required only if 'geographical_spread' is selected in 2.5
-      const classificationCriteria = detailsForm.get('classificationCriterion')?.value || [];
-      const isGeoSpreadChecked = classificationCriteria.includes('geographical_spread');
-      if (isGeoSpreadChecked && (!detailsForm.get('countryCodeMaterialityThresholds')?.value || detailsForm.get('countryCodeMaterialityThresholds')?.value.length === 0)) {
-        missingFields.push('2.6 Country Code Materiality Thresholds');
+    // Special validation for Major Incident Reclassified as Non-Major
+    if (incidentSubmissionType === 'major_incident_reclassified_as_non-major') {
+      // Only validate specific required fields: 1.2, 1.3a, 1.4, 2.1, 2.10
+      if (!f.get('incidentSubmissionDetails.incidentSubmission')?.value) missingFields.push('1.1 Incident Submission Type');
+      if (!f.get('submittingEntity.name')?.value) missingFields.push('1.2 Submitting Entity Name');
+      if (!f.get('submittingEntity.code')?.value) missingFields.push('1.3a Submitting Entity Code');
+      
+      // 1.4 - Check affected entity type for first affected entity
+      const affectedEntities = f.get('affectedEntity') as FormArray;
+      if (affectedEntities && affectedEntities.length > 0) {
+        const firstEntity = affectedEntities.at(0);
+        const affectedEntityType = firstEntity.get('affectedEntityType')?.value;
+        if (!affectedEntityType || affectedEntityType.length === 0) {
+          missingFields.push('1.4 Affected Entity Type');
+        }
+      } else {
+        missingFields.push('1.4 Affected Entity Type (no affected entities defined)');
       }
-      if (!detailsForm.get('incidentDiscovery')?.value) missingFields.push('2.7 Incident Discovery');
-      if (!detailsForm.get('originatesFromThirdPartyProvider')?.value) missingFields.push('2.8 Originates From Third Party Provider');
-      if (detailsForm.get('isBusinessContinuityActivated')?.value === null || detailsForm.get('isBusinessContinuityActivated')?.value === undefined) missingFields.push('2.9 Is Business Continuity Activated');
-      if (!detailsForm.get('otherInformation')?.value) missingFields.push('2.10 Other Information');
+      
+      // 2.1 and 2.10 - From incident details form
+      if (detailsForm) {
+        if (!detailsForm.get('financialEntityCode')?.value) missingFields.push('2.1 Incident Reference Code');
+        if (!detailsForm.get('otherInformation')?.value) missingFields.push('2.10 Other Information');
+      } else {
+        missingFields.push('2.1 Incident Reference Code (incident details form missing)');
+        missingFields.push('2.10 Other Information (incident details form missing)');
+      }
+    } else {
+      // Section 1 validation (for all types except Major Incident Reclassified as Non-Major)
+      if (!f.get('incidentSubmissionDetails.incidentSubmission')?.value) missingFields.push('1.1 Incident Submission Type');
+      if (!f.get('incidentSubmissionDetails.reportCurrency')?.value) missingFields.push('1.15 Report Currency');
+      if (!f.get('submittingEntity.name')?.value) missingFields.push('1.2 Submitting Entity Name');
+      const code = f.get('submittingEntity.code')?.value;
+      const lei = f.get('submittingEntity.LEI')?.value;
+      if (!code && !lei) missingFields.push('1.3a or 1.3b: At least one of Submitting Entity Code or LEI');
+      const affectedEntities = f.get('affectedEntity') as FormArray;
+      if (affectedEntities && affectedEntities.length > 0) {
+        affectedEntities.controls.forEach((ctrl, i) => {
+          if (!ctrl.get('LEI')?.value) missingFields.push(`1.6 Affected Entity LEI (row ${i+1})`);
+        });
+      }
+      if (!f.get('primaryContact.name')?.value) missingFields.push('1.7 Primary Contact Name');
+      if (!f.get('primaryContact.email')?.value || f.get('primaryContact.email')?.invalid) missingFields.push('1.8 Primary Contact Email (required/valid)');
+      if (!f.get('primaryContact.phone')?.value) missingFields.push('1.9 Primary Contact Phone');
+      if (!f.get('secondaryContact.name')?.value) missingFields.push('1.10 Secondary Contact Name');
+      if (!f.get('secondaryContact.email')?.value || f.get('secondaryContact.email')?.invalid) missingFields.push('1.11 Secondary Contact Email (required/valid)');
+      if (!f.get('secondaryContact.phone')?.value) missingFields.push('1.12 Secondary Contact Phone');
+      //if (!f.get('ultimateParentUndertaking.name')?.value) missingFields.push('1.13 Ultimate Parent Undertaking Name');
+      //if (!f.get('ultimateParentUndertaking.LEI')?.value) missingFields.push('1.14 Ultimate Parent Undertaking LEI');
+
+      // Section 2 validation (for all types except Major Incident Reclassified as Non-Major)
+      if (detailsForm) {
+        if (!detailsForm.get('financialEntityCode')?.value) missingFields.push('2.1 Incident Reference Code');
+        if (!detailsForm.get('detectionDate')?.value || !detailsForm.get('detectionTime')?.value) missingFields.push('2.2 Detection Date & Time');
+        if (!detailsForm.get('classificationDate')?.value || !detailsForm.get('classificationTime')?.value) missingFields.push('2.3 Classification Date & Time');
+        if (!detailsForm.get('incidentDescription')?.value) missingFields.push('2.4 Incident Description');
+        if (!detailsForm.get('classificationCriterion')?.value || detailsForm.get('classificationCriterion')?.value.length === 0) missingFields.push('2.5 Classification Criteria');
+        // 2.6 Country Code Materiality Thresholds is required only if 'geographical_spread' is selected in 2.5
+        const classificationCriteria = detailsForm.get('classificationCriterion')?.value || [];
+        const isGeoSpreadChecked = classificationCriteria.includes('geographical_spread');
+        if (isGeoSpreadChecked && (!detailsForm.get('countryCodeMaterialityThresholds')?.value || detailsForm.get('countryCodeMaterialityThresholds')?.value.length === 0)) {
+          missingFields.push('2.6 Country Code Materiality Thresholds');
+        }
+        if (!detailsForm.get('incidentDiscovery')?.value) missingFields.push('2.7 Incident Discovery');
+        //if (!detailsForm.get('originatesFromThirdPartyProvider')?.value) missingFields.push('2.8 Originates From Third Party Provider');
+        if (detailsForm.get('isBusinessContinuityActivated')?.value === null || detailsForm.get('isBusinessContinuityActivated')?.value === undefined) missingFields.push('2.9 Is Business Continuity Activated');
+        //if (!detailsForm.get('otherInformation')?.value) missingFields.push('2.10 Other Information');
+      }
     }
 
     // Section 3 validation (for intermediate_report and final_report)
@@ -569,7 +1125,7 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
         if (!reportingForm.get('grossAmountIndirectDirectCosts')?.value) missingFields.push('4.13 Gross Amount of Indirect & Direct Costs');
         if (!reportingForm.get('financialRecoveriesAmount')?.value) missingFields.push('4.14 Amount of Financial Recoveries');
         if (!reportingForm.get('recurringNonMajorIncidentsDescription')?.value) missingFields.push('4.15 Description of Recurring Non-Major Incidents');
-        if (!reportingForm.get('occurrenceOfRecurringIncidentsDate')?.value || !reportingForm.get('occurrenceOfRecurringIncidentsTime')?.value) missingFields.push('4.16 Occurrence of Recurring Incidents Date & Time');
+        if (!reportingForm.get('occurrenceOfRecurringIncidentsDate')?.value || !reportingForm.get('recurringIncidentDate')?.value) missingFields.push('4.16 Occurrence of Recurring Incidents Date & Time');
       }
     }
 
@@ -579,23 +1135,97 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
       if (detailsForm) this.markFormGroupTouched(detailsForm);
       if (impactForm) this.markFormGroupTouched(impactForm);
       if (reportingForm) this.markFormGroupTouched(reportingForm);
-      alert('Please fill in the following required fields:\n' + missingFields.join('\n'));
+      //alert('Please fill in the following required fields:\n' + missingFields.join('\n'));
       return;
     }
 
-    // Data extraction for JSON
-    const section1 = {
+    // Data extraction and transformation according to DORA IR Schema v1.2
+    const formatDateTime = (date: string, time: string): string | undefined => {
+      if (!date || !time) return undefined;
+      
+      const dateObj = new Date(date);
+      const timeParts = time.split(':');
+      const hours = Number(timeParts[0]);
+      const minutes = Number(timeParts[1]);
+      const seconds = timeParts.length > 2 ? Number(timeParts[2]) : 0;
+      
+      if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) return undefined;
+      
+      dateObj.setHours(hours, minutes, seconds, 0);
+      return dateObj.toISOString();
+    };
+    
+    const formatDate = (date: string | Date): string | undefined => {
+      if (!date) return undefined;
+      const dateObj = new Date(date);
+      if (isNaN(dateObj.getTime())) return undefined;
+      return dateObj.toISOString();
+    };
+
+    // Helper function to build classification types array
+    const buildClassificationTypes = (): any[] => {
+      const classificationTypes: any[] = [];
+      const criteria = details?.classificationCriterion || [];
+      
+      criteria.forEach((criterion: string) => {
+        const classificationType: any = {
+          classificationCriterion: criterion
+        };
+
+        // Add specific fields based on criterion type
+        if (criterion === 'geographical_spread') {
+          if (details?.countryCodeMaterialityThresholds?.length > 0) {
+            classificationType.countryCodeMaterialityThresholds = details.countryCodeMaterialityThresholds;
+          }
+          if (impact?.memberStatesImpactType?.length > 0) {
+            classificationType.memberStatesImpactType = impact.memberStatesImpactType;
+          }
+          if (impact?.memberStatesImpactTypeDescription) {
+            classificationType.memberStatesImpactTypeDescription = impact.memberStatesImpactTypeDescription;
+          }
+        } else if (criterion === 'data_losses') {
+          if (impact?.dataLosseMaterialityThresholds?.length > 0) {
+            classificationType.dataLosseMaterialityThresholds = impact.dataLosseMaterialityThresholds;
+          }
+          if (impact?.dataLossesDescription) {
+            classificationType.dataLossesDescription = impact.dataLossesDescription;
+          }
+        } else if (criterion === 'reputational_impact') {
+          if (impact?.reputationalImpactType?.length > 0) {
+            classificationType.reputationalImpactType = impact.reputationalImpactType;
+          }
+          if (impact?.reputationalImpactDescription) {
+            classificationType.reputationalImpactDescription = impact.reputationalImpactDescription;
+          }
+        } else if (criterion === 'economic_impact') {
+          if (reporting?.economicImpactMaterialityThreshold) {
+            classificationType.economicImpactMaterialityThreshold = reporting.economicImpactMaterialityThreshold;
+          }
+        }
+
+        classificationTypes.push(classificationType);
+      });
+
+      return classificationTypes;
+    };
+
+    // Build the DORA IR compliant JSON structure
+    const doraReport: any = {
       incidentSubmission: f.value.incidentSubmissionDetails?.incidentSubmission,
       reportCurrency: f.value.incidentSubmissionDetails?.reportCurrency,
       submittingEntity: {
+        entityType: "SUBMITTING_ENTITY",
         name: f.value.submittingEntity?.name,
-        code: f.value.submittingEntity?.code,
-        LEI: f.value.submittingEntity?.LEI
+        ...(f.value.submittingEntity?.code && { code: f.value.submittingEntity.code }),
+        ...(f.value.submittingEntity?.LEI && { LEI: f.value.submittingEntity.LEI }),
+        affectedEntityType: ["credit_institution"] // Default value as per schema
       },
       affectedEntity: (f.value.affectedEntity || []).map((entity: any) => ({
-        affectedEntityType: entity.affectedEntityType,
-        name: entity.name,
-        LEI: entity.LEI
+        entityType: "AFFECTED_ENTITY",
+        name: entity.name || "String",
+        ...(entity.code && { code: entity.code }),
+        LEI: entity.LEI || "00000000000000000000",
+        affectedEntityType: entity.affectedEntityType?.length > 0 ? entity.affectedEntityType : ["credit_institution"]
       })),
       primaryContact: {
         name: f.value.primaryContact?.name,
@@ -606,98 +1236,237 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
         name: f.value.secondaryContact?.name,
         email: f.value.secondaryContact?.email,
         phone: f.value.secondaryContact?.phone
-      },
-      ultimateParentUndertaking: {
-        name: f.value.ultimateParentUndertaking?.name,
-        LEI: f.value.ultimateParentUndertaking?.LEI
       }
     };
-    const section2 = details ? {
-      financialEntityCode: details.financialEntityCode,
-      detectionDate: details.detectionDate,
-      detectionTime: details.detectionTime,
-      classificationDate: details.classificationDate,
-      classificationTime: details.classificationTime,
-      incidentDescription: details.incidentDescription,
-      classificationCriterion: details.classificationCriterion,
-      countryCodeMaterialityThresholds: details.countryCodeMaterialityThresholds,
-      incidentDiscovery: details.incidentDiscovery,
-      originatesFromThirdPartyProvider: details.originatesFromThirdPartyProvider,
-      isBusinessContinuityActivated: details.isBusinessContinuityActivated,
-      otherInformation: details.otherInformation
-    } : {};
-    const section3 = impact ? {
-      competentAuthorityCode: impact.competentAuthorityCode,
-      occurrenceDate: impact.occurrenceDate,
-      occurrenceTime: impact.occurrenceTime,
-      recoveryDate: impact.recoveryDate,
-      recoveryTime: impact.recoveryTime,
-      number: impact.number,
-      percentage: impact.percentage,
-      numberOfFinancialCounterpartsAffected: impact.numberOfFinancialCounterpartsAffected,
-      percentageOfFinancialCounterpartsAffected: impact.percentageOfFinancialCounterpartsAffected,
-      hasImpactOnRelevantClients: impact.hasImpactOnRelevantClients,
-      numberOfAffectedTransactions: impact.numberOfAffectedTransactions,
-      percentageOfAffectedTransactions: impact.percentageOfAffectedTransactions,
-      valueOfAffectedTransactions: impact.valueOfAffectedTransactions,
-      numbersActualEstimate: impact.numbersActualEstimate,
-      reputationalImpactType: impact.reputationalImpactType,
-      reputationalImpactDescription: impact.reputationalImpactDescription,
-      incidentDuration: impact.incidentDuration,
-      serviceDowntime: impact.serviceDowntime,
-      informationDurationServiceDowntimeActualOrEstimate: impact.informationDurationServiceDowntimeActualOrEstimate,
-      memberStatesImpactType: impact.memberStatesImpactType,
-      memberStatesImpactTypeDescription: impact.memberStatesImpactTypeDescription,
-      dataLosseMaterialityThresholds: impact.dataLosseMaterialityThresholds,
-      dataLossesDescription: impact.dataLossesDescription,
-      criticalServicesAffected: impact.criticalServicesAffected,
-      IncidentType: impact.IncidentType,
-      otherIncidentClassification: impact.otherIncidentClassification,
-      threatTechniques: impact.threatTechniques,
-      otherThreatTechniques: impact.otherThreatTechniques,
-      affectedFunctionalAreas: impact.affectedFunctionalAreas,
-      isAffectedInfrastructureComponents: impact.isAffectedInfrastructureComponents,
-      affectedInfrastructureComponents: impact.affectedInfrastructureComponents,
-      isImpactOnFinancialInterest: impact.isImpactOnFinancialInterest,
-      reportingToOtherAuthorities: impact.reportingToOtherAuthorities,
-      reportingToOtherAuthoritiesOther: impact.reportingToOtherAuthoritiesOther,
-      isTemporaryActionsMeasuresForRecovery: impact.isTemporaryActionsMeasuresForRecovery,
-      descriptionOfTemporaryActionsMeasuresForRecovery: impact.descriptionOfTemporaryActionsMeasuresForRecovery,
-      indicatorsOfCompromise: impact.indicatorsOfCompromise
-    } : {};
-    const section4 = reporting ? {
-      rootCauseHLClassification: reporting.rootCauseHLClassification,
-      rootCausesDetailedClassification: reporting.rootCausesDetailedClassification,
-      rootCausesAdditionalClassification: reporting.rootCausesAdditionalClassification,
-      rootCausesOther: reporting.rootCausesOther,
-      rootCausesInformation: reporting.rootCausesInformation,
-      incidentResolutionSummary: reporting.incidentResolutionSummary,
-      incidentRootCauseAddressedDate: reporting.incidentRootCauseAddressedDate,
-      incidentRootCauseAddressedTime: reporting.incidentRootCauseAddressedTime,
-      rootCauseAddressingDateTime: reporting.rootCauseAddressingDateTime,
-      incidentWasResolvedDate: reporting.incidentWasResolvedDate,
-      incidentWasResolvedTime: reporting.incidentWasResolvedTime,
-      incidentResolutionDateTime: reporting.incidentResolutionDateTime,
-      incidentResolutionVsPlannedImplementation: reporting.incidentResolutionVsPlannedImplementation,
-      assessmentOfRiskToCriticalFunctions: reporting.assessmentOfRiskToCriticalFunctions,
-      informationRelevantToResolutionAuthorities: reporting.informationRelevantToResolutionAuthorities,
-      economicImpactMaterialityThreshold: reporting.economicImpactMaterialityThreshold,
-      grossAmountIndirectDirectCosts: reporting.grossAmountIndirectDirectCosts,
-      financialRecoveriesAmount: reporting.financialRecoveriesAmount,
-      recurringNonMajorIncidentsDescription: reporting.recurringNonMajorIncidentsDescription,
-      occurrenceOfRecurringIncidentsDate: reporting.occurrenceOfRecurringIncidentsDate,
-      occurrenceOfRecurringIncidentsTime: reporting.occurrenceOfRecurringIncidentsTime,
-      recurringIncidentsOccurrenceDateTime: reporting.recurringIncidentsOccurrenceDateTime
-    } : {};
+
+    // Add ultimateParentUndertaking if provided
+    if (f.value.ultimateParentUndertaking?.name || f.value.ultimateParentUndertaking?.LEI) {
+      doraReport.ultimateParentUndertaking = {
+        entityType: "ULTIMATE_PARENT_UNDERTAKING_ENTITY",
+        name: f.value.ultimateParentUndertaking?.name || "String",
+        ...(f.value.ultimateParentUndertaking?.code && { code: f.value.ultimateParentUndertaking.code }),
+        LEI: f.value.ultimateParentUndertaking?.LEI || "00000000000000000000",
+        affectedEntityType: ["credit_institution"]
+      };
+    }
+
+    // Add incident details
+    if (details) {
+      doraReport.incident = {
+        ...(details.financialEntityCode && { financialEntityCode: details.financialEntityCode }),
+        ...(formatDateTime(details.detectionDate, details.detectionTime) && { 
+          detectionDateTime: formatDateTime(details.detectionDate, details.detectionTime) 
+        }),
+        ...(formatDateTime(details.classificationDate, details.classificationTime) && { 
+          classificationDateTime: formatDateTime(details.classificationDate, details.classificationTime) 
+        }),
+        incidentDescription: details.incidentDescription || "String",
+        ...(details.otherInformation && { otherInformation: details.otherInformation }),
+        classificationTypes: buildClassificationTypes(),
+        ...(details.isBusinessContinuityActivated !== null && details.isBusinessContinuityActivated !== undefined && {
+          isBusinessContinuityActivated: details.isBusinessContinuityActivated
+        }),
+        ...(formatDateTime(impact?.occurrenceDate, impact?.occurrenceTime) && {
+          incidentOccurrenceDateTime: formatDateTime(impact.occurrenceDate, impact.occurrenceTime)
+        }),
+        ...(impact?.incidentDuration && { incidentDuration: impact.incidentDuration }),
+        ...(details.originatesFromThirdPartyProvider && { 
+          originatesFromThirdPartyProvider: details.originatesFromThirdPartyProvider 
+        }),
+        ...(details.incidentDiscovery && { incidentDiscovery: details.incidentDiscovery }),
+        ...(impact?.competentAuthorityCode && { competentAuthorityCode: impact.competentAuthorityCode })
+      };
+
+      // Add incident type if available
+      if (impact?.IncidentType?.length > 0) {
+        doraReport.incident.incidentType = {
+          incidentClassification: impact.IncidentType,
+          ...(impact.otherIncidentClassification && { otherIncidentClassification: impact.otherIncidentClassification }),
+          ...(impact.threatTechniques?.length > 0 && { threatTechniques: impact.threatTechniques }),
+          ...(impact.otherThreatTechniques && { otherThreatTechniques: impact.otherThreatTechniques }),
+          ...(impact.indicatorsOfCompromise && { indicatorsOfCompromise: impact.indicatorsOfCompromise })
+        };
+      }
+
+      // Add root cause information if available (for intermediate and final reports)
+      if (reporting && (incidentSubmissionType === 'intermediate_report' || incidentSubmissionType === 'final_report')) {
+        if (reporting.rootCauseHLClassification?.length > 0) {
+          doraReport.incident.rootCauseHLClassification = reporting.rootCauseHLClassification;
+        }
+        if (reporting.rootCausesDetailedClassification?.length > 0) {
+          doraReport.incident.rootCausesDetailedClassification = reporting.rootCausesDetailedClassification;
+        }
+        if (reporting.rootCausesAdditionalClassification?.length > 0) {
+          doraReport.incident.rootCausesAdditionalClassification = reporting.rootCausesAdditionalClassification;
+        }
+        if (reporting.rootCausesOther) {
+          doraReport.incident.rootCausesOther = reporting.rootCausesOther;
+        }
+        if (reporting.rootCausesInformation) {
+          doraReport.incident.rootCausesInformation = reporting.rootCausesInformation;
+        }
+        if (reporting.rootCauseAddressingDateTime || formatDateTime(reporting.incidentRootCauseAddressedDate, reporting.incidentRootCauseAddressedTime)) {
+          doraReport.incident.rootCauseAddressingDateTime = reporting.rootCauseAddressingDateTime || 
+            formatDateTime(reporting.incidentRootCauseAddressedDate, reporting.incidentRootCauseAddressedTime);
+        }
+        if (reporting.incidentResolutionSummary) {
+          doraReport.incident.incidentResolutionSummary = reporting.incidentResolutionSummary;
+        }
+        if (reporting.incidentResolutionDateTime || formatDateTime(reporting.incidentWasResolvedDate, reporting.incidentWasResolvedTime)) {
+          doraReport.incident.incidentResolutionDateTime = reporting.incidentResolutionDateTime || 
+            formatDateTime(reporting.incidentWasResolvedDate, reporting.incidentWasResolvedTime);
+        }
+        if (reporting.incidentResolutionVsPlannedImplementation) {
+          doraReport.incident.incidentResolutionVsPlannedImplementation = reporting.incidentResolutionVsPlannedImplementation;
+        }
+        if (reporting.assessmentOfRiskToCriticalFunctions) {
+          doraReport.incident.assessmentOfRiskToCriticalFunctions = reporting.assessmentOfRiskToCriticalFunctions;
+        }
+        if (reporting.informationRelevantToResolutionAuthorities) {
+          doraReport.incident.informationRelevantToResolutionAuthorities = reporting.informationRelevantToResolutionAuthorities;
+        }
+        if (reporting.financialRecoveriesAmount !== null && reporting.financialRecoveriesAmount !== undefined) {
+          doraReport.incident.financialRecoveriesAmount = Number(reporting.financialRecoveriesAmount);
+        }
+        if (reporting.grossAmountIndirectDirectCosts !== null && reporting.grossAmountIndirectDirectCosts !== undefined) {
+          doraReport.incident.grossAmountIndirectDirectCosts = Number(reporting.grossAmountIndirectDirectCosts);
+        }
+        if (reporting.recurringNonMajorIncidentsDescription) {
+          doraReport.incident.recurringNonMajorIncidentsDescription = reporting.recurringNonMajorIncidentsDescription;
+        }
+        if (reporting.recurringIncidentDate || formatDateTime(reporting.occurrenceOfRecurringIncidentsDate, '00:00:00')) {
+          doraReport.incident.recurringIncidentDate = reporting.recurringIncidentDate || 
+            formatDateTime(reporting.occurrenceOfRecurringIncidentsDate, '00:00:00');
+        }
+      }
+      
+      // Add available root cause information from reporting form for initial notifications and intermediate reports
+      if (reporting && (incidentSubmissionType === 'initial_notification' || incidentSubmissionType === 'intermediate_report')) {
+        // Only add fields that have actual values from the form
+        if (reporting.rootCauseHLClassification?.length > 0) {
+          doraReport.incident.rootCauseHLClassification = reporting.rootCauseHLClassification;
+        }
+        if (reporting.rootCausesAdditionalClassification?.length > 0) {
+          doraReport.incident.rootCausesAdditionalClassification = reporting.rootCausesAdditionalClassification;
+        }
+        if (reporting.rootCausesOther) {
+          doraReport.incident.rootCausesOther = reporting.rootCausesOther;
+        }
+        if (reporting.rootCausesInformation) {
+          doraReport.incident.rootCausesInformation = reporting.rootCausesInformation;
+        }
+        if (reporting.rootCauseAddressingDateTime || formatDateTime(reporting.incidentRootCauseAddressedDate, reporting.incidentRootCauseAddressedTime)) {
+          doraReport.incident.rootCauseAddressingDateTime = reporting.rootCauseAddressingDateTime || 
+            formatDateTime(reporting.incidentRootCauseAddressedDate, reporting.incidentRootCauseAddressedTime);
+        }
+        if (reporting.incidentResolutionSummary) {
+          doraReport.incident.incidentResolutionSummary = reporting.incidentResolutionSummary;
+        }
+        if (reporting.incidentResolutionDateTime || formatDateTime(reporting.incidentWasResolvedDate, reporting.incidentWasResolvedTime)) {
+          doraReport.incident.incidentResolutionDateTime = reporting.incidentResolutionDateTime || 
+            formatDateTime(reporting.incidentWasResolvedDate, reporting.incidentWasResolvedTime);
+        }
+        if (reporting.incidentResolutionVsPlannedImplementation) {
+          doraReport.incident.incidentResolutionVsPlannedImplementation = reporting.incidentResolutionVsPlannedImplementation;
+        }
+        if (reporting.assessmentOfRiskToCriticalFunctions) {
+          doraReport.incident.assessmentOfRiskToCriticalFunctions = reporting.assessmentOfRiskToCriticalFunctions;
+        }
+        if (reporting.informationRelevantToResolutionAuthorities) {
+          doraReport.incident.informationRelevantToResolutionAuthorities = reporting.informationRelevantToResolutionAuthorities;
+        }
+        if (reporting.financialRecoveriesAmount !== null && reporting.financialRecoveriesAmount !== undefined) {
+          doraReport.incident.financialRecoveriesAmount = Number(reporting.financialRecoveriesAmount);
+        }
+        if (reporting.grossAmountIndirectDirectCosts !== null && reporting.grossAmountIndirectDirectCosts !== undefined) {
+          doraReport.incident.grossAmountIndirectDirectCosts = Number(reporting.grossAmountIndirectDirectCosts);
+        }
+        if (reporting.recurringNonMajorIncidentsDescription) {
+          doraReport.incident.recurringNonMajorIncidentsDescription = reporting.recurringNonMajorIncidentsDescription;
+        }
+        if (reporting.recurringIncidentDate || formatDateTime(reporting.occurrenceOfRecurringIncidentsDate, '00:00:00')) {
+          doraReport.incident.recurringIncidentDate = reporting.recurringIncidentDate || 
+            formatDateTime(reporting.occurrenceOfRecurringIncidentsDate, '00:00:00');
+        }
+      }
+    }
+
+    // Add impact assessment for ALL report types with real form data
+    if (impact) {
+      doraReport.impactAssessment = {
+        hasImpactOnRelevantClients: impact.hasImpactOnRelevantClients !== null && impact.hasImpactOnRelevantClients !== undefined ? impact.hasImpactOnRelevantClients : false,
+        serviceImpact: {
+          ...(impact.serviceDowntime && { serviceDowntime: impact.serviceDowntime }),
+          ...(formatDateTime(impact.recoveryDate, impact.recoveryTime) && {
+            serviceRestorationDateTime: formatDateTime(impact.recoveryDate, impact.recoveryTime)
+          }),
+          ...(impact.isTemporaryActionsMeasuresForRecovery !== null && impact.isTemporaryActionsMeasuresForRecovery !== undefined && {
+            isTemporaryActionsMeasuresForRecovery: impact.isTemporaryActionsMeasuresForRecovery
+          }),
+          ...(impact.descriptionOfTemporaryActionsMeasuresForRecovery && {
+            descriptionOfTemporaryActionsMeasuresForRecovery: impact.descriptionOfTemporaryActionsMeasuresForRecovery
+          })
+        },
+        ...(impact.criticalServicesAffected && { criticalServicesAffected: impact.criticalServicesAffected }),
+        affectedAssets: {
+          ...(impact.number !== null && impact.number !== undefined && impact.percentage !== null && impact.percentage !== undefined && {
+            affectedClients: {
+              number: Number(impact.number),
+              percentage: Number(impact.percentage)
+            }
+          }),
+          ...(impact.numberOfFinancialCounterpartsAffected !== null && impact.numberOfFinancialCounterpartsAffected !== undefined && 
+              impact.percentageOfFinancialCounterpartsAffected !== null && impact.percentageOfFinancialCounterpartsAffected !== undefined && {
+            affectedFinancialCounterparts: {
+              number: Number(impact.numberOfFinancialCounterpartsAffected),
+              percentage: Number(impact.percentageOfFinancialCounterpartsAffected)
+            }
+          }),
+          ...(impact.numberOfAffectedTransactions !== null && impact.numberOfAffectedTransactions !== undefined && 
+              impact.percentageOfAffectedTransactions !== null && impact.percentageOfAffectedTransactions !== undefined && {
+            affectedTransactions: {
+              number: Number(impact.numberOfAffectedTransactions),
+              percentage: Number(impact.percentageOfAffectedTransactions)
+            }
+          }),
+          ...(impact.valueOfAffectedTransactions !== null && impact.valueOfAffectedTransactions !== undefined && {
+            valueOfAffectedTransactions: Number(impact.valueOfAffectedTransactions)
+          }),
+          ...(impact.numbersActualEstimate?.length > 0 && { numbersActualEstimate: impact.numbersActualEstimate })
+        },
+        ...(impact.affectedFunctionalAreas && { affectedFunctionalAreas: impact.affectedFunctionalAreas }),
+        ...(impact.isAffectedInfrastructureComponents && { isAffectedInfrastructureComponents: impact.isAffectedInfrastructureComponents }),
+        ...(impact.affectedInfrastructureComponents && { affectedInfrastructureComponents: impact.affectedInfrastructureComponents }),
+        ...(impact.isImpactOnFinancialInterest && { isImpactOnFinancialInterest: impact.isImpactOnFinancialInterest })
+      };
+    }
+
+    // Add reporting to other authorities if available
+    if (impact?.reportingToOtherAuthorities?.length > 0) {
+      doraReport.reportingToOtherAuthorities = impact.reportingToOtherAuthorities;
+      if (impact.reportingToOtherAuthoritiesOther) {
+        doraReport.reportingToOtherAuthoritiesOther = impact.reportingToOtherAuthoritiesOther;
+      }
+    }
+
+    // Add duration and downtime information if available
+    if (impact?.informationDurationServiceDowntimeActualOrEstimate) {
+      doraReport.informationDurationServiceDowntimeActualOrEstimate = impact.informationDurationServiceDowntimeActualOrEstimate;
+    }
 
     // File generation logic
+    let filename = '';
     if (incidentSubmissionType === 'final_report') {
-      this.downloadJson({ section1, section2, section3, section4 }, 'section1-section2-section3-section4-final-report.json');
+      filename = 'DORA_IR_FinalReport.json';
     } else if (incidentSubmissionType === 'intermediate_report') {
-      this.downloadJson({ section1, section2, section3 }, 'section1-section2-section3-intermediate-report.json');
+      filename = 'DORA_IR_IntermediateReport.json';
     } else if (incidentSubmissionType === 'initial_notification') {
-      this.downloadJson({ section1, section2 }, 'section1-section2-entity-information.json');
+      filename = 'DORA_IR_InitialNotification.json';
+    } else if (incidentSubmissionType === 'major_incident_reclassified_as_non-major') {
+      filename = 'DORA_IR_ReclassifiedIncident.json';
     }
+
+    this.downloadJson(doraReport, filename);
   }
 
   private downloadJson(data: any, filename: string): void {
@@ -752,6 +1521,75 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Clear all validators from main form except the incident submission details
+   */
+  private clearAllValidatorsExceptRequiredForReclassified(): void {
+    // Clear validators from affected entities
+    const affectedEntitiesArray = this.incidentForm.get('affectedEntity') as FormArray;
+    if (affectedEntitiesArray) {
+      affectedEntitiesArray.controls.forEach(control => {
+        const group = control as FormGroup;
+        Object.keys(group.controls).forEach(key => {
+          const fieldControl = group.get(key);
+          if (fieldControl) {
+            fieldControl.clearValidators();
+            fieldControl.updateValueAndValidity();
+          }
+        });
+      });
+    }
+    
+    // Clear validators from ultimate parent undertaking
+    const ultimateParentGroup = this.incidentForm.get('ultimateParentUndertaking') as FormGroup;
+    if (ultimateParentGroup) {
+      ultimateParentGroup.clearValidators();
+      Object.keys(ultimateParentGroup.controls).forEach(key => {
+        const control = ultimateParentGroup.get(key);
+        if (control) {
+          control.clearValidators();
+          control.updateValueAndValidity();
+        }
+      });
+      ultimateParentGroup.updateValueAndValidity();
+    }
+    
+    // Clear validators from primary and secondary contacts
+    const primaryContactGroup = this.incidentForm.get('primaryContact') as FormGroup;
+    if (primaryContactGroup) {
+      Object.keys(primaryContactGroup.controls).forEach(key => {
+        const control = primaryContactGroup.get(key);
+        if (control) {
+          control.clearValidators();
+          control.updateValueAndValidity();
+        }
+      });
+    }
+    
+    const secondaryContactGroup = this.incidentForm.get('secondaryContact') as FormGroup;
+    if (secondaryContactGroup) {
+      Object.keys(secondaryContactGroup.controls).forEach(key => {
+        const control = secondaryContactGroup.get(key);
+        if (control) {
+          control.clearValidators();
+          control.updateValueAndValidity();
+        }
+      });
+    }
+    
+    // Clear validators from other main form fields, excluding incident submission details and submitting entity
+    const fieldsToKeepValidators = ['incidentSubmissionDetails', 'submittingEntity'];
+    Object.keys(this.incidentForm.controls).forEach(key => {
+      if (!fieldsToKeepValidators.includes(key)) {
+        const control = this.incidentForm.get(key);
+        if (control) {
+          control.clearValidators();
+          control.updateValueAndValidity();
+        }
+      }
+    });
+  }
+
   get affectedEntity(): FormArray {
     return this.incidentForm.get('affectedEntity') as FormArray;
   }
@@ -759,7 +1597,7 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
   addAffectedEntity(): void {
     this.affectedEntity.push(this.fb.group({
       name: [''],
-      LEI: ['', [Validators.pattern(/^[A-Z0-9]{18}[0-9]{2}$/)]],
+      LEI: ['', [Validators.required, Validators.pattern(/^[A-Z0-9]{18}[0-9]{2}$/)]],
       affectedEntityType: [[]],
       entityType: ['AFFECTED_ENTITY']
     }));
@@ -784,5 +1622,505 @@ export class IncidentReportFormComponent implements OnInit, OnDestroy {
       .replace(/_/g, ' ')
       .replace(/\b\w/g, l => l.toUpperCase())
       .replace(/-/g, ' ');
+  }
+
+  get entityInformationTabLabel(): string {
+    // First check if incident submission type is selected
+    const incidentSubmissionType = this.incidentForm.get('incidentSubmissionDetails.incidentSubmission')?.value;
+    
+    // Don't show warning icon if no incident submission type is selected yet
+    if (!incidentSubmissionType) {
+      return 'Entity Information';
+    }
+    
+    // Check if any required fields have errors that should be displayed
+    const hasVisibleErrors = this.hasVisibleValidationErrors();
+    
+    if (hasVisibleErrors) {
+      return 'Entity Information ⚠️';
+    }
+    return 'Entity Information';
+  }
+
+  private hasVisibleValidationErrors(): boolean {
+    // Get current incident submission type
+    const incidentSubmissionType = this.incidentForm.get('incidentSubmissionDetails.incidentSubmission')?.value;
+    
+    // Helper function to check if a control has validation errors that should be shown
+    const hasError = (controlPath: string, checkRequiredOnly: boolean = false): boolean => {
+      const control = this.incidentForm.get(controlPath);
+      if (!control) return false;
+      
+      if (checkRequiredOnly) {
+        // For required fields, show error if field is empty and has required validator
+        const hasRequiredError = control.hasError('required');
+        const isEmpty = !control.value || control.value === '';
+        return hasRequiredError || isEmpty;
+      }
+      
+      // For other validations, show error only if touched or form submitted
+      return !!(control.invalid && (control.touched || this.formSubmitted));
+    };
+
+    // Special handling for Major Incident Reclassified as Non-Major
+    if (incidentSubmissionType === 'major_incident_reclassified_as_non-major') {
+      // Only check the specific required fields for this type:
+      // 1.2 - submittingEntity.name
+      // 1.3a - submittingEntity.code  
+      // 1.4 - affectedEntity[0].affectedEntityType
+      const submittingEntityNameError = hasError('submittingEntity.name', true);
+      const submittingEntityCodeError = hasError('submittingEntity.code', true);
+      
+      // Check 1.4 - affectedEntityType for first affected entity
+      let affectedEntityTypeError = false;
+      if (this.affectedEntity && this.affectedEntity.length > 0) {
+        const firstAffectedEntity = this.affectedEntity.at(0);
+        const affectedEntityTypeControl = firstAffectedEntity.get('affectedEntityType');
+        if (affectedEntityTypeControl) {
+          const isEmpty = !affectedEntityTypeControl.value || affectedEntityTypeControl.value.length === 0;
+          const hasValidationError = affectedEntityTypeControl.invalid && (affectedEntityTypeControl.touched || this.formSubmitted);
+          affectedEntityTypeError = isEmpty || hasValidationError;
+        }
+      }
+      
+      return submittingEntityNameError || submittingEntityCodeError || affectedEntityTypeError;
+    }
+
+    // Default validation for other incident types
+    // Check submitting entity validation errors
+    const submittingEntityErrors = 
+      hasError('submittingEntity.name', true) ||
+      hasError('submittingEntity.LEI') ||
+      (this.submittingEntityGroup?.hasError('codeOrLeiRequired'));
+
+    // Check primary contact validation errors - all are required
+    const primaryContactErrors =
+      hasError('primaryContact.name', true) ||
+      hasError('primaryContact.email', true) ||
+      hasError('primaryContact.phone', true);
+
+    // Check secondary contact validation errors - all are required  
+    const secondaryContactErrors =
+      hasError('secondaryContact.name', true) ||
+      hasError('secondaryContact.email', true) ||
+      hasError('secondaryContact.phone', true);
+
+    // Check ultimate parent undertaking validation errors (not required by default)
+    const ultimateParentErrors =
+      hasError('ultimateParentUndertaking.name') ||
+      hasError('ultimateParentUndertaking.LEI');
+
+    // Check affected entities validation errors - LEI is required
+    let affectedEntityErrors = false;
+    if (this.affectedEntity && this.affectedEntity.length > 0) {
+      affectedEntityErrors = this.affectedEntity.controls.some((ctrl) => {
+        const leiControl = ctrl.get('LEI');
+        if (!leiControl) return false;
+        
+        // LEI is required, show error if empty
+        const isEmpty = !leiControl.value || leiControl.value === '';
+        const hasValidationError = leiControl.invalid && (leiControl.touched || this.formSubmitted);
+        
+        return isEmpty || hasValidationError;
+      });
+    }
+
+    // Check if report currency has errors (required field)
+    const reportCurrencyErrors = hasError('incidentSubmissionDetails.reportCurrency', true);
+
+    return submittingEntityErrors || primaryContactErrors || secondaryContactErrors || 
+           ultimateParentErrors || affectedEntityErrors || reportCurrencyErrors;
+  }
+
+  get incidentDetailsTabLabel(): string {
+    // First check if incident submission type is selected
+    const incidentSubmissionType = this.incidentForm.get('incidentSubmissionDetails.incidentSubmission')?.value;
+    
+    // Don't show warning icon if no incident submission type is selected yet
+    if (!incidentSubmissionType) {
+      return 'Incident Details';
+    }
+    
+    if (this.incidentDetailsFormComponent && this.incidentDetailsFormComponent.incidentDetailsForm && this.incidentDetailsFormComponent.incidentDetailsForm.invalid) {
+      return 'Incident Details ⚠️';
+    }
+    return 'Incident Details';
+  }
+
+  get impactAssessmentTabLabel(): string {
+    // First check if incident submission type is selected
+    const incidentSubmissionType = this.incidentForm.get('incidentSubmissionDetails.incidentSubmission')?.value;
+    
+    // Don't show warning icon if no incident submission type is selected yet
+    if (!incidentSubmissionType) {
+      return 'Impact Assessment';
+    }
+    
+    if (this.impactAssessmentComponent && this.impactAssessmentComponent.impactForm && this.impactAssessmentComponent.impactForm.invalid) {
+      return 'Impact Assessment ⚠️';
+    }
+    return 'Impact Assessment';
+  }
+
+  get reportingToOtherAuthoritiesTabLabel(): string {
+    // First check if incident submission type is selected
+    const incidentSubmissionType = this.incidentForm.get('incidentSubmissionDetails.incidentSubmission')?.value;
+    
+    // Don't show warning icon if no incident submission type is selected yet
+    if (!incidentSubmissionType) {
+      return 'Reporting to Other Authorities';
+    }
+    
+    if (this.reportingToOtherAuthoritiesComponent && this.reportingToOtherAuthoritiesComponent.reportingForm && this.reportingToOtherAuthoritiesComponent.reportingForm.invalid) {
+      return 'Reporting to Other Authorities ⚠️';
+    }
+    return 'Reporting to Other Authorities';
+  }
+
+  get isGenerateReportButtonDisabled(): boolean {
+    // Disable the button only if the incident submission type is not selected
+    const incidentSubmissionType = this.incidentForm.get('incidentSubmissionDetails.incidentSubmission')?.value;
+    return !incidentSubmissionType;
+  }
+
+  /**
+   * Handle validation for Major Incident Reclassified as Non-Major
+   * Only fields 1.2, 1.3a, 1.4, 2.1 and 2.10 should be required
+   */
+  private handleMajorIncidentReclassifiedValidation(): void {
+    // Clear validators from incident submission details (including Report Currency 1.15)
+    const incidentSubmissionGroup = this.incidentForm.get('incidentSubmissionDetails') as FormGroup;
+    if (incidentSubmissionGroup) {
+      // Keep only the incident submission type as required, clear report currency validator
+      const reportCurrencyControl = incidentSubmissionGroup.get('reportCurrency');
+      if (reportCurrencyControl) {
+        reportCurrencyControl.clearValidators();
+        reportCurrencyControl.updateValueAndValidity();
+      }
+    }
+
+    // Clear ALL validators from submittingEntity EXCEPT name and code
+    const submittingEntityGroup = this.incidentForm.get('submittingEntity') as FormGroup;
+    if (submittingEntityGroup) {
+      // Clear the group validator (codeOrLeiRequiredValidator)
+      submittingEntityGroup.clearValidators();
+      submittingEntityGroup.updateValueAndValidity();
+      
+      // Clear validators from LEI field (keep only name and code as required)
+      const leiControl = submittingEntityGroup.get('LEI');
+      if (leiControl) {
+        leiControl.clearValidators();
+        leiControl.updateValueAndValidity();
+      }
+      
+      // Set required validators only for the specific fields
+      // 1.2 - submittingEntity.name (keep existing)
+      // 1.3a - submittingEntity.code (set as required)
+      const submittingEntityCodeControl = submittingEntityGroup.get('code');
+      if (submittingEntityCodeControl) {
+        submittingEntityCodeControl.setValidators([Validators.required, Validators.maxLength(32767)]);
+        submittingEntityCodeControl.updateValueAndValidity();
+      }
+    }
+
+    // Clear ALL validators from affected entities EXCEPT affectedEntityType for first entity
+    const affectedEntitiesArray = this.incidentForm.get('affectedEntity') as FormArray;
+    if (affectedEntitiesArray) {
+      affectedEntitiesArray.controls.forEach((control, index) => {
+        const group = control as FormGroup;
+        Object.keys(group.controls).forEach(key => {
+          const fieldControl = group.get(key);
+          if (fieldControl) {
+            fieldControl.clearValidators();
+            fieldControl.updateValueAndValidity();
+          }
+        });
+        
+        // 1.4 - Set required only for affectedEntityType of first affected entity
+        if (index === 0) {
+          const affectedEntityTypeControl = group.get('affectedEntityType');
+          if (affectedEntityTypeControl) {
+            affectedEntityTypeControl.setValidators([Validators.required]);
+            affectedEntityTypeControl.updateValueAndValidity();
+          }
+        }
+      });
+    }
+
+    // Clear ALL validators from primary and secondary contacts
+    const primaryContactGroup = this.incidentForm.get('primaryContact') as FormGroup;
+    if (primaryContactGroup) {
+      Object.keys(primaryContactGroup.controls).forEach(key => {
+        const control = primaryContactGroup.get(key);
+        if (control) {
+          control.clearValidators();
+          control.updateValueAndValidity();
+        }
+      });
+    }
+    
+    const secondaryContactGroup = this.incidentForm.get('secondaryContact') as FormGroup;
+    if (secondaryContactGroup) {
+      Object.keys(secondaryContactGroup.controls).forEach(key => {
+        const control = secondaryContactGroup.get(key);
+        if (control) {
+          control.clearValidators();
+          control.updateValueAndValidity();
+        }
+      });
+    }
+
+    // Clear ALL validators from ultimate parent undertaking
+    const ultimateParentGroup = this.incidentForm.get('ultimateParentUndertaking') as FormGroup;
+    if (ultimateParentGroup) {
+      ultimateParentGroup.clearValidators();
+      Object.keys(ultimateParentGroup.controls).forEach(key => {
+        const control = ultimateParentGroup.get(key);
+        if (control) {
+          control.clearValidators();
+          control.updateValueAndValidity();
+        }
+      });
+      ultimateParentGroup.updateValueAndValidity();
+    }
+
+    // 2.1 and 2.10 - handled in incident details form
+    const incidentDetailsForm = this.incidentDetailsFormComponent?.incidentDetailsForm;
+    if (incidentDetailsForm) {
+      // Clear ALL validators first
+      Object.keys(incidentDetailsForm.controls).forEach(key => {
+        const control = incidentDetailsForm.get(key);
+        if (control) {
+          control.clearValidators();
+          control.updateValueAndValidity();
+        }
+      });
+      
+      // Set required only for 2.1 and 2.10
+      const financialEntityCodeControl = incidentDetailsForm.get('financialEntityCode');
+      if (financialEntityCodeControl) {
+        financialEntityCodeControl.setValidators([Validators.required, Validators.maxLength(32767)]);
+        financialEntityCodeControl.updateValueAndValidity();
+      }
+      
+      const otherInformationControl = incidentDetailsForm.get('otherInformation');
+      if (otherInformationControl) {
+        otherInformationControl.setValidators([Validators.required]);
+        otherInformationControl.updateValueAndValidity();
+      }
+    }
+    
+    // Clear ALL validators from impact assessment and reporting forms
+    const impactForm = this.impactAssessmentComponent?.impactForm;
+    if (impactForm) {
+      Object.keys(impactForm.controls).forEach(key => {
+        const control = impactForm.get(key);
+        if (control) {
+          control.clearValidators();
+          control.updateValueAndValidity();
+        }
+      });
+    }
+    
+    const reportingForm = this.reportingToOtherAuthoritiesComponent?.reportingForm;
+    if (reportingForm) {
+      Object.keys(reportingForm.controls).forEach(key => {
+        const control = reportingForm.get(key);
+        if (control) {
+          control.clearValidators();
+          control.updateValueAndValidity();
+        }
+      });
+    }
+
+    // Clear validators from other main form fields
+    const fieldsToKeepValidators = ['incidentSubmissionDetails', 'submittingEntity', 'affectedEntity'];
+    Object.keys(this.incidentForm.controls).forEach(key => {
+      if (!fieldsToKeepValidators.includes(key)) {
+        const control = this.incidentForm.get(key);
+        if (control) {
+          control.clearValidators();
+          control.updateValueAndValidity();
+        }
+      }
+    });
+  }
+
+  /**
+   * Clear all validators from main form except the incident submission details
+   */
+  private clearAllValidatorsExceptRequired(): void {
+    // Clear validators from affected entities
+    const affectedEntitiesArray = this.incidentForm.get('affectedEntity') as FormArray;
+    if (affectedEntitiesArray) {
+      affectedEntitiesArray.controls.forEach(control => {
+        const group = control as FormGroup;
+        Object.keys(group.controls).forEach(key => {
+          const fieldControl = group.get(key);
+          if (fieldControl) {
+            fieldControl.clearValidators();
+            fieldControl.updateValueAndValidity();
+          }
+        });
+      });
+    }
+    
+    // Clear validators from ultimate parent undertaking
+    const ultimateParentGroup = this.incidentForm.get('ultimateParentUndertaking') as FormGroup;
+    if (ultimateParentGroup) {
+      ultimateParentGroup.clearValidators();
+      Object.keys(ultimateParentGroup.controls).forEach(key => {
+        const control = ultimateParentGroup.get(key);
+        if (control) {
+          control.clearValidators();
+          control.updateValueAndValidity();
+        }
+      });
+      ultimateParentGroup.updateValueAndValidity();
+    }
+    
+    // Clear validators from primary and secondary contacts
+    const primaryContactGroup = this.incidentForm.get('primaryContact') as FormGroup;
+    if (primaryContactGroup) {
+      Object.keys(primaryContactGroup.controls).forEach(key => {
+        const control = primaryContactGroup.get(key);
+        if (control) {
+          control.clearValidators();
+          control.updateValueAndValidity();
+        }
+      });
+    }
+    
+    const secondaryContactGroup = this.incidentForm.get('secondaryContact') as FormGroup;
+    if (secondaryContactGroup) {
+      Object.keys(secondaryContactGroup.controls).forEach(key => {
+        const control = secondaryContactGroup.get(key);
+        if (control) {
+          control.clearValidators();
+          control.updateValueAndValidity();
+        }
+      });
+    }
+    
+    // Clear validators from other main form fields
+    const fieldsToKeepValidators = ['incidentSubmissionDetails'];
+    Object.keys(this.incidentForm.controls).forEach(key => {
+      if (!fieldsToKeepValidators.includes(key) && key !== 'submittingEntity') {
+        const control = this.incidentForm.get(key);
+        if (control) {
+          control.clearValidators();
+          control.updateValueAndValidity();
+        }
+      }
+    });
+  }
+
+  /**
+   * Restore normal validators for all incident types except Major Incident Reclassified as Non-Major
+   */
+  private restoreNormalValidators(): void {
+    // Restore validators for incident submission details (including Report Currency 1.15)
+    const incidentSubmissionGroup = this.incidentForm.get('incidentSubmissionDetails') as FormGroup;
+    if (incidentSubmissionGroup) {
+      const reportCurrencyControl = incidentSubmissionGroup.get('reportCurrency');
+      if (reportCurrencyControl) {
+        reportCurrencyControl.setValidators([Validators.required]);
+        reportCurrencyControl.updateValueAndValidity();
+      }
+    }
+
+    // Restore validators for submittingEntity
+    const submittingEntityGroup = this.incidentForm.get('submittingEntity') as FormGroup;
+    if (submittingEntityGroup) {
+      // Restore group validator (codeOrLeiRequiredValidator)
+      submittingEntityGroup.setValidators([IncidentReportFormComponent.codeOrLeiRequiredValidator]);
+      submittingEntityGroup.updateValueAndValidity();
+      
+      // Restore LEI field pattern validator
+      const leiControl = submittingEntityGroup.get('LEI');
+      if (leiControl) {
+        leiControl.setValidators([Validators.pattern(/^[A-Z0-9]{18}[0-9]{2}$/)]);
+        leiControl.updateValueAndValidity();
+      }
+      
+      // Clear required validator from code (since either code or LEI is required)
+      const codeControl = submittingEntityGroup.get('code');
+      if (codeControl) {
+        codeControl.setValidators([Validators.maxLength(32767)]);
+        codeControl.updateValueAndValidity();
+      }
+    }
+
+    // Restore validators for affected entities
+    const affectedEntitiesArray = this.incidentForm.get('affectedEntity') as FormArray;
+    if (affectedEntitiesArray) {
+      affectedEntitiesArray.controls.forEach(control => {
+        const group = control as FormGroup;
+        
+        // Restore LEI required and pattern validators
+        const leiControl = group.get('LEI');
+        if (leiControl) {
+          leiControl.setValidators([Validators.required, Validators.pattern(/^[A-Z0-9]{18}[0-9]{2}$/)]);
+          leiControl.updateValueAndValidity();
+        }
+      });
+    }
+
+    // Restore validators for primary and secondary contacts
+    const primaryContactGroup = this.incidentForm.get('primaryContact') as FormGroup;
+    if (primaryContactGroup) {
+      const nameControl = primaryContactGroup.get('name');
+      const emailControl = primaryContactGroup.get('email');
+      const phoneControl = primaryContactGroup.get('phone');
+      
+      if (nameControl) {
+        nameControl.setValidators([Validators.required, Validators.maxLength(32767)]);
+        nameControl.updateValueAndValidity();
+      }
+      if (emailControl) {
+        emailControl.setValidators([Validators.required, Validators.email]);
+        emailControl.updateValueAndValidity();
+      }
+      if (phoneControl) {
+        phoneControl.setValidators([Validators.required, Validators.pattern(/^[+]?[0-9\s\-\(\)]{7,15}$/)]);
+        phoneControl.updateValueAndValidity();
+      }
+    }
+    
+    const secondaryContactGroup = this.incidentForm.get('secondaryContact') as FormGroup;
+    if (secondaryContactGroup) {
+      const nameControl = secondaryContactGroup.get('name');
+      const emailControl = secondaryContactGroup.get('email');
+      const phoneControl = secondaryContactGroup.get('phone');
+      
+      if (nameControl) {
+        nameControl.setValidators([Validators.required, Validators.maxLength(32767)]);
+        nameControl.updateValueAndValidity();
+      }
+      if (emailControl) {
+        emailControl.setValidators([Validators.required, Validators.email]);
+        emailControl.updateValueAndValidity();
+      }
+      if (phoneControl) {
+        phoneControl.setValidators([Validators.required, Validators.pattern(/^[+]?[0-9\s\-\(\)]{7,15}$/)]);
+        phoneControl.updateValueAndValidity();
+      }
+    }
+
+    // Clear validators from ultimate parent undertaking (not required for normal types)
+    const ultimateParentGroup = this.incidentForm.get('ultimateParentUndertaking') as FormGroup;
+    if (ultimateParentGroup) {
+      const nameControl = ultimateParentGroup.get('name');
+      const leiControl = ultimateParentGroup.get('LEI');
+      
+      if (nameControl) {
+        nameControl.setValidators([Validators.maxLength(32767)]);
+        nameControl.updateValueAndValidity();
+      }
+      if (leiControl) {
+        leiControl.setValidators([Validators.pattern(/^[A-Z0-9]{18}[0-9]{2}$/)]);
+        leiControl.updateValueAndValidity();
+      }
+    }
   }
 }

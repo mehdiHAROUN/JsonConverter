@@ -1,6 +1,7 @@
 import { Component, Input, OnInit, forwardRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray, AbstractControl, ValidationErrors, ValidatorFn, ControlValueAccessor, NG_VALUE_ACCESSOR, NG_VALIDATORS } from '@angular/forms';
+import { FormPersistenceDirective } from '../../shared/directives/form-persistence.directive';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -183,7 +184,8 @@ export enum ClassificationCriterion {
     MatCheckboxModule,
     MatIconModule,
     MatDividerModule,
-    MatRadioModule
+    MatRadioModule,
+    FormPersistenceDirective
   ],
   templateUrl: './incident-details-form.component.html',
   styleUrls: ['./incident-details-form.component.scss'],
@@ -246,18 +248,18 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
     }));
 
     this.incidentDetailsForm = this.fb.group({
-      financialEntityCode: ['', Validators.maxLength(32767)], // 2.1
-      detectionDate: [null], // 2.2 (date part)
-      detectionTime: [null], // 2.2 (time part)
-      classificationDate: [null], // 2.3 (date part)
-      classificationTime: [null], // 2.3 (time part)
-      incidentDescription: ['', Validators.maxLength(32767)], // 2.4
-      classificationCriterion: [[]], // 2.5 - now an array for multiple choice
-      countryCodeMaterialityThresholds: [[]], // 2.6 - array of country codes
-      incidentDiscovery: [''], // 2.7
-      originatesFromThirdPartyProvider: ['', Validators.maxLength(32767)], // 2.8
-      isBusinessContinuityActivated: [false], // 2.9 - boolean field for business continuity plan activation
-      otherInformation: ['', Validators.maxLength(32767)], // 2.10 -
+      financialEntityCode: ['', [Validators.required, Validators.maxLength(32767)]], // 2.1
+      detectionDate: [null, Validators.required], // 2.2 (date part)
+      detectionTime: [null, Validators.required], // 2.2 (time part)
+      classificationDate: [null, Validators.required], // 2.3 (date part)
+      classificationTime: [null, Validators.required], // 2.3 (time part)
+      incidentDescription: ['', [Validators.required, Validators.maxLength(32767)]], // 2.4
+      classificationCriterion: [[], Validators.required], // 2.5 - at least one required
+      countryCodeMaterialityThresholds: [[]], // 2.6 - required if geographical_spread
+      incidentDiscovery: ['', Validators.required], // 2.7
+      originatesFromThirdPartyProvider: [''], // 2.8 - non obligatoire
+      isBusinessContinuityActivated: [null, Validators.required], // 2.9
+      otherInformation: [''], // 2.10 - non obligatoire
     });
 
     // Disable ictThirdPartyProviderDetails by default
@@ -299,12 +301,17 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
 
   private combineDateAndTime(date: Date | null, time: string | null): string | null {
     if (!date || !time) return null;
-    const [hours, minutes] = time.split(':').map(Number);
+    const timeParts = time.split(':');
+    const hours = Number(timeParts[0]);
+    const minutes = Number(timeParts[1]);
+    const seconds = timeParts.length > 2 ? Number(timeParts[2]) : 0;
+    
+    if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) return null;
+    
     const combinedDate = new Date(date);
-    combinedDate.setHours(hours, minutes);
-    return combinedDate.toISOString(); // Convert to ISO 8601 string format
+    combinedDate.setHours(hours, minutes, seconds, 0);
+    return combinedDate.toISOString();
   }
-
   private updateFormValue(): void {
     const formValue = this.incidentDetailsForm.value;
     
@@ -415,5 +422,27 @@ export class IncidentDetailsFormComponent implements OnInit, ControlValueAccesso
     return value
       .replace(/_/g, ' ')
       .replace(/\b\w/g, l => l.toUpperCase());
+  }
+
+  /**
+   * Public method to reset the form to default values
+   */
+  public resetToDefaults(): void {
+    this.incidentDetailsForm.patchValue({
+      financialEntityCode: '',
+      detectionDate: null,
+      detectionTime: null,
+      classificationDate: null,
+      classificationTime: null,
+      incidentDescription: '',
+      classificationCriterion: [],
+      countryCodeMaterialityThresholds: [],
+      incidentDiscovery: '',
+      originatesFromThirdPartyProvider: '',
+      isBusinessContinuityActivated: null,
+      otherInformation: ''
+    });
+    this.incidentDetailsForm.markAsPristine();
+    this.incidentDetailsForm.markAsUntouched();
   }
 }

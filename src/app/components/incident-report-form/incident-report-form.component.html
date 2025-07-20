@@ -1,40 +1,58 @@
 <div class="incident-report-form">
-  <h2>JSON DORA</h2>
-  <form [formGroup]="incidentForm" (ngSubmit)="onSubmit()">
-    <div formGroupName="incidentSubmissionDetails">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Incident Submission Type (field 1.1)</mat-label>
-        <mat-select formControlName="incidentSubmission">
-          <mat-option [value]="IncidentSubmissionType.INITIAL_NOTIFICATION">
-            Initial Notification
-          </mat-option>
-          <mat-option [value]="IncidentSubmissionType.INTERMEDIATE_REPORT">
-            Intermediate Report
-          </mat-option>
-          <mat-option [value]="IncidentSubmissionType.FINAL_REPORT">
-            Final Report
-          </mat-option>
-          <mat-option [value]="IncidentSubmissionType.MAJOR_INCIDENT_RECLASSIFIED">
-            Major Incident Reclassified as Non-Major
-          </mat-option>
-        </mat-select>
-        <mat-error *ngIf="incidentForm.get('incidentSubmissionDetails.incidentSubmission')?.hasError('required')">
-          Incident submission type is required
-        </mat-error>
-      </mat-form-field>
+  <form [formGroup]="incidentForm" (ngSubmit)="onSubmit()" appFormPersistence="incident-report-form" [excludeFields]="['password']" [expiryHours]="48">
+    <div class="form-header-row">
+      <div class="form-header-content">
+        <div formGroupName="incidentSubmissionDetails" class="incident-type-field">
+          <mat-form-field appearance="outline">
+            <mat-label>Incident Submission Type (field 1.1)</mat-label>
+            <mat-select formControlName="incidentSubmission">
+              <mat-option [value]="IncidentSubmissionType.INITIAL_NOTIFICATION">
+                Initial Notification
+              </mat-option>
+              <mat-option [value]="IncidentSubmissionType.INTERMEDIATE_REPORT">
+                Intermediate Report
+              </mat-option>
+              <mat-option [value]="IncidentSubmissionType.FINAL_REPORT">
+                Final Report
+              </mat-option>
+              <mat-option [value]="IncidentSubmissionType.MAJOR_INCIDENT_RECLASSIFIED">
+                Major Incident Reclassified as Non-Major
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="incidentForm.get('incidentSubmissionDetails.incidentSubmission')?.hasError('required')">
+              Incident submission type is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="action-buttons">
+          <button mat-raised-button color="primary" type="submit" [disabled]="isGenerateReportButtonDisabled">
+            Generate Report
+          </button>
+          <button 
+            mat-stroked-button 
+            color="warn" 
+            type="button" 
+            (click)="clearAllSavedData()" 
+            title="Delete all saved data"
+            [disabled]="!hasFormData()">
+            <mat-icon>delete_sweep</mat-icon>
+            Clear Saved Data
+          </button>
+        </div>
+      </div>
     </div>
 
     <mat-tab-group>
       <!-- Entity Information -->
-      <mat-tab label="Entity Information">
+      <mat-tab [label]="entityInformationTabLabel">
         <div class="tab-content">
-          <!-- Submitting Entity Card -->
-          <mat-card class="entity-card">
-            <mat-card-title>Submitting Entity</mat-card-title>
+          <!-- Submitting Entity Section -->
+          <section class="entity-section">
+            <h4>Submitting Entity</h4>
             <div [formGroup]="submittingEntityGroup">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Name (field 1.2)</mat-label>
-                <input matInput formControlName="name">
+                <input matInput formControlName="name" [value]="'ENGIE GLOBAL MARKETS'">
                 <mat-error *ngIf="incidentForm.get('submittingEntity.name')?.hasError('required') && (incidentForm.get('submittingEntity.name')?.touched || formSubmitted)">
                   Name is required
                 </mat-error>
@@ -45,7 +63,7 @@
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>LEI (field 1.3b)</mat-label>
-                <input matInput formControlName="LEI">
+                <input matInput formControlName="LEI" [value]="'5493003C3KJ2TY7MBZ44'">
                 <mat-error *ngIf="incidentForm.get('submittingEntity.LEI')?.hasError('pattern') && (incidentForm.get('submittingEntity.LEI')?.touched || formSubmitted)">
                   LEI must be 20 characters: 18 alphanumeric characters followed by 2 digits
                 </mat-error>
@@ -55,11 +73,11 @@
                 Either Code or LEI is required
               </mat-error>
             </div>
-          </mat-card>
+          </section>
 
-          <!-- Affected Entities Card -->
-          <mat-card class="entity-card">
-            <mat-card-title>Affected Entities</mat-card-title>
+          <!-- Affected Entities Section -->
+          <section class="entity-section">
+            <h4>Affected Entities</h4>
             <div formArrayName="affectedEntity">
               <div *ngFor="let entity of affectedEntity.controls; let i = index" [formGroupName]="i" class="affected-entity-group">
                 <div class="entity-fields">
@@ -70,6 +88,9 @@
                         {{ option.label }}
                       </mat-option>
                     </mat-select>
+                    <mat-error *ngIf="entity.get('affectedEntityType')?.hasError('required') && (entity.get('affectedEntityType')?.touched || formSubmitted)">
+                      Entity Type is required
+                    </mat-error>
                   </mat-form-field>
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Name (field 1.5)</mat-label>
@@ -78,7 +99,10 @@
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>LEI (field 1.6)</mat-label>
                     <input matInput formControlName="LEI">
-                    <mat-error *ngIf="entity.get('LEI')?.hasError('pattern') && entity.get('LEI')?.touched">
+                    <mat-error *ngIf="entity.get('LEI')?.hasError('required') && (entity.get('LEI')?.touched || formSubmitted)">
+                      LEI is required
+                    </mat-error>
+                    <mat-error *ngIf="entity.get('LEI')?.hasError('pattern') && (entity.get('LEI')?.touched || formSubmitted)">
                       LEI must be 20 characters: 18 alphanumeric characters followed by 2 digits
                     </mat-error>
                   </mat-form-field>
@@ -86,18 +110,21 @@
                 </div>
               </div>
             </div>
-          </mat-card>
+          </section>
 
-          <!-- Primary Contact Card -->
-          <mat-card class="entity-card">
-            <mat-card-title>Primary Contact</mat-card-title>
+          <!-- Primary Contact Section -->
+          <section class="entity-section">
+            <h4>Primary Contact</h4>
             <div formGroupName="primaryContact">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Name (field 1.7)</mat-label>
                 <input matInput formControlName="name">
+                <mat-error *ngIf="incidentForm.get('primaryContact.name')?.hasError('required') && (incidentForm.get('primaryContact.name')?.touched || formSubmitted)">
+                  Name is required
+                </mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Email (field 1.8)</mat-label>
+                <mat-label>Email (field 1.8) </mat-label>
                 <input matInput formControlName="email" type="email">
                 <mat-error *ngIf="incidentForm.get('primaryContact.email')?.hasError('required') && (incidentForm.get('primaryContact.email')?.touched || formSubmitted)">
                   Email is required
@@ -109,20 +136,26 @@
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Phone (field 1.9)</mat-label>
                 <input matInput formControlName="phone">
+                <mat-error *ngIf="incidentForm.get('primaryContact.phone')?.hasError('required') && (incidentForm.get('primaryContact.phone')?.touched || formSubmitted)">
+                  Phone is required
+                </mat-error>
                 <mat-error *ngIf="incidentForm.get('primaryContact.phone')?.hasError('pattern') && (incidentForm.get('primaryContact.phone')?.touched || formSubmitted)">
                   Please enter a valid international phone number
                 </mat-error>
               </mat-form-field>
             </div>
-          </mat-card>
+          </section>
 
-          <!-- Secondary Contact Card -->
-          <mat-card class="entity-card">
-            <mat-card-title>Secondary Contact</mat-card-title>
+          <!-- Secondary Contact Section -->
+          <section class="entity-section">
+            <h4>Secondary Contact</h4>
             <div formGroupName="secondaryContact">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Name (field 1.10)</mat-label>
                 <input matInput formControlName="name">
+                <mat-error *ngIf="incidentForm.get('secondaryContact.name')?.hasError('required') && (incidentForm.get('secondaryContact.name')?.touched || formSubmitted)">
+                  Name is required
+                </mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Email (field 1.11)</mat-label>
@@ -137,24 +170,30 @@
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Phone (field 1.12)</mat-label>
                 <input matInput formControlName="phone">
+                <mat-error *ngIf="incidentForm.get('secondaryContact.phone')?.hasError('required') && (incidentForm.get('secondaryContact.phone')?.touched || formSubmitted)">
+                  Phone is required
+                </mat-error>
+                <mat-error *ngIf="incidentForm.get('secondaryContact.phone')?.hasError('pattern') && (incidentForm.get('secondaryContact.phone')?.touched || formSubmitted)">
+                  Please enter a valid international phone number
+                </mat-error>
               </mat-form-field>
             </div>
-          </mat-card>
+          </section>
 
-          <!-- Ultimate Parent Undertaking Card -->
-          <mat-card class="entity-card">
-            <mat-card-title>Ultimate Parent Undertaking</mat-card-title>
+          <!-- Ultimate Parent Undertaking Section -->
+          <section class="entity-section">
+            <h4>Ultimate Parent Undertaking</h4>
             <div [formGroup]="ultimateParentUndertakingGroup">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Name (field 1.13)</mat-label>
-                <input matInput formControlName="name">
+                <input matInput formControlName="name" placeholder="This field is mandatory if the FE belongs to a group.">
                 <mat-error *ngIf="incidentForm.get('ultimateParentUndertaking.name')?.hasError('required') && (incidentForm.get('ultimateParentUndertaking.name')?.touched || formSubmitted)">
                   Name is required
                 </mat-error>
               </mat-form-field>
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>LEI (field 1.14)</mat-label>
-                <input matInput formControlName="LEI">
+                <input matInput formControlName="LEI" placeholder="This field is mandatory if the FE belongs to a group.">
                 <mat-error *ngIf="incidentForm.get('ultimateParentUndertaking.LEI')?.hasError('required') && (incidentForm.get('ultimateParentUndertaking.LEI')?.touched || formSubmitted)">
                   LEI is required
                 </mat-error>
@@ -167,62 +206,57 @@
                 LEI is required
               </mat-error>
             </div>
-          </mat-card>
+          </section>
 
-          <!-- Report Currency Card -->
-          <mat-card class="entity-card">
-            <mat-card-title>Report Currency</mat-card-title>
+          <!-- Report Currency Section -->
+          <section class="entity-section">
+            <h4>Report Currency</h4>
             <div formGroupName="incidentSubmissionDetails">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Report Currency (field 1.15)</mat-label>
-              <mat-select formControlName="reportCurrency">
-                <mat-option value="EUR">EUR</mat-option>
-                <mat-option value="BGN">BGN</mat-option>
-                <mat-option value="CZK">CZK</mat-option>
-                <mat-option value="DKK">DKK</mat-option>
-                <mat-option value="HUF">HUF</mat-option>
-                <mat-option value="PLN">PLN</mat-option>
-                <mat-option value="RON">RON</mat-option>
-                <mat-option value="ISK">ISK</mat-option>
-                <mat-option value="CHF">CHF</mat-option>
-                <mat-option value="NOK">NOK</mat-option>
-                <mat-option value="SEK">SEK</mat-option>
-              </mat-select>
-                <mat-error *ngIf="incidentForm.get('incidentSubmissionDetails.reportCurrency')?.hasError('required')">
-                Report currency is required
-              </mat-error>
-            </mat-form-field>
-          </div>
-          </mat-card>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Report Currency (field 1.15)</mat-label>
+                <mat-select formControlName="reportCurrency">
+                  <mat-option value="EUR">EUR</mat-option>
+                  <mat-option value="BGN">BGN</mat-option>
+                  <mat-option value="CZK">CZK</mat-option>
+                  <mat-option value="DKK">DKK</mat-option>
+                  <mat-option value="HUF">HUF</mat-option>
+                  <mat-option value="PLN">PLN</mat-option>
+                  <mat-option value="RON">RON</mat-option>
+                  <mat-option value="ISK">ISK</mat-option>
+                  <mat-option value="CHF">CHF</mat-option>
+                  <mat-option value="NOK">NOK</mat-option>
+                  <mat-option value="SEK">SEK</mat-option>
+                </mat-select>
+                <mat-error *ngIf="incidentForm.get('incidentSubmissionDetails.reportCurrency')?.hasError('required') && (incidentForm.get('incidentSubmissionDetails.reportCurrency')?.touched || formSubmitted)">
+                  Report currency is required
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </section>
         </div>
       </mat-tab>
 
       <!-- Incident Details -->
-      <mat-tab label="Incident Details">
+      <mat-tab [label]="incidentDetailsTabLabel">
         <div class="tab-content">
           <app-incident-details-form></app-incident-details-form>
         </div>
       </mat-tab>
 
       <!-- Impact Assessment -->
-      <mat-tab label="Impact Assessment">
+      <mat-tab [label]="impactAssessmentTabLabel">
         <div class="tab-content">
           <app-impact-assessment></app-impact-assessment>
         </div>
       </mat-tab>
 
       <!-- Reporting to Other Authorities -->
-      <mat-tab label="Reporting to Other Authorities">
+      <mat-tab [label]="reportingToOtherAuthoritiesTabLabel">
         <div class="tab-content">
           <app-reporting-to-other-authorities></app-reporting-to-other-authorities>
         </div>
       </mat-tab>
     </mat-tab-group>
 
-    <div class="button-container">
-      <button mat-raised-button color="primary" type="submit">
-        generate report
-      </button>
-    </div>
   </form>
 </div>

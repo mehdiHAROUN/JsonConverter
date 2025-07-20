@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { FormGroup, FormBuilder, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { FormPersistenceDirective } from '../../shared/directives/form-persistence.directive';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -83,7 +84,8 @@ function durationFormatValidator(): ValidatorFn {
     MatDatepickerModule,
     MatNativeDateModule,
     MatRadioModule,
-    MatSelectModule
+    MatSelectModule,
+    FormPersistenceDirective
   ],
   templateUrl: './impact-assessment.component.html',
   styleUrl: './impact-assessment.component.scss'
@@ -106,10 +108,10 @@ export class ImpactAssessmentComponent implements OnInit {
 
   // Options for Reputational Impact (field 3.13)
   reputationalImpactOptions = [
-    { value: 'reflected_in_media', label: 'The major ICT-related incident has been reflected in the media' },
-    { value: 'repetitive_complaints', label: 'The major ICT-related incident has resulted in repetitive complaints from different clients or financial counterparts on client-facing services or critical business relationships' },
-    { value: 'unable_to_meet_regulatory', label: 'The financial entity will not be able to or is likely not to be able to meet regulatory requirements as a result of the major ICT-related incident' },
-    { value: 'likely_to_lose_clients', label: 'The financial entity will or is likely to lose clients or financial counterparts with a material impact on its business as a result of the major ICT-related incident' }
+    { value: 'the_major_ict-related_incident_has_been_reflected_in_the_media', label: 'The major ICT-related incident has been reflected in the media' },
+    { value: 'the_major_ict-related_incident_has_resulted_in_repetitive_complaints_from_different_clients_or_financial_counterparts_on_client-facing_services_or_critical_business_relationships', label: 'The major ICT-related incident has resulted in repetitive complaints from different clients or financial counterparts on client-facing services or critical business relationships' },
+    { value: 'the_financial_entity_will_not_be_able_to_or_is_likely_not_to_be_able_to_meet_regulatory_requirements_as_a_result_of_the_major_ict-related_incident', label: 'The financial entity will not be able to or is likely not to be able to meet regulatory requirements as a result of the major ICT-related incident' },
+    { value: 'the_financial_entity_will_or_is_likely_to_lose_clients_or_financial_counterparts_with_a_material_impact_on_its_business_as_a_result_of_the_major_ict-related_incident', label: 'The financial entity will or is likely to lose clients or financial counterparts with a material impact on its business as a result of the major ICT-related incident' }
   ];
 
   // Options for Duration and Downtime Information Type (field 3.17)
@@ -181,44 +183,43 @@ export class ImpactAssessmentComponent implements OnInit {
 
   constructor(private fb: FormBuilder) {
     this.impactForm = this.fb.group({
-      competentAuthorityCode: ['', Validators.maxLength(32767)], // field 3.1
-      occurrenceDate: [null], // field 3.2 (date part)
-      occurrenceTime: [null], // field 3.2 (time part)
-      recoveryDate: [null], // field 3.3 (date part)
-      recoveryTime: [null], // field 3.3 (time part)
-      number: [null, [Validators.min(0), Validators.pattern(/^\d+$/)]], // field 3.4 (renamed from numberOfClientsAffected)
-      percentage: [null, [Validators.min(0), Validators.max(100), Validators.pattern(/^\d+$/)]], // field 3.5 (renamed from percentageOfClientsAffected, changed to integer)
-      numberOfFinancialCounterpartsAffected: [null, [Validators.min(0), Validators.pattern(/^\d+$/)]], // field 3.6
-      percentageOfFinancialCounterpartsAffected: [null, [Validators.min(0), Validators.max(100), percentageValidator()]], // field 3.7
-      hasImpactOnRelevantClients: [null], // field 3.8
-      numberOfAffectedTransactions: [null, [Validators.min(0), Validators.pattern(/^\d+$/)]], // field 3.9
-      percentageOfAffectedTransactions: [null, [Validators.min(0), Validators.max(100), percentageValidator()]], // field 3.10
-      valueOfAffectedTransactions: [null, [Validators.min(0), transactionValueValidator()]], // field 3.11
-      numbersActualEstimate: [[]], // field 3.12 - added to match template
-      reportedDataStatus: [[]], // field 3.12
-      reputationalImpactType: [[]], // field 3.13
-      reputationalImpactDescription: ['', Validators.maxLength(32767)], // field 3.14
-      incidentDuration: ['', [durationFormatValidator()]], // field 3.15
-      serviceDowntime: ['', [durationFormatValidator()]], // field 3.16
-      informationDurationServiceDowntimeActualOrEstimate: [''], // field 3.17
-      memberStatesImpactType: [[]], // field 3.18
-      memberStatesImpactTypeDescription: ['', Validators.maxLength(32767)], // field 3.19
-      dataLosseMaterialityThresholds: [[]], // field 3.20
-      dataLossesDescription: ['', Validators.maxLength(32767)], // field 3.21
-      criticalServicesAffected: ['', Validators.maxLength(32767)], // field 3.22
-      IncidentType: [[]], // field 3.23
-      otherIncidentClassification: ['', Validators.maxLength(32767)], // field 3.24
-      threatTechniques: [[]], // field 3.25
-      otherThreatTechniques: ['', Validators.maxLength(32767)], // field 3.26
-      affectedFunctionalAreas: ['', Validators.maxLength(32767)], // field 3.27
-      isAffectedInfrastructureComponents: [''], // field 3.28
-      affectedInfrastructureComponents: ['', Validators.maxLength(32767)], // field 3.29
-      isImpactOnFinancialInterest: [''], // field 3.30
-      reportingToOtherAuthorities: [[]], // field 3.31
-      reportingToOtherAuthoritiesOther: ['', Validators.maxLength(32767)], // field 3.32
-      isTemporaryActionsMeasuresForRecovery: [null], // field 3.33
-      descriptionOfTemporaryActionsMeasuresForRecovery: ['', Validators.maxLength(32767)], // field 3.34
-      indicatorsOfCompromise: ['', Validators.maxLength(32767)] // field 3.35
+      competentAuthorityCode: ['', Validators.maxLength(32767)], // 3.1
+      occurrenceDate: [null], // 3.2 (date part)
+      occurrenceTime: [null], // 3.2 (time part)
+      recoveryDate: [null], // 3.3 (date part)
+      recoveryTime: [null], // 3.3 (time part)
+      number: [null, [Validators.min(0), Validators.pattern(/^[0-9]+$/)]], // 3.4
+      percentage: [null, [Validators.min(0), Validators.max(100), Validators.pattern(/^[0-9]+$/)]], // 3.5
+      numberOfFinancialCounterpartsAffected: [null, [Validators.min(0), Validators.pattern(/^[0-9]+$/)]], // 3.6
+      percentageOfFinancialCounterpartsAffected: [null, [Validators.min(0), Validators.max(100), percentageValidator()]], // 3.7
+      hasImpactOnRelevantClients: [null], // 3.8
+      numberOfAffectedTransactions: [null, [Validators.min(0), Validators.pattern(/^[0-9]+$/)]], // 3.9
+      percentageOfAffectedTransactions: [null, [Validators.min(0), Validators.max(100), percentageValidator()]], // 3.10
+      valueOfAffectedTransactions: [null, [Validators.min(0), transactionValueValidator()]], // 3.11
+      numbersActualEstimate: [[]], // 3.12
+      reputationalImpactType: [[]], // 3.13 (conditional)
+      reputationalImpactDescription: ['', Validators.maxLength(32767)], // 3.14 (conditional)
+      incidentDuration: ['', [durationFormatValidator()]], // 3.15
+      serviceDowntime: ['', [durationFormatValidator()]], // 3.16
+      informationDurationServiceDowntimeActualOrEstimate: [''], // 3.17 (conditional)
+      memberStatesImpactType: [[],], // 3.18 (conditional)
+      memberStatesImpactTypeDescription: ['', Validators.maxLength(32767)], // 3.19 (conditional)
+      dataLosseMaterialityThresholds: [[],], // 3.20 (conditional)
+      dataLossesDescription: ['', Validators.maxLength(32767)], // 3.21 (conditional)
+      criticalServicesAffected: ['',], // 3.22
+      IncidentType: [[],], // 3.23
+      otherIncidentClassification: ['', Validators.maxLength(32767)], // 3.24 (conditional)
+      threatTechniques: [[],], // 3.25 (conditional)
+      otherThreatTechniques: ['', Validators.maxLength(32767)], // 3.26 (conditional)
+      affectedFunctionalAreas: ['',], // 3.27
+      isAffectedInfrastructureComponents: ['',], // 3.28
+      affectedInfrastructureComponents: ['',], // 3.29
+      isImpactOnFinancialInterest: ['',], // 3.30
+      reportingToOtherAuthorities: [[],], // 3.31
+      reportingToOtherAuthoritiesOther: ['', Validators.maxLength(32767)], // 3.32 (conditional)
+      isTemporaryActionsMeasuresForRecovery: [null], // 3.33
+      descriptionOfTemporaryActionsMeasuresForRecovery: ['', Validators.maxLength(32767)], // 3.34 (conditional)
+      indicatorsOfCompromise: ['', Validators.maxLength(32767)] // 3.35 (conditional)
     });
 
     // Set up value transformation for percentage fields
@@ -271,13 +272,43 @@ export class ImpactAssessmentComponent implements OnInit {
     this.impactForm.get('recoveryTime')?.valueChanges.subscribe(() => {
       this.updateServiceRestorationDateTime();
     });
+
+    // Add conditional validation for recoveryDate and recoveryTime
+    this.impactForm.get('serviceDowntime')?.valueChanges.subscribe(value => {
+      this.updateRecoveryDateTimeValidation(value);
+    });
+  }
+
+  private updateRecoveryDateTimeValidation(serviceDowntimeValue: any): void {
+    const recoveryDateControl = this.impactForm.get('recoveryDate');
+    const recoveryTimeControl = this.impactForm.get('recoveryTime');
+    
+    if (serviceDowntimeValue && typeof serviceDowntimeValue === 'string' && serviceDowntimeValue.trim() !== '') {
+      // If serviceDowntime is filled, add Validators.required
+      recoveryDateControl?.setValidators([Validators.required]);
+      recoveryTimeControl?.setValidators([Validators.required]);
+    } else {
+      // If serviceDowntime is not filled, remove Validators.required
+      recoveryDateControl?.clearValidators();
+      recoveryTimeControl?.clearValidators();
+    }
+    
+    // Apply validation changes
+    recoveryDateControl?.updateValueAndValidity();
+    recoveryTimeControl?.updateValueAndValidity();
   }
 
   private combineDateAndTime(date: Date | null, time: string | null): string | null {
     if (!date || !time) return null;
-    const [hours, minutes] = time.split(':').map(Number);
+    const timeParts = time.split(':');
+    const hours = Number(timeParts[0]);
+    const minutes = Number(timeParts[1]);
+    const seconds = timeParts.length > 2 ? Number(timeParts[2]) : 0;
+    
+    if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) return null;
+    
     const combinedDate = new Date(date);
-    combinedDate.setHours(hours, minutes);
+    combinedDate.setHours(hours, minutes, seconds, 0);
     return combinedDate.toISOString();
   }
 
@@ -333,5 +364,9 @@ export class ImpactAssessmentComponent implements OnInit {
 
   ngOnInit(): void {
     // Component initialization
+    
+    // Apply initial validation state for recoveryDate and recoveryTime
+    const serviceDowntimeValue = this.impactForm.get('serviceDowntime')?.value;
+    this.updateRecoveryDateTimeValidation(serviceDowntimeValue);
   }
 }

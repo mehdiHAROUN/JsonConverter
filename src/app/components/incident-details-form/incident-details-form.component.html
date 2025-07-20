@@ -1,9 +1,8 @@
-<form [formGroup]="incidentDetailsForm">
-  <mat-card class="incident-details-card">
-    <mat-card-title>Incident Details</mat-card-title>
+<form [formGroup]="incidentDetailsForm" appFormPersistence="incident-details" [expiryHours]="720">
+  <section class="entity-section">
     <div class="incident-details-section">
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Incident reference code(field 2.1)</mat-label>
+        <mat-label>Incident reference code (field 2.1)</mat-label>
         <input matInput formControlName="financialEntityCode">
       </mat-form-field>
 
@@ -16,7 +15,7 @@
         </mat-form-field>
         <mat-form-field appearance="outline" class="half-width">
           <mat-label>Detection Time (field 2.2)</mat-label>
-          <input matInput type="time" formControlName="detectionTime">
+          <input matInput type="time" step="1" formControlName="detectionTime">
         </mat-form-field>
       </div>
 
@@ -29,7 +28,7 @@
         </mat-form-field>
         <mat-form-field appearance="outline" class="half-width">
           <mat-label>Classification Time (field 2.3)</mat-label>
-          <input matInput type="time" formControlName="classificationTime">
+          <input matInput type="time" step="1" formControlName="classificationTime">
         </mat-form-field>
       </div>
 
@@ -67,7 +66,7 @@
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Indication whether the incident originates from a third-party provider or another financial entity (field 2.8)</mat-label>
-        <textarea matInput formControlName="originatesFromThirdPartyProvider" rows="3" style="resize: vertical;"></textarea>
+        <textarea matInput formControlName="originatesFromThirdPartyProvider" rows="3" style="resize: vertical;" placeholder="This field is mandatory if the incident originates from a third-party provider or another financial entity."></textarea>
       </mat-form-field>
 
       <div class="radio-group-field">
@@ -80,7 +79,7 @@
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Other relevant information (field 2.10)</mat-label>
-        <textarea matInput formControlName="otherInformation" rows="3" style="resize: vertical;"></textarea>
+        <textarea matInput formControlName="otherInformation" rows="3" style="resize: vertical;" placeholder="This field is mandatory if the incident originates from a third-party provider or another financial entity."></textarea>
         <mat-error *ngIf="incidentDetailsForm.get('otherInformation')?.hasError('pattern')">
           Only alphanumeric characters, spaces, and basic punctuation (-_.,;:()) are allowed
         </mat-error>
@@ -89,5 +88,5 @@
       <div class="button-group">
       </div>
     </div>
-  </mat-card>
+  </section>
 </form>

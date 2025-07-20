@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormPersistenceDirective } from '../../shared/directives/form-persistence.directive';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -19,7 +20,8 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatSelectModule,
     MatInputModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    FormPersistenceDirective
   ],
   templateUrl: './reporting-to-other-authorities.component.html',
   styleUrl: './reporting-to-other-authorities.component.scss'
@@ -47,7 +49,7 @@ export class ReportingToOtherAuthoritiesComponent implements OnInit {
     { value: 'process_failure_insufficient_or_failure_of_ict_operations_and_ict_security_operations', label: 'process failure: insufficient or failure of ICT operations and ICT security operations' },
     { value: 'process_failure_insufficient_or_failure_of_ict_project_management', label: 'process failure: insufficient or failure of ICT project management' },
     { value: 'process_failure_inadequacy_of_internal_policies_procedures_and_documentation', label: 'process failure: inadequacy of internal policies, procedures and documentation' },
-    { value: 'process_failure_inadequate_ict_systems_acquisition_development_and_maintenance', label: 'Process failure: inadequate ICT systems acquisition, development, and maintenance' },
+    { value: 'process_failure_inadequate_ict_systems_acquisition_development_and_maintenance', label: 'process failure: inadequate ICT systems acquisition, development, and maintenance' },
     { value: 'process_failure_other', label: 'process failure: other (please specify)' },
     { value: 'system_failure_hardware_capacity_and_performance', label: 'system failure: hardware capacity and performance' },
     { value: 'system_failure_hardware_maintenance', label: 'system failure: hardware maintenance' },
@@ -61,7 +63,7 @@ export class ReportingToOtherAuthoritiesComponent implements OnInit {
     { value: 'human_error_mistake', label: 'human error: mistake' },
     { value: 'human_error_skills_knowledge', label: 'human error: skills & knowledge' },
     { value: 'human_error_inadequate_human_resources', label: 'human error: inadequate human resources' },
-    { value: 'human_error_miscommunication', label: 'human error miscommunication' },
+    { value: 'human_error_miscommunication', label: 'human error: miscommunication' },
     { value: 'human_error_other', label: 'human error: other (please specify)' },
     { value: 'external_event_natural_disasters_force_majeure', label: 'external event: natural disasters/force majeure' },
     { value: 'external_event_third-party_failures', label: 'external event: third-party failures' },
@@ -113,7 +115,7 @@ export class ReportingToOtherAuthoritiesComponent implements OnInit {
       financialRecoveriesAmount: [null, [Validators.min(0), this.transactionValueValidator()]], // field 4.14
       recurringNonMajorIncidentsDescription: ['', Validators.maxLength(32767)], // field 4.15
       occurrenceOfRecurringIncidentsDate: [null], // field 4.16 (date part)
-      occurrenceOfRecurringIncidentsTime: [null], // field 4.16 (time part)
+      recurringIncidentDate: [null], // field 4.16 (time part)
       recurringIncidentsOccurrenceDateTime: [''], // field 4.16 (combined date-time)
     });
 
@@ -140,12 +142,15 @@ export class ReportingToOtherAuthoritiesComponent implements OnInit {
       this.updateRecurringIncidentsOccurrenceDateTime();
     });
 
-    this.reportingForm.get('occurrenceOfRecurringIncidentsTime')?.valueChanges.subscribe(() => {
+    this.reportingForm.get('recurringIncidentDate')?.valueChanges.subscribe(() => {
       this.updateRecurringIncidentsOccurrenceDateTime();
     });
   }
 
+  public isFinalReport = false;
+
   ngOnInit(): void {
+
   }
 
   // Custom validator for monetary values (thousands of units)
@@ -172,9 +177,15 @@ export class ReportingToOtherAuthoritiesComponent implements OnInit {
 
   private combineDateAndTime(date: Date | null, time: string | null): string | null {
     if (!date || !time) return null;
-    const [hours, minutes] = time.split(':').map(Number);
+    const timeParts = time.split(':');
+    const hours = Number(timeParts[0]);
+    const minutes = Number(timeParts[1]);
+    const seconds = timeParts.length > 2 ? Number(timeParts[2]) : 0;
+    
+    if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) return null;
+    
     const combinedDate = new Date(date);
-    combinedDate.setHours(hours, minutes);
+    combinedDate.setHours(hours, minutes, seconds, 0);
     return combinedDate.toISOString();
   }
 
@@ -212,7 +223,7 @@ export class ReportingToOtherAuthoritiesComponent implements OnInit {
 
   private updateRecurringIncidentsOccurrenceDateTime(): void {
     const date = this.reportingForm.get('occurrenceOfRecurringIncidentsDate')?.value;
-    const time = this.reportingForm.get('occurrenceOfRecurringIncidentsTime')?.value;
+    const time = this.reportingForm.get('recurringIncidentDate')?.value;
     
     const recurringIncidentsOccurrenceDateTime = this.combineDateAndTime(date, time);
     
@@ -222,7 +233,7 @@ export class ReportingToOtherAuthoritiesComponent implements OnInit {
   // Getter for the computed recurringIncidentsOccurrenceDateTime
   get recurringIncidentsOccurrenceDateTime(): string | null {
     const date = this.reportingForm.get('occurrenceOfRecurringIncidentsDate')?.value;
-    const time = this.reportingForm.get('occurrenceOfRecurringIncidentsTime')?.value;
+    const time = this.reportingForm.get('recurringIncidentDate')?.value;
     return this.combineDateAndTime(date, time);
   }
-} 
+}
