@@ -1,0 +1,56 @@
+{
+  "section1": {
+    "incidentSubmission": "initial_notification",
+    "reportCurrency": "EUR",
+    "submittingEntity": {
+      "name": "Submitting Entity NAME",
+      "code": "1.3",
+      "LEI": "13B9C3D1E5F2G8H6J499"
+    },
+    "affectedEntity": [
+      {
+        "affectedEntityType": [
+          "credit_institution",
+          "payment_institution"
+        ],
+        "name": "primarycontactNAME",
+        "LEI": "16B9C3D1E5F2G8H6J499"
+      }
+    ],
+    "primaryContact": {
+      "name": "primarycontactNAME",
+      "email": "primarycontact@gmail.com",
+      "phone": "+936111111111"
+    },
+    "secondaryContact": {
+      "name": "secondarycontactNAME",
+      "email": "secondarycontact@gmail.com",
+      "phone": "282222222222"
+    },
+    "ultimateParentUndertaking": {
+      "name": "Ultimate Parent Undertaking NAME",
+      "LEI": "1149C3D1E5F2G8H6J499"
+    }
+  },
+  "section2": {
+    "financialEntityCode": "21",
+    "detectionDate": "2025-06-05T23:00:00.000Z",
+    "detectionTime": "22:22",
+    "classificationDate": "2025-06-06T23:00:00.000Z",
+    "classificationTime": "03:33",
+    "incidentDescription": "2.4string",
+    "classificationCriterion": [
+      "clients_financial_counterparts_and_transactions_affected",
+      "geographical_spread",
+      "reputational_impact"
+    ],
+    "countryCodeMaterialityThresholds": [
+      "AT",
+      "BE"
+    ],
+    "incidentDiscovery": "staff",
+    "originatesFromThirdPartyProvider": "2.8string",
+    "isBusinessContinuityActivated": true,
+    "otherInformation": "2.10string"
+  }
+}

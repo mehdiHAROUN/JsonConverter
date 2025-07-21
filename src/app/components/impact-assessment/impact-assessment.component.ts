@@ -95,15 +95,15 @@ export class ImpactAssessmentComponent implements OnInit {
 
   // Options for Reported Data Status (field 3.12)
   reportedDataStatusOptions = [
-    { value: 'actual_figures_clients', label: 'Actual figures for clients affected' },
-    { value: 'actual_figures_financial_counterparts', label: 'Actual figures for financial counterparts affected' },
-    { value: 'actual_figures_transactions', label: 'Actual figures for transactions affected' },
-    { value: 'estimates_clients', label: 'Estimates for clients affected' },
-    { value: 'estimates_financial_counterparts', label: 'Estimates for financial counterparts affected' },
-    { value: 'estimates_transactions', label: 'Estimates for transactions affected' },
-    { value: 'no_impact_clients', label: 'No impact on clients' },
-    { value: 'no_impact_financial_counterparts', label: 'No impact on financial counterparts' },
-    { value: 'no_impact_transactions', label: 'No impact on transactions' }
+    { value: 'actual_figures_for_clients_affected', label: 'Actual figures for clients affected' },
+    { value: 'actual_figures_for_financial_counterparts_affected', label: 'Actual figures for financial counterparts affected' },
+    { value: 'actual_figures_for_transactions_affected', label: 'Actual figures for transactions affected' },
+    { value: 'estimates_for_clients_affected', label: 'Estimates for clients affected' },
+    { value: 'estimates_for_financial_counterparts_affected', label: 'Estimates for financial counterparts affected' },
+    { value: 'estimates_for_transactions_affected', label: 'Estimates for transactions affected' },
+    { value: 'no_impact_on_clients', label: 'No impact on clients' },
+    { value: 'no_impact_on_financial_counterparts', label: 'No impact on financial counterparts' },
+    { value: 'no_impact_on_transactions', label: 'No impact on transactions' }
   ];
 
   // Options for Reputational Impact (field 3.13)
